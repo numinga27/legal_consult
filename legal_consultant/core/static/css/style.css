@@ -1,0 +1,77 @@
+/* Основные стили */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+}
+
+/* Карточки */
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border: none;
+    border-radius: 10px;
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+}
+
+/* Вопросы в админке */
+.question-item {
+    transition: background-color 0.2s;
+}
+
+.question-item:hover {
+    background-color: #f8f9fa;
+}
+
+/* Прогресс-бар для пользователя */
+.progress-container {
+    background-color: #e9ecef;
+    border-radius: 10px;
+    height: 20px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #007bff, #00bcd4);
+    transition: width 0.5s ease;
+}
+
+/* Анимации */
+.fade-in {
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Ответы в опроснике */
+.answer-btn {
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.answer-btn:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.answer-btn.selected {
+    border-color: #007bff;
+    background-color: #e7f1ff;
+}
+
+/* Для мобильных устройств */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+    
+    .card-body {
+        padding: 15px;
+    }
+}

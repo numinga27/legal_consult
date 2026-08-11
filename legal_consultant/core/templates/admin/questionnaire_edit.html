@@ -1,0 +1,292 @@
+{% extends 'base.html' %}
+{% block title %}Редактирование опросника{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-edit"></i> {{ questionnaire.name }}</h2>
+        <div>
+            <a href="{% url 'core:admin_dashboard' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Назад
+            </a>
+        </div>
+    </div>
+
+    <ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" data-bs-toggle="tab" href="#questions">Вопросы</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="tab" href="#conclusions">Выводы</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="tab" href="#links">Связи</a>
+        </li>
+    </ul>
+
+    <div class="tab-content mt-3">
+        <!-- Вкладка Вопросы -->
+        <div id="questions" class="tab-pane fade show active">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Вопросы</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Список вопросов -->
+                    {% for question in questions %}
+                    <div class="question-item border-bottom py-2">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <strong>{{ question.order }}. {{ question.text }}</strong>
+                                <div class="text-muted small">
+                                    <span class="badge bg-info">{{ question.answers.count }} ответов</span>
+                                </div>
+                                <!-- Ответы -->
+                                <ul class="list-unstyled ms-3 mt-2">
+                                    {% for answer in question.answers.all %}
+                                    <li class="small">
+                                        {{ answer.text }}
+                                        {% if answer.is_final %} 
+                                        <span class="badge bg-success">→ Вывод</span>
+                                        {% elif answer.next_question %}
+                                        <span class="badge bg-primary">→ Вопрос {{ answer.next_question.order }}</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">Нет связи</span>
+                                        {% endif %}
+                                        <a href="{% url 'core:admin_delete_answer' answer.id %}" 
+                                           class="text-danger ms-2" 
+                                           onclick="return confirm('Удалить ответ?')">
+                                            <i class="fas fa-times"></i>
+                                        </a>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            <div>
+                                <a href="{% url 'core:admin_delete_question' question.id %}" 
+                                   class="btn btn-sm btn-danger"
+                                   onclick="return confirm('Удалить вопрос?')">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted">Нет вопросов</p>
+                    {% endfor %}
+
+                    <!-- Форма добавления вопроса -->
+                    <hr>
+                    <h6>Добавить вопрос</h6>
+                    <form method="post" class="row g-3">
+                        {% csrf_token %}
+                        <div class="col-md-10">
+                            <input type="text" name="question_text" class="form-control" placeholder="Текст вопроса" required>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" name="action" value="add_question" class="btn btn-success w-100">
+                                <i class="fas fa-plus"></i> Добавить
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Форма добавления ответа -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5>Добавить ответ</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>Вопрос</label>
+                                <select name="question_id" class="form-select" required>
+                                    {% for q in questions %}
+                                    <option value="{{ q.id }}">{{ q.order }}. {{ q.text|truncatechars:50 }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label>Текст ответа</label>
+                                <input type="text" name="answer_text" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-6">
+                                <label>Следующий вопрос</label>
+                                <select name="next_question" class="form-select">
+                                    <option value="">-- Конец (вывод) --</option>
+                                    {% for q in questions %}
+                                    <option value="{{ q.id }}">Вопрос {{ q.order }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label>Промежуточная консультация</label>
+                                <textarea name="intermediate_text" class="form-control" rows="2"></textarea>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input type="checkbox" name="is_final" class="form-check-input" id="isFinal">
+                                    <label class="form-check-label" for="isFinal">Это финальный ответ (ведет к выводу)</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <button type="submit" name="action" value="add_answer" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Добавить ответ
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Вкладка Выводы -->
+        <div id="conclusions" class="tab-pane fade">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Выводы</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Список выводов -->
+                    {% for conclusion in conclusions %}
+                    <div class="border-bottom py-2">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <strong>Вывод #{{ conclusion.order }}: {{ conclusion.title }}</strong>
+                                <div class="text-muted small">
+                                    Цена: {{ conclusion.price }} ₽ | Успех: {{ conclusion.success_rate }}%
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-muted small mt-1">
+                            {{ conclusion.short_text|truncatechars:100 }}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted">Нет выводов</p>
+                    {% endfor %}
+
+                    <!-- Форма добавления вывода -->
+                    <hr>
+                    <h6>Добавить вывод</h6>
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>Заголовок</label>
+                                <input type="text" name="title" class="form-control" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label>Цена (₽)</label>
+                                <input type="number" name="price" class="form-control" step="0.01" value="0">
+                            </div>
+                            <div class="col-md-3">
+                                <label>Вероятность успеха (%)</label>
+                                <input type="number" name="success_rate" class="form-control" min="0" max="100" value="50">
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-6">
+                                <label>Краткий вывод (бесплатно)</label>
+                                <textarea name="short_text" class="form-control" rows="3" required></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label>Полный вывод (платно)</label>
+                                <textarea name="full_text" class="form-control" rows="3" required></textarea>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-6">
+                                <label>Плюсы</label>
+                                <textarea name="pros" class="form-control" rows="2"></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label>Минусы</label>
+                                <textarea name="cons" class="form-control" rows="2"></textarea>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <label>Документ</label>
+                            <input type="file" name="documents" class="form-control">
+                        </div>
+                        <div class="mt-2">
+                            <button type="submit" name="action" value="add_conclusion" class="btn btn-success">
+                                <i class="fas fa-plus"></i> Добавить вывод
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Вкладка Связи -->
+        <div id="links" class="tab-pane fade">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Связи ответов с выводами</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>Ответ</label>
+                                <select name="answer_id" class="form-select" required>
+                                    <option value="">Выберите ответ...</option>
+                                    {% for q in all_questions %}
+                                    <optgroup label="{{ q.order }}. {{ q.text|truncatechars:50 }}">
+                                        {% for a in q.answers.all %}
+                                        <option value="{{ a.id }}">
+                                            {{ a.text }}
+                                            {% if a.is_final %} (финальный){% endif %}
+                                        </option>
+                                        {% endfor %}
+                                    </optgroup>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label>Вывод</label>
+                                <select name="conclusion_id" class="form-select" required>
+                                    <option value="">Выберите вывод...</option>
+                                    {% for c in conclusions %}
+                                    <option value="{{ c.id }}">Вывод #{{ c.order }}: {{ c.title }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <button type="submit" name="action" value="link_answer" class="btn btn-primary">
+                                <i class="fas fa-link"></i> Связать
+                            </button>
+                        </div>
+                    </form>
+
+                    <hr>
+                    <h6>Существующие связи</h6>
+                    {% for q in all_questions %}
+                        {% for a in q.answers.all %}
+                            {% if a.conclusion_link %}
+                            <div class="border-bottom py-1 small">
+                                <span class="badge bg-secondary">Вопрос {{ q.order }}</span>
+                                {{ a.text }} → 
+                                <span class="badge bg-success">{{ a.conclusion_link.conclusion.title }}</span>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% empty %}
+                    <p class="text-muted">Нет связей</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

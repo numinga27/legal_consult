@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Результат консультации{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Результат -->
+            <div class="card shadow-sm fade-in">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="fas fa-check-circle"></i> Ваш результат</h4>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ conclusion.title|default:"Вывод по вашей ситуации" }}</h5>
+                    
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-chart-line"></i> Вероятность успеха</h6>
+                        <div class="progress" style="height: 25px;">
+                            <div class="progress-bar bg-success" role="progressbar" 
+                                 style="width: {{ conclusion.success_rate }}%;" 
+                                 aria-valuenow="{{ conclusion.success_rate }}" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100">
+                                {{ conclusion.success_rate }}%
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Краткий вывод (бесплатный) -->
+                    <div class="border-bottom pb-3 mb-3">
+                        <h6><i class="fas fa-file-alt text-primary"></i> Краткий вывод</h6>
+                        <p class="text-muted">{{ conclusion.short_text|linebreaks }}</p>
+                    </div>
+
+                    <!-- Плюсы и минусы -->
+                    {% if conclusion.pros or conclusion.cons %}
+                    <div class="row">
+                        {% if conclusion.pros %}
+                        <div class="col-md-6">
+                            <div class="alert alert-success">
+                                <h6><i class="fas fa-plus-circle"></i> Плюсы</h6>
+                                <p class="mb-0">{{ conclusion.pros|linebreaks }}</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if conclusion.cons %}
+                        <div class="col-md-6">
+                            <div class="alert alert-danger">
+                                <h6><i class="fas fa-minus-circle"></i> Минусы</h6>
+                                <p class="mb-0">{{ conclusion.cons|linebreaks }}</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Блок с платными услугами -->
+                    <div class="mt-4 p-3 bg-light rounded">
+                        <h5 class="text-center mb-3">
+                            <i class="fas fa-gem text-warning"></i> 
+                            Получите полную юридическую консультацию
+                        </h5>
+                        <p class="text-muted text-center">
+                            Профессиональная письменная консультация, пошаговый план действий и готовые документы
+                        </p>
+                        
+                        {% if conclusion.price > 0 %}
+                        <div class="text-center">
+                            <div class="display-4 text-primary">{{ conclusion.price }} ₽</div>
+                            <a href="{% url 'core:user_payment' conclusion.id %}" class="btn btn-success btn-lg mt-3">
+                                <i class="fas fa-shopping-cart"></i> Получить консультацию
+                            </a>
+                        </div>
+                        {% else %}
+                        <div class="text-center">
+                            <div class="alert alert-warning">
+                                <i class="fas fa-info-circle"></i> 
+                                Консультация бесплатна!
+                            </div>
+                            <a href="{% url 'core:user_payment' conclusion.id %}" class="btn btn-success btn-lg">
+                                <i class="fas fa-download"></i> Скачать материалы
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Кнопки навигации -->
+            <div class="mt-4 text-center">
+                <a href="{% url 'core:user_select_problem' %}" class="btn btn-outline-primary">
+                    <i class="fas fa-home"></i> На главную
+                </a>
+                <a href="javascript:history.back()" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Назад
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.fade-in {
+    animation: fadeIn 0.8s ease;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+</style>
+{% endblock %}
