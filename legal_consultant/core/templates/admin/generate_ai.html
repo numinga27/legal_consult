@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}AI Генерация опросника{% endblock %}
+
+{% block extra_css %}
+<style>
+.ai-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+.ai-card {
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+}
+.feature-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin: 20px 0;
+}
+.feature-item {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 15px;
+    text-align: center;
+}
+.feature-item .icon {
+    font-size: 30px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container ai-container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-robot text-primary"></i> Генерация опросника с AI</h2>
+        <a href="{% url 'core:admin_dashboard' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Назад
+        </a>
+    </div>
+
+    <div class="ai-card">
+        <div class="text-center mb-4">
+            <i class="fas fa-brain text-primary" style="font-size: 50px;"></i>
+            <h4 class="mt-2">Создание опросника с помощью искусственного интеллекта</h4>
+            <p class="text-muted">Опишите юридическую проблему, и AI создаст полный опросник</p>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+                <label class="form-label fw-bold">Юридическое направление</label>
+                <select name="direction_id" class="form-select" required>
+                    <option value="">Выберите направление...</option>
+                    {% for direction in directions %}
+                    <option value="{{ direction.id }}">{{ direction.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-bold">Тема опросника</label>
+                <input type="text" name="topic" class="form-control form-control-lg" 
+                       placeholder="Например: Отмена судебного приказа" required>
+                <small class="text-muted">Опишите проблему кратко и четко</small>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-bold">Категория</label>
+                <select name="category" class="form-select">
+                    <option value="family_law">Семейное право</option>
+                    <option value="labor_law">Трудовое право</option>
+                    <option value="consumer_law">Потребительское право</option>
+                    <option value="housing_law">Жилищное право</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-bold">Дополнительные инструкции</label>
+                <textarea name="instructions" class="form-control" rows="3"
+                          placeholder="Укажите особые требования к опроснику..."></textarea>
+            </div>
+
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <div class="icon">📋</div>
+                    <div>3-5 вопросов</div>
+                    <small class="text-muted">С вариантами ответов</small>
+                </div>
+                <div class="feature-item">
+                    <div class="icon">📄</div>
+                    <div>2-3 вывода</div>
+                    <small class="text-muted">Краткий и полный</small>
+                </div>
+                <div class="feature-item">
+                    <div class="icon">📎</div>
+                    <div>Документы</div>
+                    <small class="text-muted">Образцы и шаблоны</small>
+                </div>
+                <div class="feature-item">
+                    <div class="icon">📊</div>
+                    <div>Аналитика</div>
+                    <small class="text-muted">Вероятность успеха</small>
+                </div>
+            </div>
+
+            <div class="d-grid gap-2 mt-4">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-robot me-2"></i> Сгенерировать опросник
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Советы -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h6 class="mb-0"><i class="fas fa-lightbulb text-warning"></i> Советы по формулировке темы</h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>Хорошие примеры:</h6>
+                    <ul class="text-muted">
+                        <li>Отмена судебного приказа</li>
+                        <li>Развод и раздел имущества</li>
+                        <li>Взыскание алиментов</li>
+                        <li>Возврат некачественного товара</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h6>Плохие примеры:</h6>
+                    <ul class="text-muted">
+                        <li>Проблемы с законом</li>
+                        <li>Как быть</li>
+                        <li>Что делать</li>
+                        <li>Помогите</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

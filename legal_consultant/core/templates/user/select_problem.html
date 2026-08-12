@@ -1,36 +1,53 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Выберите юридическую проблему{% endblock %}
+{% block title %}Карманный юрист - выберите проблему{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
+<div class="container py-5">
+    <!-- Hero секция -->
     <div class="text-center mb-5">
-        <h1 class="display-4"><i class="fas fa-gavel text-primary"></i> Карманный юрист</h1>
-        <p class="lead text-muted">Выберите вашу юридическую проблему, и мы поможем вам разобраться</p>
+        <h1 class="display-4 fw-bold text-primary">
+            <i class="fas fa-gavel"></i> Карманный юрист
+        </h1>
+        <p class="lead text-muted">Бесплатная юридическая помощь в несколько кликов</p>
+        <div class="row justify-content-center mt-4">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <input type="text" class="form-control form-control-lg" 
+                           placeholder="Поиск проблемы..." id="searchProblem">
+                    <button class="btn btn-primary btn-lg" type="button" onclick="searchProblems()">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="row">
+    <!-- Категории проблем -->
+    <div class="row" id="problemsGrid">
         {% for direction in directions %}
-        <div class="col-md-4 mb-4">
+        <div class="col-md-4 mb-4 problem-card" data-name="{{ direction.name|lower }}">
             <div class="card h-100 shadow-sm hover-card">
-                <div class="card-body text-center">
-                    <i class="fas fa-{{ direction.icon|default:'balance-scale' }} fa-4x text-primary mb-3"></i>
+                <div class="card-body text-center p-4">
+                    <div class="icon-circle bg-primary-soft mb-3">
+                        <i class="fas fa-{{ direction.icon|default:'balance-scale' }} fa-3x text-primary"></i>
+                    </div>
                     <h5 class="card-title">{{ direction.name }}</h5>
-                    <p class="card-text text-muted">{{ direction.description|default:'Юридическое направление' }}</p>
+                    <p class="card-text text-muted small">{{ direction.description|default:'Юридическое направление' }}</p>
                     
                     {% if direction.questionnaires.all %}
                         {% for questionnaire in direction.questionnaires.all %}
                             {% if questionnaire.is_active %}
                             <a href="{% url 'core:user_questionnaire' questionnaire.id %}" 
-                               class="btn btn-outline-primary btn-sm mt-2 w-100">
+                               class="btn btn-outline-primary btn-sm mt-2 w-100 start-btn">
                                 <i class="fas fa-arrow-right"></i> 
                                 {{ questionnaire.name }}
                             </a>
                             {% endif %}
                         {% endfor %}
                     {% else %}
-                        <p class="text-muted small">Нет активных опросников</p>
+                        <p class="text-muted small mt-3">Нет активных опросников</p>
                     {% endif %}
                 </div>
             </div>
@@ -45,22 +62,89 @@
         {% endfor %}
     </div>
 
-    {% if user.is_staff %}
-    <div class="mt-5 text-center">
-        <a href="{% url 'core:admin_dashboard' %}" class="btn btn-primary">
-            <i class="fas fa-user-cog"></i> Перейти в админ-панель
-        </a>
+    <!-- Статистика -->
+    <div class="row mt-5 text-center">
+        <div class="col-md-3">
+            <div class="stat-card">
+                <h3 class="text-primary">500+</h3>
+                <p class="text-muted">Юридических консультаций</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <h3 class="text-success">95%</h3>
+                <p class="text-muted">Довольных клиентов</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <h3 class="text-info">24/7</h3>
+                <p class="text-muted">Доступность сервиса</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <h3 class="text-warning">10+</h3>
+                <p class="text-muted">Юридических направлений</p>
+            </div>
+        </div>
     </div>
-    {% endif %}
 </div>
 
 <style>
 .hover-card {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 15px;
+    overflow: hidden;
 }
 .hover-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15) !important;
+    transform: translateY(-8px);
+    box-shadow: 0 1rem 2rem rgba(0,0,0,0.15) !important;
+}
+.icon-circle {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    background: rgba(13, 110, 253, 0.1);
+}
+.bg-primary-soft {
+    background: rgba(13, 110, 253, 0.1);
+}
+.stat-card {
+    padding: 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+.start-btn {
+    border-radius: 25px;
+    transition: all 0.3s;
+}
+.start-btn:hover {
+    transform: scale(1.05);
 }
 </style>
+
+<script>
+function searchProblems() {
+    const query = document.getElementById('searchProblem').value.toLowerCase();
+    const cards = document.querySelectorAll('.problem-card');
+    
+    cards.forEach(card => {
+        const name = card.dataset.name || '';
+        if (name.includes(query) || query === '') {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
+// Поиск при вводе
+document.getElementById('searchProblem').addEventListener('keyup', searchProblems);
+</script>
 {% endblock %}

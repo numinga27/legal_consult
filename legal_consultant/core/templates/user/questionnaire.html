@@ -3,108 +3,295 @@
 
 {% block title %}{{ questionnaire.name }}{% endblock %}
 
+{% block extra_css %}
+<style>
+.question-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+.progress-wrapper {
+    background: #f0f0f0;
+    border-radius: 30px;
+    padding: 5px;
+    margin-bottom: 30px;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+}
+.progress-bar-custom {
+    height: 20px;
+    background: linear-gradient(90deg, #007bff, #00d2ff);
+    border-radius: 30px;
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 10px;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+}
+.question-card {
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+    min-height: 300px;
+}
+.question-number {
+    color: #6c757d;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.question-text {
+    font-size: 22px;
+    font-weight: 600;
+    color: #1a1a2e;
+    margin: 20px 0;
+    line-height: 1.5;
+}
+.answer-option {
+    display: block;
+    width: 100%;
+    padding: 15px 20px;
+    margin-bottom: 10px;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    background: white;
+    transition: all 0.3s ease;
+    font-size: 16px;
+    text-align: left;
+    cursor: pointer;
+}
+.answer-option:hover {
+    border-color: #007bff;
+    background: #f8f9ff;
+    transform: translateX(5px);
+}
+.answer-option:active {
+    transform: scale(0.98);
+}
+.answer-option.selected {
+    border-color: #007bff;
+    background: #e7f1ff;
+}
+.answer-option .option-icon {
+    margin-right: 12px;
+    color: #6c757d;
+}
+.answer-option:hover .option-icon {
+    color: #007bff;
+}
+.intermediate-box {
+    background: #f8f9fa;
+    border-left: 4px solid #28a745;
+    padding: 15px 20px;
+    border-radius: 8px;
+    margin-top: 20px;
+    animation: slideDown 0.5s ease;
+}
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.nav-buttons {
+    margin-top: 25px;
+    display: flex;
+    justify-content: space-between;
+}
+.btn-back {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 25px;
+    transition: all 0.3s;
+}
+.btn-back:hover {
+    background: #5a6268;
+    transform: translateX(-3px);
+}
+.btn-exit {
+    color: #dc3545;
+    border: 2px solid #dc3545;
+    background: transparent;
+    padding: 10px 25px;
+    border-radius: 25px;
+    transition: all 0.3s;
+}
+.btn-exit:hover {
+    background: #dc3545;
+    color: white;
+}
+.spinner-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255,255,255,0.9);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+.spinner-overlay.active {
+    display: flex;
+}
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <!-- Прогресс-бар -->
-            <div class="mb-4">
-                <div class="d-flex justify-content-between mb-2">
-                    <span class="text-muted">Вопрос <span id="current-question-number">1</span> из <span id="total-questions">{{ total_questions }}</span></span>
-                    <span class="text-muted" id="progress-percent">0%</span>
-                </div>
-                <div class="progress-container">
-                    <div class="progress-fill" id="progress-fill" style="width: 0%;"></div>
-                </div>
-            </div>
+<div class="container question-container">
+    <!-- Заголовок -->
+    <div class="text-center mb-4">
+        <h4 class="text-primary">{{ questionnaire.name }}</h4>
+        <p class="text-muted small">{{ questionnaire.description }}</p>
+    </div>
 
-            <!-- Карточка с вопросом -->
-            <div class="card shadow-sm fade-in" id="question-card">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0" id="questionnaire-title">{{ questionnaire.name }}</h5>
-                </div>
-                <div class="card-body">
-                    <h4 class="card-title mb-4" id="question-text">{{ question.text }}</h4>
-                    
-                    {% if question.help_text %}
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle"></i> {{ question.help_text }}
+    <!-- Прогресс -->
+    <div class="progress-wrapper">
+        <div class="progress-bar-custom" id="progressBar" style="width: 0%;">
+            <span id="progressText">0%</span>
+        </div>
+    </div>
+    <div class="d-flex justify-content-between text-muted small mb-3">
+        <span>Вопрос <span id="currentQuestionNum">1</span> из <span id="totalQuestions">{{ total_questions }}</span></span>
+        <span id="progressLabel">Начало</span>
+    </div>
+
+    <!-- Карточка вопроса -->
+    <div class="question-card" id="questionCard">
+        <div class="question-number" id="questionNumber">Вопрос 1</div>
+        <div class="question-text" id="questionText">{{ question.text }}</div>
+        
+        {% if question.help_text %}
+        <div class="alert alert-info small">
+            <i class="fas fa-info-circle"></i> {{ question.help_text }}
+        </div>
+        {% endif %}
+
+        <div id="answersContainer">
+            {% for answer in question.answers.all %}
+            <button class="answer-option" data-answer-id="{{ answer.id }}" 
+                    data-session-id="{{ session_id }}" data-is-final="{{ answer.is_final|yesno:'true,false' }}">
+                <span class="option-icon">
+                    <i class="fas fa-circle"></i>
+                </span>
+                {{ answer.text }}
+            </button>
+            {% endfor %}
+        </div>
+
+        <!-- Промежуточная консультация -->
+        <div id="intermediateContainer" style="display: none;">
+            <div class="intermediate-box">
+                <div class="d-flex align-items-start">
+                    <i class="fas fa-info-circle text-success me-2 mt-1"></i>
+                    <div>
+                        <strong class="text-success">Информация</strong>
+                        <div id="intermediateText" class="mt-1"></div>
                     </div>
-                    {% endif %}
-
-                    <div class="answers-container" id="answers-container">
-                        {% for answer in question.answers.all %}
-                        <button class="btn btn-outline-primary answer-btn w-100 mb-2 text-start p-3" 
-                                data-answer-id="{{ answer.id }}"
-                                data-session-id="{{ session_id }}">
-                            <i class="fas fa-circle-notch me-2"></i>
-                            {{ answer.text }}
-                        </button>
-                        {% endfor %}
-                    </div>
-
-                    <!-- Промежуточная консультация -->
-                    <div id="intermediate-container" style="display: none;" class="mt-4">
-                        <div class="alert alert-success">
-                            <h6><i class="fas fa-info-circle"></i> Информация</h6>
-                            <div id="intermediate-text"></div>
-                        </div>
-                    </div>
-
-                    <!-- Кнопка "Назад" -->
-                    <button id="back-btn" class="btn btn-secondary mt-3" style="display: none;">
-                        <i class="fas fa-arrow-left"></i> Назад
-                    </button>
                 </div>
-            </div>
-
-            <!-- Кнопка выхода -->
-            <div class="mt-3 text-center">
-                <a href="{% url 'core:user_select_problem' %}" class="btn btn-outline-danger">
-                    <i class="fas fa-times"></i> Выйти из опросника
-                </a>
             </div>
         </div>
+
+        <!-- Навигация -->
+        <div class="nav-buttons">
+            <button class="btn-back" id="backBtn" style="display: none;">
+                <i class="fas fa-arrow-left"></i> Назад
+            </button>
+            <button class="btn-exit" onclick="exitQuestionnaire()">
+                <i class="fas fa-times"></i> Выйти
+            </button>
+        </div>
+    </div>
+
+    <!-- Подсказка -->
+    <div class="text-center mt-4">
+        <small class="text-muted">
+            <i class="fas fa-lock text-success"></i> 
+            Ваши ответы анонимны и не сохраняются
+        </small>
+    </div>
+</div>
+
+<!-- Spinner -->
+<div class="spinner-overlay" id="spinnerOverlay">
+    <div class="text-center">
+        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+            <span class="visually-hidden">Загрузка...</span>
+        </div>
+        <p class="mt-3 text-muted">Обработка вашего ответа...</p>
     </div>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Инициализация
     let history = [];
     let currentQuestionId = {{ question.id }};
-    let answeredQuestions = 0;
-    const totalQuestions = {{ total_questions }};
-    const sessionId = '{{ session_id }}';
-    let isLoading = false;
+    let currentStep = 0;
+    let totalSteps = {{ total_questions }};
+    let isProcessing = false;
+    let sessionId = '{{ session_id }}';
+    let answerHistory = [];
+
+    // Элементы
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    const progressLabel = document.getElementById('progressLabel');
+    const questionText = document.getElementById('questionText');
+    const questionNumber = document.getElementById('questionNumber');
+    const answersContainer = document.getElementById('answersContainer');
+    const intermediateContainer = document.getElementById('intermediateContainer');
+    const intermediateText = document.getElementById('intermediateText');
+    const backBtn = document.getElementById('backBtn');
+    const spinner = document.getElementById('spinnerOverlay');
 
     // Обновление прогресса
-    function updateProgress(current, total) {
-        const percent = total > 0 ? (current / total) * 100 : 0;
-        document.getElementById('progress-fill').style.width = percent + '%';
-        document.getElementById('progress-percent').textContent = Math.round(percent) + '%';
-        document.getElementById('current-question-number').textContent = current;
+    function updateProgress(step, total) {
+        const percent = Math.round((step / total) * 100);
+        progressBar.style.width = percent + '%';
+        progressText.textContent = percent + '%';
+        progressLabel.textContent = `Вопрос ${step} из ${total}`;
+        document.getElementById('currentQuestionNum').textContent = step;
+        
+        // Меняем цвет прогресса
+        if (percent < 30) {
+            progressBar.style.background = 'linear-gradient(90deg, #ffc107, #ff9800)';
+        } else if (percent < 70) {
+            progressBar.style.background = 'linear-gradient(90deg, #007bff, #00bcd4)';
+        } else {
+            progressBar.style.background = 'linear-gradient(90deg, #28a745, #20c997)';
+        }
     }
 
     // Показ промежуточной консультации
     function showIntermediate(text) {
-        const container = document.getElementById('intermediate-container');
-        const textElement = document.getElementById('intermediate-text');
-        textElement.textContent = text;
-        container.style.display = 'block';
-        container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (text && text.trim()) {
+            intermediateText.textContent = text;
+            intermediateContainer.style.display = 'block';
+            setTimeout(() => {
+                intermediateContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 300);
+        } else {
+            intermediateContainer.style.display = 'none';
+        }
     }
 
     // Обработка ответа
-    function handleAnswer(answerId) {
-        if (isLoading) return;
-        isLoading = true;
+    function handleAnswer(answerId, buttonElement) {
+        if (isProcessing) return;
+        isProcessing = true;
+        spinner.classList.add('active');
 
-        const answerBtn = document.querySelector(`.answer-btn[data-answer-id="${answerId}"]`);
-        if (answerBtn) {
-            answerBtn.disabled = true;
-            answerBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Загрузка...';
-        }
+        // Сохраняем в историю
+        const currentAnswer = buttonElement ? buttonElement.textContent.trim() : '';
+        answerHistory.push(currentAnswer);
 
+        // Отправляем запрос
         fetch('{% url "core:api_get_next_question" %}', {
             method: 'POST',
             headers: {
@@ -116,16 +303,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 session_id: sessionId
             })
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Сервер вернул ошибку: ' + response.status);
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.error) {
-                alert('Ошибка: ' + data.error);
-                isLoading = false;
-                if (answerBtn) {
-                    answerBtn.disabled = false;
-                    answerBtn.innerHTML = answerBtn.dataset.originalText || 'Попробовать снова';
-                }
-                return;
+                throw new Error(data.error);
             }
 
             // Показываем промежуточную консультацию
@@ -133,111 +319,95 @@ document.addEventListener('DOMContentLoaded', function() {
                 showIntermediate(data.intermediate_text);
             }
 
-            // Проверяем, есть ли следующий вопрос
-            if (data.next_question) {
-                // Сохраняем текущий вопрос в историю
-                history.push(currentQuestionId);
-                answeredQuestions++;
-                updateProgress(answeredQuestions, totalQuestions);
+            // Проверяем завершение
+            if (data.conclusion_id) {
+                // Сохраняем ответы в localStorage для истории
+                localStorage.setItem('lastAnswers', JSON.stringify(answerHistory));
+                // Переходим к результату
+                setTimeout(() => {
+                    window.location.href = '/result/' + data.conclusion_id + '/';
+                }, 800);
+                return;
+            }
 
-                // Обновляем вопрос
-                currentQuestionId = data.next_question.id;
-                document.getElementById('question-text').textContent = data.next_question.text;
+            // Обновляем вопрос
+            if (data.next_question) {
+                currentStep++;
+                updateProgress(currentStep, totalSteps);
+                
+                // Обновляем текст вопроса
+                questionText.textContent = data.next_question.text;
+                questionNumber.textContent = 'Вопрос ' + (currentStep + 1);
                 
                 // Обновляем ответы
-                const container = document.getElementById('answers-container');
-                container.innerHTML = '';
+                answersContainer.innerHTML = '';
                 data.next_question.answers.forEach(answer => {
                     const btn = document.createElement('button');
-                    btn.className = 'btn btn-outline-primary answer-btn w-100 mb-2 text-start p-3';
+                    btn.className = 'answer-option';
                     btn.dataset.answerId = answer.id;
-                    btn.dataset.originalText = answer.text;
-                    btn.innerHTML = `<i class="fas fa-circle-notch me-2"></i> ${answer.text}`;
+                    btn.dataset.isFinal = answer.is_final || false;
+                    btn.innerHTML = `
+                        <span class="option-icon">
+                            <i class="fas fa-circle"></i>
+                        </span>
+                        ${answer.text}
+                    `;
                     btn.addEventListener('click', function() {
-                        handleAnswer(this.dataset.answerId);
+                        handleAnswer(answer.dataset.answerId, this);
                     });
-                    container.appendChild(btn);
+                    answersContainer.appendChild(btn);
                 });
 
                 // Показываем кнопку "Назад"
-                document.getElementById('back-btn').style.display = 'inline-block';
-                isLoading = false;
-
-            } else if (data.conclusion_id) {
-                // Переход к результату
-                window.location.href = '/result/' + data.conclusion_id + '/';
-            } else {
-                // Нет вывода и нет следующего вопроса
-                alert('Опросник завершен, но нет вывода. Обратитесь к администратору.');
-                isLoading = false;
+                backBtn.style.display = 'inline-block';
+                currentQuestionId = data.next_question.id;
+            } else if (!data.conclusion_id) {
+                // Нет вывода и нет следующего вопроса - ошибка
+                throw new Error('Опросник завершен, но нет вывода. Обратитесь к администратору.');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Произошла ошибка. Пожалуйста, попробуйте еще раз.');
-            isLoading = false;
-            if (answerBtn) {
-                answerBtn.disabled = false;
-                answerBtn.innerHTML = answerBtn.dataset.originalText || 'Попробовать снова';
-            }
+            alert('Произошла ошибка: ' + error.message + '\nПожалуйста, попробуйте еще раз.');
+        })
+        .finally(() => {
+            isProcessing = false;
+            spinner.classList.remove('active');
+            // Обновляем состояние кнопок
+            document.querySelectorAll('.answer-option').forEach(btn => {
+                btn.disabled = false;
+            });
         });
     }
 
     // Обработчики для кнопок ответов
-    document.querySelectorAll('.answer-btn').forEach(btn => {
-        btn.dataset.originalText = btn.textContent.trim();
+    document.querySelectorAll('.answer-option').forEach(btn => {
         btn.addEventListener('click', function() {
-            handleAnswer(this.dataset.answerId);
+            // Отключаем все кнопки на время обработки
+            document.querySelectorAll('.answer-option').forEach(b => b.disabled = true);
+            handleAnswer(this.dataset.answerId, this);
         });
     });
 
     // Кнопка "Назад"
-    document.getElementById('back-btn').addEventListener('click', function() {
+    backBtn.addEventListener('click', function() {
         if (history.length > 0) {
-            // Просто перезагружаем страницу - это вернет к началу
-            // В реальном проекте нужно реализовать полноценный возврат
+            // Восстанавливаем предыдущий вопрос
+            const prevState = history.pop();
+            // Здесь должна быть логика возврата
             location.reload();
         }
     });
 
+    // Выход из опросника
+    window.exitQuestionnaire = function() {
+        if (confirm('Вы уверены, что хотите выйти? Прогресс будет потерян.')) {
+            window.location.href = '{% url "core:user_select_problem" %}';
+        }
+    };
+
     // Инициализация прогресса
-    updateProgress(1, totalQuestions);
+    updateProgress(1, totalSteps);
 });
 </script>
-
-<style>
-.progress-container {
-    background-color: #e9ecef;
-    border-radius: 10px;
-    height: 25px;
-    overflow: hidden;
-    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
-}
-.progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #007bff, #00bcd4);
-    transition: width 0.5s ease;
-    border-radius: 10px;
-}
-.answer-btn {
-    transition: all 0.3s ease;
-    border: 2px solid #e9ecef;
-}
-.answer-btn:hover {
-    transform: scale(1.02);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border-color: #007bff;
-    background-color: #f8f9ff;
-}
-.answer-btn:active {
-    transform: scale(0.98);
-}
-.fade-in {
-    animation: fadeIn 0.5s ease;
-}
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-</style>
 {% endblock %}

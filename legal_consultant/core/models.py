@@ -10,6 +10,7 @@ class LegalDirection(models.Model):
     icon = models.CharField('Иконка (CSS класс)', max_length=50, blank=True)
     created_at = models.DateTimeField('Дата создания', auto_now_add=True)
     updated_at = models.DateTimeField('Дата обновления', auto_now=True)
+    is_active = models.BooleanField('Активно', default=True)
 
     class Meta:
         verbose_name = 'Юридическое направление'
@@ -34,7 +35,8 @@ class Questionnaire(models.Model):
     is_active = models.BooleanField('Активен', default=True)
     created_at = models.DateTimeField('Дата создания', auto_now_add=True)
     updated_at = models.DateTimeField('Дата обновления', auto_now=True)
-
+    views_count = models.PositiveIntegerField('Просмотров', default=0)  # Добавить
+    completions_count = models.PositiveIntegerField('Завершений', default=0) 
     class Meta:
         verbose_name = 'Опросник'
         verbose_name_plural = 'Опросники'
@@ -120,6 +122,9 @@ class Conclusion(models.Model):
     )
     order = models.PositiveIntegerField('Номер вывода')
     title = models.CharField('Заголовок', max_length=200)
+    is_paid = models.BooleanField('Только платно', default=False)  # Добавить
+    views_count = models.PositiveIntegerField('Просмотров', default=0)  # Добавить
+    purchases_count = models.PositiveIntegerField('Покупок', default=0)  # Добавить
     short_text = models.TextField('Краткий вывод (бесплатно)')
     full_text = models.TextField('Итоговый вывод (платно)')
     pros = models.TextField('Плюсы ситуации', blank=True, help_text='Положительные аспекты для пользователя')

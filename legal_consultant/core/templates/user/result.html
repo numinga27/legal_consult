@@ -3,111 +3,283 @@
 
 {% block title %}Результат консультации{% endblock %}
 
-{% block content %}
-<div class="container mt-4">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <!-- Результат -->
-            <div class="card shadow-sm fade-in">
-                <div class="card-header bg-success text-white">
-                    <h4 class="mb-0"><i class="fas fa-check-circle"></i> Ваш результат</h4>
-                </div>
-                <div class="card-body">
-                    <h5 class="card-title">{{ conclusion.title|default:"Вывод по вашей ситуации" }}</h5>
-                    
-                    <div class="alert alert-info">
-                        <h6><i class="fas fa-chart-line"></i> Вероятность успеха</h6>
-                        <div class="progress" style="height: 25px;">
-                            <div class="progress-bar bg-success" role="progressbar" 
-                                 style="width: {{ conclusion.success_rate }}%;" 
-                                 aria-valuenow="{{ conclusion.success_rate }}" 
-                                 aria-valuemin="0" 
-                                 aria-valuemax="100">
-                                {{ conclusion.success_rate }}%
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Краткий вывод (бесплатный) -->
-                    <div class="border-bottom pb-3 mb-3">
-                        <h6><i class="fas fa-file-alt text-primary"></i> Краткий вывод</h6>
-                        <p class="text-muted">{{ conclusion.short_text|linebreaks }}</p>
-                    </div>
-
-                    <!-- Плюсы и минусы -->
-                    {% if conclusion.pros or conclusion.cons %}
-                    <div class="row">
-                        {% if conclusion.pros %}
-                        <div class="col-md-6">
-                            <div class="alert alert-success">
-                                <h6><i class="fas fa-plus-circle"></i> Плюсы</h6>
-                                <p class="mb-0">{{ conclusion.pros|linebreaks }}</p>
-                            </div>
-                        </div>
-                        {% endif %}
-                        {% if conclusion.cons %}
-                        <div class="col-md-6">
-                            <div class="alert alert-danger">
-                                <h6><i class="fas fa-minus-circle"></i> Минусы</h6>
-                                <p class="mb-0">{{ conclusion.cons|linebreaks }}</p>
-                            </div>
-                        </div>
-                        {% endif %}
-                    </div>
-                    {% endif %}
-
-                    <!-- Блок с платными услугами -->
-                    <div class="mt-4 p-3 bg-light rounded">
-                        <h5 class="text-center mb-3">
-                            <i class="fas fa-gem text-warning"></i> 
-                            Получите полную юридическую консультацию
-                        </h5>
-                        <p class="text-muted text-center">
-                            Профессиональная письменная консультация, пошаговый план действий и готовые документы
-                        </p>
-                        
-                        {% if conclusion.price > 0 %}
-                        <div class="text-center">
-                            <div class="display-4 text-primary">{{ conclusion.price }} ₽</div>
-                            <a href="{% url 'core:user_payment' conclusion.id %}" class="btn btn-success btn-lg mt-3">
-                                <i class="fas fa-shopping-cart"></i> Получить консультацию
-                            </a>
-                        </div>
-                        {% else %}
-                        <div class="text-center">
-                            <div class="alert alert-warning">
-                                <i class="fas fa-info-circle"></i> 
-                                Консультация бесплатна!
-                            </div>
-                            <a href="{% url 'core:user_payment' conclusion.id %}" class="btn btn-success btn-lg">
-                                <i class="fas fa-download"></i> Скачать материалы
-                            </a>
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-
-            <!-- Кнопки навигации -->
-            <div class="mt-4 text-center">
-                <a href="{% url 'core:user_select_problem' %}" class="btn btn-outline-primary">
-                    <i class="fas fa-home"></i> На главную
-                </a>
-                <a href="javascript:history.back()" class="btn btn-outline-secondary">
-                    <i class="fas fa-arrow-left"></i> Назад
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
-
+{% block extra_css %}
 <style>
-.fade-in {
-    animation: fadeIn 0.8s ease;
+.result-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
 }
-@keyframes fadeIn {
+.result-header {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    border-radius: 20px;
+    padding: 40px;
+    text-align: center;
+    margin-bottom: 30px;
+}
+.result-header .icon {
+    font-size: 60px;
+    margin-bottom: 15px;
+}
+.result-card {
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    margin-bottom: 25px;
+}
+.section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1a1a2e;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #f0f0f0;
+}
+.pros-cons-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+@media (max-width: 768px) {
+    .pros-cons-grid {
+        grid-template-columns: 1fr;
+    }
+}
+.pros-box {
+    background: #d4edda;
+    border-radius: 12px;
+    padding: 20px;
+    border-left: 4px solid #28a745;
+}
+.cons-box {
+    background: #f8d7da;
+    border-radius: 12px;
+    padding: 20px;
+    border-left: 4px solid #dc3545;
+}
+.payment-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 15px;
+}
+@media (max-width: 768px) {
+    .payment-options {
+        grid-template-columns: 1fr;
+    }
+}
+.payment-option {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    transition: all 0.3s;
+    border: 2px solid transparent;
+    cursor: pointer;
+}
+.payment-option:hover {
+    border-color: #007bff;
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+.payment-option.selected {
+    border-color: #007bff;
+    background: #e7f1ff;
+}
+.payment-option .price {
+    font-size: 28px;
+    font-weight: bold;
+    color: #007bff;
+}
+.payment-option .label {
+    font-size: 14px;
+    color: #6c757d;
+}
+.payment-option input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    margin-bottom: 10px;
+}
+.total-price {
+    font-size: 32px;
+    font-weight: bold;
+    color: #28a745;
+}
+.animate-result {
+    animation: fadeInUp 0.8s ease;
+}
+@keyframes fadeInUp {
     from { opacity: 0; transform: translateY(30px); }
     to { opacity: 1; transform: translateY(0); }
 }
 </style>
+{% endblock %}
+
+{% block content %}
+<div class="container result-container animate-result">
+    <!-- Заголовок результата -->
+    <div class="result-header">
+        <div class="icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <h2 class="fw-bold">{{ conclusion.title }}</h2>
+        <p class="mb-0 opacity-75">{{ conclusion.questionnaire.name }}</p>
+    </div>
+
+    <!-- Краткий вывод -->
+    <div class="result-card">
+        <div class="section-title">
+            <i class="fas fa-file-alt text-primary me-2"></i> Краткий вывод
+        </div>
+        <p class="mb-0" style="font-size: 16px; line-height: 1.8;">
+            {{ conclusion.short_text|linebreaks }}
+        </p>
+    </div>
+
+    <!-- Плюсы и минусы -->
+    {% if conclusion.pros or conclusion.cons %}
+    <div class="result-card">
+        <div class="section-title">
+            <i class="fas fa-balance-scale text-primary me-2"></i> Анализ ситуации
+        </div>
+        <div class="pros-cons-grid">
+            {% if conclusion.pros %}
+            <div class="pros-box">
+                <h6 class="text-success fw-bold"><i class="fas fa-plus-circle me-1"></i> Плюсы</h6>
+                <p class="mb-0 small">{{ conclusion.pros|linebreaks }}</p>
+            </div>
+            {% endif %}
+            {% if conclusion.cons %}
+            <div class="cons-box">
+                <h6 class="text-danger fw-bold"><i class="fas fa-minus-circle me-1"></i> Минусы</h6>
+                <p class="mb-0 small">{{ conclusion.cons|linebreaks }}</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Вероятность успеха -->
+    <div class="result-card">
+        <div class="section-title">
+            <i class="fas fa-chart-line text-primary me-2"></i> Вероятность успеха
+        </div>
+        <div class="d-flex align-items-center">
+            <div class="flex-grow-1">
+                <div class="progress" style="height: 30px; border-radius: 15px;">
+                    <div class="progress-bar bg-success" role="progressbar" 
+                         style="width: {{ conclusion.success_rate }}%; border-radius: 15px;"
+                         aria-valuenow="{{ conclusion.success_rate }}" 
+                         aria-valuemin="0" 
+                         aria-valuemax="100">
+                        {{ conclusion.success_rate }}%
+                    </div>
+                </div>
+            </div>
+            <div class="ms-3">
+                <span class="badge bg-{% if conclusion.success_rate > 70 %}success{% elif conclusion.success_rate > 40 %}warning{% else %}danger{% endif %} fs-6">
+                    {% if conclusion.success_rate > 70 %}Высокая{% elif conclusion.success_rate > 40 %}Средняя{% else %}Низкая{% endif %}
+                </span>
+            </div>
+        </div>
+        <p class="text-muted small mt-2 mb-0">
+            <i class="fas fa-info-circle"></i> 
+            Основано на анализе ваших ответов и судебной практике
+        </p>
+    </div>
+
+    <!-- Блок с платными услугами -->
+    <div class="result-card" id="paymentSection">
+        <div class="section-title">
+            <i class="fas fa-gem text-warning me-2"></i> Полная юридическая помощь
+        </div>
+        
+        <p class="text-muted">
+            Получите профессиональную письменную консультацию, пошаговый план действий 
+            и готовые документы для вашей ситуации
+        </p>
+
+        <form id="paymentForm" method="post" action="{% url 'core:user_payment' conclusion.id %}">
+            {% csrf_token %}
+            
+            <div class="payment-options mb-4">
+                <!-- Опция 1: Консультация -->
+                <div class="payment-option" onclick="toggleOption(this)">
+                    <input type="checkbox" name="services" value="consultation" checked>
+                    <div class="label">Письменная консультация</div>
+                    <div class="price">{{ conclusion.price|floatformat:0 }} ₽</div>
+                    <small class="text-muted">Детальный анализ вашей ситуации</small>
+                </div>
+                
+                <!-- Опция 2: План действий -->
+                <div class="payment-option" onclick="toggleOption(this)">
+                    <input type="checkbox" name="services" value="plan">
+                    <div class="label">Пошаговый план действий</div>
+                    <div class="price">{{ conclusion.price|floatformat:0|add:0 }} ₽</div>
+                    <small class="text-muted">Четкая инструкция что делать</small>
+                </div>
+                
+                <!-- Опция 3: Документы -->
+                <div class="payment-option" onclick="toggleOption(this)">
+                    <input type="checkbox" name="services" value="documents">
+                    <div class="label">Готовые документы</div>
+                    <div class="price">{{ conclusion.price|floatformat:0|add:0 }} ₽</div>
+                    <small class="text-muted">Образцы с нормативной базой</small>
+                </div>
+            </div>
+
+            <!-- Итоговая цена -->
+            <div class="text-center py-3 bg-light rounded">
+                <p class="text-muted mb-1">Итого:</p>
+                <div class="total-price" id="totalPrice">{{ conclusion.price|floatformat:0 }} ₽</div>
+            </div>
+
+            <!-- Кнопка оплаты -->
+            <div class="d-grid gap-2 mt-4">
+                <button type="submit" class="btn btn-success btn-lg py-3">
+                    <i class="fas fa-lock me-2"></i> Получить полную консультацию
+                </button>
+            </div>
+        </form>
+
+        <div class="text-center mt-3">
+            <small class="text-muted">
+                <i class="fas fa-shield-alt text-success"></i> 
+                Безопасный платеж. Все материалы придут на email
+            </small>
+        </div>
+    </div>
+
+    <!-- Кнопки навигации -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="{% url 'core:user_questionnaire' conclusion.questionnaire.id %}" 
+           class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Пройти заново
+        </a>
+        <a href="{% url 'core:user_select_problem' %}" class="btn btn-outline-primary">
+            <i class="fas fa-home"></i> На главную
+        </a>
+    </div>
+</div>
+
+<script>
+function toggleOption(element) {
+    const checkbox = element.querySelector('input[type="checkbox"]');
+    checkbox.checked = !checkbox.checked;
+    element.classList.toggle('selected');
+    updateTotalPrice();
+}
+
+function updateTotalPrice() {
+    const checkboxes = document.querySelectorAll('input[name="services"]:checked');
+    const basePrice = {{ conclusion.price|floatformat:0 }};
+    const count = checkboxes.length;
+    const total = basePrice * count;
+    document.getElementById('totalPrice').textContent = total + ' ₽';
+}
+
+// Инициализация: выбираем первый вариант
+document.querySelectorAll('.payment-option')[0].classList.add('selected');
+</script>
 {% endblock %}
