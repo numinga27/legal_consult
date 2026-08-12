@@ -12,7 +12,8 @@ urlpatterns = [
     path('admin-questionnaire-add/', views.admin_add_questionnaire, name='admin_add_questionnaire'),
     path('admin-question-delete/<int:q_id>/', views.admin_delete_question, name='admin_delete_question'),
     path('admin-answer-delete/<int:a_id>/', views.admin_delete_answer, name='admin_delete_answer'),
-    
+    path('api/questionnaire/<int:q_id>/', views.api_questionnaire_data, name='api_questionnaire_data'),
+    path('api/check-answer/', views.api_check_answer, name='api_check_answer'),
     # Пользовательская часть
     path('', views.user_select_problem, name='user_select_problem'),
     path('questionnaire/<int:q_id>/', views.user_questionnaire, name='user_questionnaire'),
