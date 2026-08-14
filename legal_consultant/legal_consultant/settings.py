@@ -31,6 +31,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'core.middleware.ForceSessionSaveMiddleware',  # 👈 ДОБАВИТЬ СЮДА
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -124,3 +125,53 @@ LOGGING = {
         'level': 'INFO',
     },
 }
+# ============ НАСТРОЙКИ СЕССИЙ ============
+
+# Используем базу данных для сессий
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+
+# Время жизни сессии - 7 дней
+SESSION_COOKIE_AGE = 604800
+
+# НЕ закрывать сессию при закрытии браузера
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
+# Сохранять сессию при каждом запросе (ВАЖНО!)
+SESSION_SAVE_EVERY_REQUEST = True
+
+# Имя cookie
+SESSION_COOKIE_NAME = 'sessionid'
+
+# Cookie работает на всем сайте
+SESSION_COOKIE_PATH = '/'
+
+# Безопасность (для разработки)
+SESSION_COOKIE_SECURE = False
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+
+# ---------- ДОПОЛНИТЕЛЬНЫЕ НАСТРОЙКИ ----------
+
+# Использовать кэш для сессий (ускоряет)
+# SESSION_CACHE_ALIAS = 'default'
+
+# Сериализация данных сессии
+SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
+
+# ---------- НАСТРОЙКИ CSRF ----------
+
+CSRF_COOKIE_NAME = 'csrftoken'
+CSRF_COOKIE_HTTPONLY = False
+CSRF_COOKIE_AGE = 604800  # 7 дней
+CSRF_COOKIE_PATH = '/'
+CSRF_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SECURE = False
+CSRF_USE_SESSIONS = False
+CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:8000', 'http://localhost:8000']
+
+# ---------- НАСТРОЙКИ АУТЕНТИФИКАЦИИ ----------
+
+# Перенаправление после логина
+LOGIN_URL = '/admin-login/'
+LOGIN_REDIRECT_URL = '/admin-dashboard/'
+LOGOUT_REDIRECT_URL = '/'

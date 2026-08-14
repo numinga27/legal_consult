@@ -374,3 +374,18 @@ Watching for file changes with StatReloader
 Not Found: /apple-touch-icon-precomposed.png
 Not Found: /apple-touch-icon.png
 Not Found: /favicon.ico
+Генерация опросника для темы: kfjdesc
+AI generation error: NOT NULL constraint failed: core_conclusion.order
+/Users/andrejkrylov/Desktop/fist/legal_consultant/legal_consultant/legal_consultant/settings.py changed, reloading.
+Watching for file changes with StatReloader
+/Users/andrejkrylov/Desktop/fist/legal_consultant/legal_consultant/core/views.py changed, reloading.
+Watching for file changes with StatReloader
+/Users/andrejkrylov/Desktop/fist/legal_consultant/legal_consultant/legal_consultant/settings.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+/Users/andrejkrylov/Desktop/fist/legal_consultant/legal_consultant/core/views.py changed, reloading.
+Watching for file changes with StatReloader
+/Users/andrejkrylov/Desktop/fist/legal_consultant/legal_consultant/legal_consultant/settings.py changed, reloading.
+Watching for file changes with StatReloader
+User admin logged in successfully. Session: 3byiissd3rapawvjedsxddi4tmuka5a9

@@ -21,22 +21,66 @@ logger = logging.getLogger(__name__)
 
 
 # ============ АДМИН-ПАНЕЛЬ ============
+from django.contrib.auth import login, authenticate, logout
+from django.shortcuts import redirect
+import logging
+
+logger = logging.getLogger(__name__)
 
 def admin_login(request):
     """Страница входа в админ-панель"""
+    # Если пользователь уже авторизован - перенаправляем
+    if request.user.is_authenticated and request.user.is_staff:
+        return redirect('core:admin_dashboard')
+    
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
+        
+        # Аутентификация
         user = authenticate(request, username=username, password=password)
         
         if user is not None and user.is_staff:
+            # Вход пользователя
             login(request, user)
-            return redirect('core:admin_dashboard')
+            
+            # ПРИНУДИТЕЛЬНОЕ сохранение сессии
+            request.session.save()
+            
+            # Создаем ответ с редиректом
+            response = redirect('core:admin_dashboard')
+            
+            # Устанавливаем COOKIE с сессией вручную
+            response.set_cookie(
+                'sessionid',
+                request.session.session_key,
+                max_age=604800,  # 7 дней
+                path='/',
+                domain=None,  # Использует текущий домен
+                secure=False,
+                httponly=True,
+                samesite='Lax'
+            )
+            
+            # Также устанавливаем CSRF cookie
+            response.set_cookie(
+                'csrftoken',
+                request.META.get('CSRF_COOKIE', ''),
+                max_age=604800,
+                path='/',
+                httponly=False,
+                samesite='Lax'
+            )
+            
+            logger.info(f"User {username} logged in successfully. Session: {request.session.session_key}")
+            
+            # Возвращаем ответ с куками
+            return response
         else:
             messages.error(request, 'Неверный логин или пароль, или у вас нет прав администратора')
+            logger.warning(f"Failed login attempt for user: {username}")
     
     return render(request, 'admin/login.html')
-
 
 @login_required
 def admin_dashboard(request):
