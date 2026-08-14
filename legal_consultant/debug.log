@@ -43,3 +43,334 @@ Watching for file changes with StatReloader
 /Users/andrejkrylov/Desktop/fist/legal_consultant/legal_consultant/core/models.py changed, reloading.
 Watching for file changes with StatReloader
 Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+/Users/andrejkrylov/Desktop/fist/legal_consultant/legal_consultant/core/views.py changed, reloading.
+Watching for file changes with StatReloader
+Internal Server Error: /questionnaire/4/
+Traceback (most recent call last):
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/backends/sqlite3/base.py", line 328, in execute
+    return super().execute(query, params)
+sqlite3.IntegrityError: UNIQUE constraint failed: core_usersession.session_key, core_usersession.questionnaire_id
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/legal_consultant/core/views.py", line 224, in user_questionnaire
+    user_session = UserSession.objects.create(
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/models/query.py", line 658, in create
+    obj.save(force_insert=True, using=self.db)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/models/base.py", line 814, in save
+    self.save_base(
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/models/base.py", line 877, in save_base
+    updated = self._save_table(
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/models/base.py", line 1020, in _save_table
+    results = self._do_insert(
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/models/base.py", line 1061, in _do_insert
+    return manager._insert(
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1805, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/models/sql/compiler.py", line 1822, in execute_sql
+    cursor.execute(sql, params)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 102, in execute
+    return super().execute(sql, params)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 67, in execute
+    return self._execute_with_wrappers(
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 80, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/backends/sqlite3/base.py", line 328, in execute
+    return super().execute(query, params)
+django.db.utils.IntegrityError: UNIQUE constraint failed: core_usersession.session_key, core_usersession.questionnaire_id
+/Users/andrejkrylov/Desktop/fist/legal_consultant/legal_consultant/core/models.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Internal Server Error: /questionnaire/4/
+Traceback (most recent call last):
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/backends/sqlite3/base.py", line 328, in execute
+    return super().execute(query, params)
+sqlite3.IntegrityError: UNIQUE constraint failed: core_usersession.session_key, core_usersession.questionnaire_id
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/legal_consultant/core/views.py", line 238, in user_questionnaire
+    user_session = UserSession.objects.create(
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/models/query.py", line 658, in create
+    obj.save(force_insert=True, using=self.db)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/models/base.py", line 814, in save
+    self.save_base(
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/models/base.py", line 877, in save_base
+    updated = self._save_table(
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/models/base.py", line 1020, in _save_table
+    results = self._do_insert(
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/models/base.py", line 1061, in _do_insert
+    return manager._insert(
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1805, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/models/sql/compiler.py", line 1822, in execute_sql
+    cursor.execute(sql, params)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 102, in execute
+    return super().execute(sql, params)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 67, in execute
+    return self._execute_with_wrappers(
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 80, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/backends/sqlite3/base.py", line 328, in execute
+    return super().execute(query, params)
+django.db.utils.IntegrityError: UNIQUE constraint failed: core_usersession.session_key, core_usersession.questionnaire_id
+Internal Server Error: /questionnaire/4/
+Traceback (most recent call last):
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/backends/sqlite3/base.py", line 328, in execute
+    return super().execute(query, params)
+sqlite3.IntegrityError: UNIQUE constraint failed: core_usersession.session_key, core_usersession.questionnaire_id
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/legal_consultant/core/views.py", line 238, in user_questionnaire
+    user_session = UserSession.objects.create(
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/models/query.py", line 658, in create
+    obj.save(force_insert=True, using=self.db)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/models/base.py", line 814, in save
+    self.save_base(
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/models/base.py", line 877, in save_base
+    updated = self._save_table(
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/models/base.py", line 1020, in _save_table
+    results = self._do_insert(
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/models/base.py", line 1061, in _do_insert
+    return manager._insert(
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1805, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/models/sql/compiler.py", line 1822, in execute_sql
+    cursor.execute(sql, params)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 102, in execute
+    return super().execute(sql, params)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 67, in execute
+    return self._execute_with_wrappers(
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 80, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/backends/sqlite3/base.py", line 328, in execute
+    return super().execute(query, params)
+django.db.utils.IntegrityError: UNIQUE constraint failed: core_usersession.session_key, core_usersession.questionnaire_id
+Watching for file changes with StatReloader
+Internal Server Error: /payment/4/
+Traceback (most recent call last):
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/backends/sqlite3/base.py", line 328, in execute
+    return super().execute(query, params)
+sqlite3.IntegrityError: NOT NULL constraint failed: core_payment.email
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/legal_consultant/core/views.py", line 348, in user_payment
+    payment = Payment.objects.create(
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/models/query.py", line 658, in create
+    obj.save(force_insert=True, using=self.db)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/models/base.py", line 814, in save
+    self.save_base(
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/models/base.py", line 877, in save_base
+    updated = self._save_table(
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/models/base.py", line 1020, in _save_table
+    results = self._do_insert(
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/models/base.py", line 1061, in _do_insert
+    return manager._insert(
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1805, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/models/sql/compiler.py", line 1822, in execute_sql
+    cursor.execute(sql, params)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 102, in execute
+    return super().execute(sql, params)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 67, in execute
+    return self._execute_with_wrappers(
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 80, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/backends/sqlite3/base.py", line 328, in execute
+    return super().execute(query, params)
+django.db.utils.IntegrityError: NOT NULL constraint failed: core_payment.email
+Internal Server Error: /payment/4/
+Traceback (most recent call last):
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/backends/sqlite3/base.py", line 328, in execute
+    return super().execute(query, params)
+sqlite3.IntegrityError: NOT NULL constraint failed: core_payment.email
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/legal_consultant/core/views.py", line 348, in user_payment
+    payment = Payment.objects.create(
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/models/query.py", line 658, in create
+    obj.save(force_insert=True, using=self.db)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/models/base.py", line 814, in save
+    self.save_base(
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/models/base.py", line 877, in save_base
+    updated = self._save_table(
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/models/base.py", line 1020, in _save_table
+    results = self._do_insert(
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/models/base.py", line 1061, in _do_insert
+    return manager._insert(
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1805, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/models/sql/compiler.py", line 1822, in execute_sql
+    cursor.execute(sql, params)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 102, in execute
+    return super().execute(sql, params)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 67, in execute
+    return self._execute_with_wrappers(
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 80, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/db/backends/sqlite3/base.py", line 328, in execute
+    return super().execute(query, params)
+django.db.utils.IntegrityError: NOT NULL constraint failed: core_payment.email
+/Users/andrejkrylov/Desktop/fist/legal_consultant/legal_consultant/core/models.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+/Users/andrejkrylov/Desktop/fist/legal_consultant/legal_consultant/core/models.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Internal Server Error: /admin-dashboard/
+Traceback (most recent call last):
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/contrib/auth/decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/legal_consultant/core/views.py", line 57, in admin_dashboard
+    return render(request, 'admin/dashboard.html', context)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 63, in render
+    result = block.nodelist.render(context)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/template/defaulttags.py", line 471, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/urls/base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "/Users/andrejkrylov/Desktop/fist/legal_consultant/venv/lib/python3.9/site-packages/django/urls/resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'admin_generate_ai' not found. 'admin_generate_ai' is not a valid view function or pattern name.
+/Users/andrejkrylov/Desktop/fist/legal_consultant/legal_consultant/core/urls.py changed, reloading.
+Watching for file changes with StatReloader
+/Users/andrejkrylov/Desktop/fist/legal_consultant/legal_consultant/core/models.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+/Users/andrejkrylov/Desktop/fist/legal_consultant/legal_consultant/core/ai_integration.py changed, reloading.
+Watching for file changes with StatReloader
+/Users/andrejkrylov/Desktop/fist/legal_consultant/legal_consultant/core/views.py changed, reloading.
+Watching for file changes with StatReloader
+/Users/andrejkrylov/Desktop/fist/legal_consultant/legal_consultant/core/models.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Not Found: /apple-touch-icon-precomposed.png
+Not Found: /apple-touch-icon.png
+Not Found: /favicon.ico

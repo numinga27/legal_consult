@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Тестирование правил AI{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-flask"></i> Тестирование правил AI</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> 
+                        Здесь вы можете протестировать, как AI будет использовать созданные вами правила
+                    </div>
+
+                    <form id="testRulesForm">
+                        <div class="mb-3">
+                            <label class="form-label">Выберите правило</label>
+                            <select id="ruleSelect" class="form-select">
+                                <option value="">-- Выберите правило --</option>
+                                {% for rule in rules %}
+                                <option value="{{ rule.id }}">{{ rule.name }} ({{ rule.get_rule_type_display }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Тема для теста</label>
+                            <input type="text" id="testTopic" class="form-control" 
+                                   placeholder="Например: Отмена судебного приказа">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Дополнительные инструкции</label>
+                            <textarea id="testInstructions" class="form-control" rows="3"
+                                      placeholder="Укажите особые требования..."></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-play"></i> Протестировать
+                        </button>
+                    </form>
+
+                    <div id="testResult" style="display: none;" class="mt-4">
+                        <hr>
+                        <h5><i class="fas fa-code"></i> Результат</h5>
+                        <div class="bg-dark text-light p-3 rounded" style="max-height: 500px; overflow-y: auto;">
+                            <pre id="resultContent" style="margin: 0; white-space: pre-wrap;"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Превью правил -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5><i class="fas fa-book"></i> Текущие правила</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Название</th>
+                                    <th>Тип</th>
+                                    <th>Приоритет</th>
+                                    <th>Статус</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for rule in rules %}
+                                <tr>
+                                    <td>{{ rule.name }}</td>
+                                    <td><span class="badge bg-info">{{ rule.get_rule_type_display }}</span></td>
+                                    <td>{{ rule.priority }}</td>
+                                    <td>
+                                        {% if rule.is_active %}
+                                        <span class="badge bg-success">Активно</span>
+                                        {% else %}
+                                        <span class="badge bg-danger">Неактивно</span>
+                                        {% endif %}
+                                        {% if rule.is_default %}
+                                        <span class="badge bg-warning">По умолчанию</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="/admin/core/airules/{{ rule.id }}/change/" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">Нет созданных правил</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('testRulesForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const ruleId = document.getElementById('ruleSelect').value;
+    const topic = document.getElementById('testTopic').value;
+    const instructions = document.getElementById('testInstructions').value;
+    
+    if (!ruleId) {
+        alert('Пожалуйста, выберите правило');
+        return;
+    }
+    
+    if (!topic) {
+        alert('Пожалуйста, введите тему');
+        return;
+    }
+    
+    const resultDiv = document.getElementById('testResult');
+    const content = document.getElementById('resultContent');
+    
+    resultDiv.style.display = 'block';
+    content.textContent = 'Генерация...';
+    
+    fetch('/api/test-rules/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || ''
+        },
+        body: JSON.stringify({
+            rule_id: ruleId,
+            topic: topic,
+            instructions: instructions
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        content.textContent = JSON.stringify(data, null, 2);
+    })
+    .catch(error => {
+        content.textContent = 'Ошибка: ' + error.message;
+    });
+});
+</script>
+{% endblock %}

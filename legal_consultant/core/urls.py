@@ -15,6 +15,9 @@ urlpatterns = [
     path('api/questionnaire/<int:q_id>/', views.api_questionnaire_data, name='api_questionnaire_data'),
     path('api/check-answer/', views.api_check_answer, name='api_check_answer'),
     # Пользовательская часть
+    path('admin-test-rules/', views.admin_test_rules, name='admin_test_rules'),
+    path('api/test-rules/', views.api_test_rules, name='api_test_rules'),
+    path('admin-generate-ai/', views.admin_generate_with_ai, name='admin_generate_ai'),
     path('', views.user_select_problem, name='user_select_problem'),
     path('questionnaire/<int:q_id>/', views.user_questionnaire, name='user_questionnaire'),
     path('api/get-next-question/', views.api_get_next_question, name='api_get_next_question'),

@@ -205,7 +205,7 @@ class UserSession(models.Model):
     class Meta:
         verbose_name = 'Сессия пользователя'
         verbose_name_plural = 'Сессии пользователей'
-        unique_together = ['session_key', 'questionnaire']
+        # unique_together = ['session_key', 'questionnaire']
 
     def __str__(self):
         return f"Сессия {self.session_key[:10]} - {self.questionnaire.name}"
@@ -225,7 +225,8 @@ class Payment(models.Model):
         UserSession,
         on_delete=models.CASCADE,
         verbose_name='Сессия',
-        related_name='payments'
+        related_name='payments',
+        null=True,
     )
     conclusion = models.ForeignKey(
         Conclusion,
@@ -246,3 +247,188 @@ class Payment(models.Model):
 
     def __str__(self):
         return f"Платеж #{self.id} - {self.status}"
+
+
+class DocumentTemplate(models.Model):
+    """
+    Шаблон документа для PDF
+    """
+    TEMPLATE_TYPES = [
+        ('claim', 'Исковое заявление'),
+        ('complaint', 'Жалоба'),
+        ('petition', 'Ходатайство'),
+        ('statement', 'Заявление'),
+        ('agreement', 'Соглашение'),
+        ('objection', 'Возражение'),
+        ('appeal', 'Апелляционная жалоба'),
+        ('letter', 'Письмо'),
+        ('other', 'Другое'),
+    ]
+    
+    name = models.CharField('Название шаблона', max_length=200)
+    template_type = models.CharField('Тип документа', max_length=20, choices=TEMPLATE_TYPES, default='other')
+    description = models.TextField('Описание', blank=True)
+    
+    # HTML шаблон с переменными в формате {{ переменная }}
+    html_template = models.TextField('HTML шаблон', help_text='Используйте {{ full_name }}, {{ address }}, {{ phone }}, {{ email }} и другие переменные')
+    
+    # CSS стили
+    css_styles = models.TextField('CSS стили', blank=True, default='''
+        body { font-family: Arial, sans-serif; font-size: 12pt; margin: 40px; }
+        h1 { color: #1a1a2e; font-size: 18pt; text-align: center; }
+        .header { text-align: right; margin-bottom: 30px; }
+        .content { line-height: 1.6; }
+        .footer { margin-top: 50px; text-align: right; }
+        .signature { margin-top: 30px; }
+        .variable { color: #007bff; background: #f0f0f0; padding: 2px 5px; border-radius: 3px; }
+    ''')
+    
+    # Переменные, которые использует шаблон
+    variables = models.JSONField('Переменные', default=list, help_text='Список переменных, например: ["full_name", "address", "phone"]')
+    
+    # Связь с выводом (какой вывод использует этот шаблон)
+    conclusion = models.ForeignKey(
+        Conclusion,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name='Вывод',
+        related_name='templates'
+    )
+    
+    is_active = models.BooleanField('Активен', default=True)
+    created_at = models.DateTimeField('Дата создания', auto_now_add=True)
+    updated_at = models.DateTimeField('Дата обновления', auto_now=True)
+
+    class Meta:
+        verbose_name = 'Шаблон документа'
+        verbose_name_plural = 'Шаблоны документов'
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+    
+    def get_variable_list(self):
+        """Возвращает список переменных из шаблона"""
+        import re
+        # Ищем все {{ переменные }}
+        variables = re.findall(r'{{(\s*[a-zA-Z_][a-zA-Z0-9_]*\s*)}}', self.html_template)
+        return [v.strip() for v in variables]
+
+
+class GeneratedDocument(models.Model):
+    """
+    Сгенерированный документ для пользователя
+    """
+    user_session = models.ForeignKey(
+        UserSession,
+        on_delete=models.CASCADE,
+        verbose_name='Сессия пользователя',
+        related_name='documents'
+    )
+    template = models.ForeignKey(
+        DocumentTemplate,
+        on_delete=models.SET_NULL,
+        null=True,
+        verbose_name='Шаблон'
+    )
+    conclusion = models.ForeignKey(
+        Conclusion,
+        on_delete=models.CASCADE,
+        verbose_name='Вывод'
+    )
+    
+    # Данные пользователя в момент генерации
+    user_data = models.JSONField('Данные пользователя', default=dict)
+    
+    # Сгенерированный PDF файл
+    pdf_file = models.FileField('PDF файл', upload_to='documents/pdfs/%Y/%m/%d/', blank=True, null=True)
+    
+    # Текст документа (для отображения)
+    content_text = models.TextField('Текст документа', blank=True)
+    
+    status = models.CharField('Статус', max_length=20, default='pending', 
+                             choices=[('pending', 'В процессе'), ('ready', 'Готов'), ('failed', 'Ошибка')])
+    
+    created_at = models.DateTimeField('Дата создания', auto_now_add=True)
+    downloaded_at = models.DateTimeField('Дата скачивания', null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'Сгенерированный документ'
+        verbose_name_plural = 'Сгенерированные документы'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Документ #{self.id} - {self.conclusion.title[:30]}"    
+
+class AIRules(models.Model):
+    """
+    Свод правил для AI - настраивается администратором
+    """
+    RULE_TYPES = [
+        ('questionnaire', 'Генерация опросников'),
+        ('consultation', 'Генерация консультаций'),
+        ('document', 'Генерация документов'),
+        ('conclusion', 'Генерация выводов'),
+        ('general', 'Общие правила'),
+    ]
+    
+    name = models.CharField('Название правила', max_length=200)
+    rule_type = models.CharField('Тип правила', max_length=20, choices=RULE_TYPES, default='general')
+    description = models.TextField('Описание', blank=True)
+    
+    rules_text = models.TextField(
+        'Свод правил',
+        help_text='Инструкция для AI. Используйте {{ topic }}, {{ category }} для подстановки'
+    )
+    
+    prompt_template = models.TextField(
+        'Шаблон промпта',
+        help_text='Шаблон запроса к AI. Используйте {{ rules }} для вставки правил, {{ topic }} для темы',
+        blank=True
+    )
+    
+    examples = models.JSONField(
+        'Примеры',
+        default=list,
+        help_text='Примеры для обучения AI (few-shot)',
+        blank=True
+    )
+    
+    variables = models.JSONField('Переменные', default=list, blank=True)
+    priority = models.IntegerField('Приоритет', default=0)
+    is_active = models.BooleanField('Активно', default=True)
+    is_default = models.BooleanField('По умолчанию', default=False)
+    
+    created_at = models.DateTimeField('Дата создания', auto_now_add=True)
+    updated_at = models.DateTimeField('Дата обновления', auto_now=True)
+
+    class Meta:
+        verbose_name = 'Правило для AI'
+        verbose_name_plural = 'Правила для AI'
+        ordering = ['-priority', 'name']
+
+    def __str__(self):
+        return f"{self.get_rule_type_display()}: {self.name}"
+
+    def get_rules_with_variables(self, context=None):
+        """Возвращает правила с подставленными переменными"""
+        text = self.rules_text
+        if context:
+            for key, value in context.items():
+                text = text.replace(f'{{{{ {key} }}}}', str(value))
+                text = text.replace(f'{{{{{key}}}}}', str(value))
+        return text
+
+    def get_prompt(self, context=None):
+        """Возвращает полный промпт с правилами и контекстом"""
+        if self.prompt_template:
+            prompt = self.prompt_template
+            rules = self.get_rules_with_variables(context)
+            prompt = prompt.replace('{{ rules }}', rules)
+            if context:
+                for key, value in context.items():
+                    prompt = prompt.replace(f'{{{{ {key} }}}}', str(value))
+                    prompt = prompt.replace(f'{{{{{key}}}}}', str(value))
+            return prompt
+        return self.get_rules_with_variables(context)

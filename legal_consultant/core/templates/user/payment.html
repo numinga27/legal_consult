@@ -3,169 +3,114 @@
 
 {% block title %}Оплата консультации{% endblock %}
 
-{% block extra_css %}
-<style>
-.payment-container {
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 20px;
-}
-.payment-card {
-    background: white;
-    border-radius: 20px;
-    padding: 40px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-}
-.order-summary {
-    background: #f8f9fa;
-    border-radius: 12px;
-    padding: 20px;
-    margin: 20px 0;
-}
-.order-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 8px 0;
-    border-bottom: 1px solid #e9ecef;
-}
-.order-item:last-child {
-    border-bottom: none;
-}
-.price-total {
-    font-size: 24px;
-    font-weight: bold;
-    color: #28a745;
-}
-.payment-methods {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-    margin: 20px 0;
-}
-.payment-method {
-    padding: 15px;
-    border: 2px solid #e9ecef;
-    border-radius: 12px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.3s;
-}
-.payment-method:hover {
-    border-color: #007bff;
-}
-.payment-method.selected {
-    border-color: #007bff;
-    background: #e7f1ff;
-}
-.payment-method .icon {
-    font-size: 30px;
-    display: block;
-    margin-bottom: 5px;
-}
-</style>
-{% endblock %}
-
 {% block content %}
-<div class="container payment-container">
-    <div class="text-center mb-4">
-        <h2><i class="fas fa-credit-card text-primary"></i> Оформление заказа</h2>
-        <p class="text-muted">Заполните данные для получения консультации</p>
-    </div>
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-credit-card"></i> Оплата консультации</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Информация о заказе -->
+                    <div class="text-center mb-4">
+                        <h5>{{ conclusion.questionnaire.name }}</h5>
+                        <p class="text-muted">{{ conclusion.title }}</p>
+                        <div class="display-4 text-primary">{{ conclusion.price|floatformat:0 }} ₽</div>
+                        <hr>
+                        <div class="text-start">
+                            <p class="text-muted small mb-1">
+                                <i class="fas fa-check-circle text-success"></i> Письменная консультация
+                            </p>
+                            <p class="text-muted small mb-1">
+                                <i class="fas fa-check-circle text-success"></i> Пошаговый план действий
+                            </p>
+                            <p class="text-muted small mb-0">
+                                <i class="fas fa-check-circle text-success"></i> Готовые документы (образцы)
+                            </p>
+                        </div>
+                    </div>
 
-    <div class="payment-card">
-        <form method="post">
-            {% csrf_token %}
-            
-            <!-- Информация о заказе -->
-            <h5 class="mb-3"><i class="fas fa-receipt text-primary"></i> Ваш заказ</h5>
-            <div class="order-summary">
-                <div class="order-item">
-                    <span>{{ conclusion.title }}</span>
-                    <span>{{ conclusion.price|floatformat:0 }} ₽</span>
-                </div>
-                <div class="order-item">
-                    <span>Письменная консультация</span>
-                    <span>Включено</span>
-                </div>
-                {% if 'plan' in request.POST.services or request.method == 'GET' %}
-                <div class="order-item">
-                    <span>Пошаговый план действий</span>
-                    <span>Включено</span>
-                </div>
-                {% endif %}
-                {% if 'documents' in request.POST.services or request.method == 'GET' %}
-                <div class="order-item">
-                    <span>Готовые документы</span>
-                    <span>Включено</span>
-                </div>
-                {% endif %}
-                <div class="order-item fw-bold">
-                    <span>Итого</span>
-                    <span class="price-total">{{ conclusion.price|floatformat:0 }} ₽</span>
+                    <form method="post" id="paymentForm">
+                        {% csrf_token %}
+                        
+                        <!-- Email -->
+                        <div class="mb-3">
+                            <label for="email" class="form-label">
+                                <i class="fas fa-envelope"></i> Ваш email для получения консультации
+                            </label>
+                            <input type="email" 
+                                   class="form-control form-control-lg" 
+                                   id="email" 
+                                   name="email" 
+                                   placeholder="example@mail.ru"
+                                   required>
+                            <small class="text-muted">
+                                Мы отправим вам полную консультацию и документы на указанный email
+                            </small>
+                        </div>
+
+                        <!-- Данные пользователя (из localStorage) -->
+                        <div id="userDataPreview" class="mb-3" style="display: none;">
+                            <label class="form-label"><i class="fas fa-user"></i> Ваши данные</label>
+                            <div class="alert alert-secondary">
+                                <div id="userDataContent"></div>
+                            </div>
+                        </div>
+
+                        <!-- Кнопка оплаты -->
+                        <button type="submit" class="btn btn-success btn-lg w-100">
+                            <i class="fas fa-lock"></i> Оплатить {{ conclusion.price|floatformat:0 }} ₽
+                        </button>
+                    </form>
+
+                    <div class="mt-3 text-center">
+                        <small class="text-muted">
+                            <i class="fas fa-shield-alt text-success"></i> 
+                            Безопасный платеж через защищенное соединение
+                        </small>
+                    </div>
                 </div>
             </div>
 
-            <!-- Email -->
-            <div class="mb-3">
-                <label class="form-label fw-bold">
-                    <i class="fas fa-envelope text-primary"></i> Ваш email
-                </label>
-                <input type="email" class="form-control form-control-lg" 
-                       name="email" placeholder="example@mail.ru" required>
-                <small class="text-muted">
-                    На этот email мы отправим консультацию и документы
-                </small>
+            <div class="mt-3 text-center">
+                <a href="{% url 'core:user_result' conclusion.id %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Вернуться к результату
+                </a>
             </div>
-
-            <!-- Способ оплаты -->
-            <h5 class="mb-3"><i class="fas fa-wallet text-primary"></i> Способ оплаты</h5>
-            <div class="payment-methods">
-                <div class="payment-method selected" onclick="selectMethod(this)">
-                    <span class="icon">💳</span>
-                    <span>Банковская карта</span>
-                </div>
-                <div class="payment-method" onclick="selectMethod(this)">
-                    <span class="icon">📱</span>
-                    <span>СБП</span>
-                </div>
-                <div class="payment-method" onclick="selectMethod(this)">
-                    <span class="icon">🏦</span>
-                    <span>По счету</span>
-                </div>
-                <div class="payment-method" onclick="selectMethod(this)">
-                    <span class="icon">📱</span>
-                    <span>ЮMoney</span>
-                </div>
-            </div>
-
-            <!-- Кнопка оплаты -->
-            <div class="d-grid gap-2 mt-4">
-                <button type="submit" class="btn btn-success btn-lg py-3">
-                    <i class="fas fa-lock me-2"></i> Оплатить {{ conclusion.price|floatformat:0 }} ₽
-                </button>
-            </div>
-
-            <div class="text-center mt-3">
-                <small class="text-muted">
-                    <i class="fas fa-lock text-success"></i> 
-                    Платеж защищен. Все данные передаются по зашифрованному каналу
-                </small>
-            </div>
-        </form>
-    </div>
-
-    <!-- Возврат -->
-    <div class="text-center mt-3">
-        <a href="{% url 'core:user_result' conclusion.id %}" class="text-muted">
-            <i class="fas fa-arrow-left"></i> Вернуться к результату
-        </a>
+        </div>
     </div>
 </div>
 
 <script>
-function selectMethod(element) {
-    document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('selected'));
-    element.classList.add('selected');
-}
+document.addEventListener('DOMContentLoaded', function() {
+    // Получаем данные пользователя из localStorage
+    const userDataStr = localStorage.getItem('userDocumentData');
+    if (userDataStr) {
+        try {
+            const userData = JSON.parse(userDataStr);
+            const preview = document.getElementById('userDataPreview');
+            const content = document.getElementById('userDataContent');
+            
+            if (userData.full_name) {
+                preview.style.display = 'block';
+                content.innerHTML = `
+                    <p class="mb-1"><strong>ФИО:</strong> ${userData.full_name}</p>
+                    ${userData.email ? `<p class="mb-1"><strong>Email:</strong> ${userData.email}</p>` : ''}
+                    ${userData.phone ? `<p class="mb-1"><strong>Телефон:</strong> ${userData.phone}</p>` : ''}
+                    ${userData.address ? `<p class="mb-1"><strong>Адрес:</strong> ${userData.address}</p>` : ''}
+                `;
+                
+                // Если email не заполнен, подставляем из данных пользователя
+                const emailInput = document.getElementById('email');
+                if (userData.email && !emailInput.value) {
+                    emailInput.value = userData.email;
+                }
+            }
+        } catch(e) {
+            console.error('Error parsing user data:', e);
+        }
+    }
+});
 </script>
 {% endblock %}

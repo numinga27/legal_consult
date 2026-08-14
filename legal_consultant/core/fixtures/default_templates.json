@@ -1,0 +1,44 @@
+[
+  {
+    "model": "core.documenttemplate",
+    "pk": 1,
+    "fields": {
+      "name": "Стандартное исковое заявление",
+      "template_type": "claim",
+      "description": "Стандартный шаблон искового заявления для суда",
+      "html_template": "<!DOCTYPE html>\n<html>\n<head>\n<meta charset='UTF-8'>\n<style>\n  body { font-family: Arial, sans-serif; font-size: 12pt; margin: 40px; }\n  h1 { color: #1a1a2e; font-size: 18pt; text-align: center; margin-bottom: 30px; }\n  .header { text-align: right; margin-bottom: 30px; }\n  .content { line-height: 1.8; }\n  .footer { margin-top: 50px; text-align: right; }\n  .signature { margin-top: 30px; }\n  .variable { color: #007bff; background: #f0f0f0; padding: 2px 5px; border-radius: 3px; }\n</style>\n</head>\n<body>\n  <div class='header'>\n    <p><strong>В [Название суда]</strong></p>\n    <p>Адрес: [Адрес суда]</p>\n    <p><br></p>\n    <p><strong>Истец:</strong> {{ full_name }}</p>\n    <p><strong>Адрес:</strong> {{ address }}</p>\n    <p><strong>Телефон:</strong> {{ phone }}</p>\n    <p><strong>Email:</strong> {{ email }}</p>\n  </div>\n\n  <h1>ИСКОВОЕ ЗАЯВЛЕНИЕ</h1>\n\n  <div class='content'>\n    <p>{{ conclusion_full }}</p>\n    \n    <p>На основании вышеизложенного, в соответствии со статьей [номер статьи] ГК РФ,</p>\n    \n    <p><strong>ПРОШУ:</strong></p>\n    <ol>\n      <li>[Требование 1]</li>\n      <li>[Требование 2]</li>\n    </ol>\n  </div>\n\n  <div class='footer'>\n    <p>Дата: {{ current_date }}</p>\n    <p><br></p>\n    <p>_________________________</p>\n    <p><strong>Подпись:</strong> {{ full_name }}</p>\n  </div>\n</body>\n</html>",
+      "css_styles": "body { font-family: Arial, sans-serif; font-size: 12pt; margin: 40px; }\nh1 { color: #1a1a2e; font-size: 18pt; text-align: center; margin-bottom: 30px; }\n.header { text-align: right; margin-bottom: 30px; }\n.content { line-height: 1.8; }\n.footer { margin-top: 50px; text-align: right; }",
+      "variables": ["full_name", "address", "phone", "email", "conclusion_full", "current_date"],
+      "conclusion": null,
+      "is_active": true
+    }
+  },
+  {
+    "model": "core.documenttemplate",
+    "pk": 2,
+    "fields": {
+      "name": "Стандартная жалоба",
+      "template_type": "complaint",
+      "description": "Шаблон жалобы в вышестоящий орган",
+      "html_template": "<!DOCTYPE html>\n<html>\n<head>\n<meta charset='UTF-8'>\n<style>\n  body { font-family: Arial, sans-serif; font-size: 12pt; margin: 40px; }\n  h1 { color: #1a1a2e; font-size: 18pt; text-align: center; margin-bottom: 30px; }\n  .header { text-align: right; margin-bottom: 30px; }\n  .content { line-height: 1.8; }\n  .footer { margin-top: 50px; text-align: right; }\n</style>\n</head>\n<body>\n  <div class='header'>\n    <p><strong>В [Название органа]</strong></p>\n    <p>Адрес: [Адрес органа]</p>\n    <p><br></p>\n    <p><strong>От:</strong> {{ full_name }}</p>\n    <p><strong>Адрес:</strong> {{ address }}</p>\n    <p><strong>Телефон:</strong> {{ phone }}</p>\n    <p><strong>Email:</strong> {{ email }}</p>\n  </div>\n\n  <h1>ЖАЛОБА</h1>\n\n  <div class='content'>\n    <p>{{ conclusion_full }}</p>\n    \n    <p>На основании статьи [номер статьи],</p>\n    \n    <p><strong>ПРОШУ:</strong></p>\n    <ol>\n      <li>[Требование]</li>\n    </ol>\n  </div>\n\n  <div class='footer'>\n    <p>Дата: {{ current_date }}</p>\n    <p>_________________________</p>\n    <p><strong>Подпись:</strong> {{ full_name }}</p>\n  </div>\n</body>\n</html>",
+      "css_styles": "body { font-family: Arial, sans-serif; font-size: 12pt; margin: 40px; }\nh1 { color: #1a1a2e; font-size: 18pt; text-align: center; margin-bottom: 30px; }\n.header { text-align: right; margin-bottom: 30px; }\n.content { line-height: 1.8; }\n.footer { margin-top: 50px; text-align: right; }",
+      "variables": ["full_name", "address", "phone", "email", "conclusion_full", "current_date"],
+      "conclusion": null,
+      "is_active": true
+    }
+  },
+  {
+    "model": "core.documenttemplate",
+    "pk": 3,
+    "fields": {
+      "name": "Стандартное ходатайство",
+      "template_type": "petition",
+      "description": "Шаблон ходатайства в суд",
+      "html_template": "<!DOCTYPE html>\n<html>\n<head>\n<meta charset='UTF-8'>\n<style>\n  body { font-family: Arial, sans-serif; font-size: 12pt; margin: 40px; }\n  h1 { color: #1a1a2e; font-size: 18pt; text-align: center; margin-bottom: 30px; }\n  .header { text-align: right; margin-bottom: 30px; }\n  .content { line-height: 1.8; }\n  .footer { margin-top: 50px; text-align: right; }\n</style>\n</head>\n<body>\n  <div class='header'>\n    <p><strong>В [Название суда]</strong></p>\n    <p>Судья: [ФИО судьи]</p>\n    <p><br></p>\n    <p><strong>Заявитель:</strong> {{ full_name }}</p>\n    <p><strong>Адрес:</strong> {{ address }}</p>\n    <p><strong>Телефон:</strong> {{ phone }}</p>\n  </div>\n\n  <h1>ХОДАТАЙСТВО</h1>\n\n  <div class='content'>\n    <p>{{ conclusion_full }}</p>\n    \n    <p><strong>ПРОШУ:</strong></p>\n    <ol>\n      <li>[Требование]</li>\n    </ol>\n  </div>\n\n  <div class='footer'>\n    <p>Дата: {{ current_date }}</p>\n    <p>_________________________</p>\n    <p><strong>Подпись:</strong> {{ full_name }}</p>\n  </div>\n</body>\n</html>",
+      "css_styles": "body { font-family: Arial, sans-serif; font-size: 12pt; margin: 40px; }\nh1 { color: #1a1a2e; font-size: 18pt; text-align: center; margin-bottom: 30px; }\n.header { text-align: right; margin-bottom: 30px; }\n.content { line-height: 1.8; }\n.footer { margin-top: 50px; text-align: right; }",
+      "variables": ["full_name", "address", "phone", "email", "conclusion_full", "current_date"],
+      "conclusion": null,
+      "is_active": true
+    }
+  }
+]
