@@ -389,3 +389,53 @@ Watching for file changes with StatReloader
 /Users/andrejkrylov/Desktop/fist/legal_consultant/legal_consultant/legal_consultant/settings.py changed, reloading.
 Watching for file changes with StatReloader
 User admin logged in successfully. Session: 3byiissd3rapawvjedsxddi4tmuka5a9
+Forbidden (CSRF token from POST incorrect.): /admin-login/
+Forbidden (CSRF token from POST incorrect.): /admin-login/
+User admin logged in successfully. Session: lu0ebigui46otw2nqjf5fj6iv4u81voa
+Watching for file changes with StatReloader
+Not Found: /favicon.ico
+Not Found: /visual-editor/1/
+Watching for file changes with StatReloader
+Not Found: /visual-editor/1/
+Not Found: /visual-editor/1/
+Forbidden (CSRF token from the 'X-Csrftoken' HTTP header has incorrect length.): /api/save-workflow/
+Forbidden (CSRF token from the 'X-Csrftoken' HTTP header has incorrect length.): /api/save-workflow/
+/Users/andrejkrylov/Desktop/fist/legal_consultant/legal_consultant/core/views.py changed, reloading.
+Watching for file changes with StatReloader
+/Users/andrejkrylov/Desktop/fist/legal_consultant/legal_consultant/core/urls.py changed, reloading.
+Watching for file changes with StatReloader
+Not Found: /favicon.ico
+Not Found: /apple-touch-icon.png
+Not Found: /apple-touch-icon-precomposed.png
+/Users/andrejkrylov/Desktop/fist/legal_consultant/legal_consultant/core/views.py changed, reloading.
+Watching for file changes with StatReloader
+/Users/andrejkrylov/Desktop/fist/legal_consultant/legal_consultant/core/urls.py changed, reloading.
+Watching for file changes with StatReloader
+/Users/andrejkrylov/Desktop/fist/legal_consultant/legal_consultant/core/views.py changed, reloading.
+Watching for file changes with StatReloader
+/Users/andrejkrylov/Desktop/fist/legal_consultant/legal_consultant/core/views.py changed, reloading.
+Watching for file changes with StatReloader
+/Users/andrejkrylov/Desktop/fist/legal_consultant/legal_consultant/core/views.py changed, reloading.
+Watching for file changes with StatReloader
+Sync workflow for questionnaire 6
+Nodes: 6
+Connections: 0
+Created question: Вопрос 1
+Created conclusion: Вывод 1
+Created conclusion: Вывод 2
+Watching for file changes with StatReloader
+Sync workflow for questionnaire 6
+Nodes: 6
+Connections: 1
+Created question: Вопрос 1
+Created conclusion: Вывод 1
+Created conclusion: Вывод 2
+Processing connection: answer -> conclusion
+Sync workflow for questionnaire 6
+Nodes: 6
+Connections: 2
+Created question: Вопрос 1
+Created conclusion: Вывод 1
+Created conclusion: Вывод 2
+Processing connection: answer -> conclusion
+Processing connection: start -> question

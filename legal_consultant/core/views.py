@@ -898,3 +898,313 @@ def api_test_rules(request):
     except Exception as e:
         logger.error(f"API test rules error: {e}")
         return JsonResponse({'error': str(e)}, status=500)
+
+@login_required
+def api_save_workflow(request):
+    """API для сохранения визуального алгоритма с синхронизацией с БД"""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+    
+    try:
+        data = json.loads(request.body)
+        questionnaire_id = data.get('questionnaire_id')
+        workflow = data.get('workflow', {})
+        
+        questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
+        
+        # Сохраняем workflow в JSON поле
+        questionnaire.workflow = workflow
+        questionnaire.save()
+        
+        # ============================================================
+        # СИНХРОНИЗАЦИЯ: создаем/обновляем вопросы, ответы, выводы
+        # ============================================================
+        
+        # 1. Удаляем старые данные (опционально - можно только обновлять)
+        # Но лучше обновлять, чтобы не потерять связи с оплатами и сессиями
+        # Поэтому будем только добавлять новые и обновлять существующие
+        
+        # Получаем существующие вопросы
+        existing_questions = {q.order: q for q in Question.objects.filter(questionnaire=questionnaire)}
+        existing_conclusions = {c.order: c for c in Conclusion.objects.filter(questionnaire=questionnaire)}
+        
+        # Счетчики для новых ID
+        question_order = 1
+        conclusion_order = 1
+        
+        # Словарь для связи node_id -> question_id
+        node_to_question = {}
+        node_to_conclusion = {}
+        
+        # Проходим по узлам
+        for node in workflow.get('nodes', []):
+            node_type = node.get('type')
+            node_id = node.get('id')
+            
+            if node_type == 'question':
+                # Создаем или обновляем вопрос
+                question, created = Question.objects.get_or_create(
+                    questionnaire=questionnaire,
+                    order=question_order,
+                    defaults={
+                        'text': node.get('title', 'Вопрос без названия'),
+                        'help_text': node.get('text', '')
+                    }
+                )
+                if not created:
+                    question.text = node.get('title', 'Вопрос без названия')
+                    question.help_text = node.get('text', '')
+                    question.save()
+                
+                node_to_question[node_id] = question
+                question_order += 1
+                
+            elif node_type == 'answer':
+                # Ответы будут создаваться позже, при обработке связей
+                pass
+                
+            elif node_type == 'conclusion':
+                # Создаем или обновляем вывод
+                conclusion, created = Conclusion.objects.get_or_create(
+                    questionnaire=questionnaire,
+                    order=conclusion_order,
+                    defaults={
+                        'title': node.get('title', 'Вывод без названия'),
+                        'short_text': node.get('text', '')[:200],
+                        'full_text': node.get('text', ''),
+                        'price': node.get('price', 0),
+                        'success_rate': node.get('success_rate', 50)
+                    }
+                )
+                if not created:
+                    conclusion.title = node.get('title', 'Вывод без названия')
+                    conclusion.short_text = node.get('text', '')[:200]
+                    conclusion.full_text = node.get('text', '')
+                    conclusion.price = node.get('price', 0)
+                    conclusion.success_rate = node.get('success_rate', 50)
+                    conclusion.save()
+                
+                node_to_conclusion[node_id] = conclusion
+                conclusion_order += 1
+        
+        # 2. Обрабатываем связи (connections)
+        # Сначала создаем все ответы для вопросов
+        answer_map = {}
+        
+        for conn in workflow.get('connections', []):
+            source_id = conn.get('source')
+            target_id = conn.get('target')
+            
+            source_node = next((n for n in workflow['nodes'] if n['id'] == source_id), None)
+            target_node = next((n for n in workflow['nodes'] if n['id'] == target_id), None)
+            
+            if not source_node or not target_node:
+                continue
+            
+            # Если источник - вопрос, а цель - ответ
+            if source_node['type'] == 'question' and target_node['type'] == 'answer':
+                question = node_to_question.get(source_id)
+                if question:
+                    # Создаем ответ
+                    answer_text = target_node.get('title', 'Вариант ответа')
+                    intermediate = target_node.get('text', '')
+                    
+                    answer, created = Answer.objects.get_or_create(
+                        question=question,
+                        text=answer_text,
+                        defaults={
+                            'intermediate_text': intermediate,
+                            'is_final': False,
+                            'order': question.answers.count() + 1
+                        }
+                    )
+                    if not created:
+                        answer.intermediate_text = intermediate
+                        answer.save()
+                    
+                    answer_map[target_id] = answer
+            
+            # Если источник - ответ, а цель - вывод
+            elif source_node['type'] == 'answer' and target_node['type'] == 'conclusion':
+                answer = answer_map.get(source_id)
+                conclusion = node_to_conclusion.get(target_id)
+                
+                if answer and conclusion:
+                    # Связываем ответ с выводом
+                    AnswerConclusion.objects.update_or_create(
+                        answer=answer,
+                        defaults={'conclusion': conclusion}
+                    )
+                    # Помечаем ответ как финальный
+                    answer.is_final = True
+                    answer.save()
+            
+            # Если источник - ответ, а цель - вопрос (переход к следующему вопросу)
+            elif source_node['type'] == 'answer' and target_node['type'] == 'question':
+                answer = answer_map.get(source_id)
+                next_question = node_to_question.get(target_id)
+                
+                if answer and next_question:
+                    answer.next_question = next_question
+                    answer.is_final = False
+                    answer.save()
+        
+        return JsonResponse({'success': True, 'message': 'Алгоритм сохранен и синхронизирован с БД'})
+        
+    except Exception as e:
+        logger.error(f"Save workflow error: {e}")
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)  
+
+@login_required
+def visual_editor(request, q_id):
+    """Визуальный редактор алгоритмов"""
+    questionnaire = get_object_or_404(Questionnaire, id=q_id)
+    return render(request, 'admin/visual_editor.html', {
+        'questionnaire': questionnaire
+    })    
+
+@login_required
+def api_load_workflow(request, q_id):
+    """API для загрузки сохраненного алгоритма"""
+    try:
+        questionnaire = get_object_or_404(Questionnaire, id=q_id)
+        workflow = questionnaire.workflow or {}
+        return JsonResponse({
+            'success': True,
+            'workflow': workflow
+        })
+    except Exception as e:
+        logger.error(f"Load workflow error: {e}")
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+@login_required
+def api_sync_workflow(request):
+    """API для синхронизации визуального редактора с БД"""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+    
+    try:
+        data = json.loads(request.body)
+        questionnaire_id = data.get('questionnaire_id')
+        workflow = data.get('workflow', {})
+        
+        logger.info(f"Sync workflow for questionnaire {questionnaire_id}")
+        logger.info(f"Nodes: {len(workflow.get('nodes', []))}")
+        logger.info(f"Connections: {len(workflow.get('connections', []))}")
+        
+        questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
+        
+        # Проверяем, есть ли данные
+        if not workflow.get('nodes'):
+            return JsonResponse({
+                'success': False, 
+                'error': 'Нет узлов для синхронизации. Сначала создайте блоки.'
+            }, status=400)
+        
+        # Очищаем старые данные
+        Question.objects.filter(questionnaire=questionnaire).delete()
+        Answer.objects.filter(question__questionnaire=questionnaire).delete()
+        Conclusion.objects.filter(questionnaire=questionnaire).delete()
+        AnswerConclusion.objects.filter(conclusion__questionnaire=questionnaire).delete()
+        
+        # Создаем заново из workflow
+        node_to_question = {}
+        node_to_conclusion = {}
+        answer_map = {}
+        
+        question_order = 1
+        conclusion_order = 1
+        
+        # Проходим по узлам
+        for node in workflow.get('nodes', []):
+            node_type = node.get('type')
+            node_id = node.get('id')
+            
+            if node_type == 'question':
+                question = Question.objects.create(
+                    questionnaire=questionnaire,
+                    order=question_order,
+                    text=node.get('title', 'Вопрос без названия'),
+                    help_text=node.get('text', '')
+                )
+                node_to_question[node_id] = question
+                question_order += 1
+                logger.info(f"Created question: {question.text}")
+                
+            elif node_type == 'conclusion':
+                conclusion = Conclusion.objects.create(
+                    questionnaire=questionnaire,
+                    order=conclusion_order,
+                    title=node.get('title', 'Вывод без названия'),
+                    short_text=node.get('text', '')[:200] if node.get('text') else '',
+                    full_text=node.get('text', ''),
+                    price=node.get('price', 0),
+                    success_rate=node.get('success_rate', 50)
+                )
+                node_to_conclusion[node_id] = conclusion
+                conclusion_order += 1
+                logger.info(f"Created conclusion: {conclusion.title}")
+        
+        # Обрабатываем связи
+        for conn in workflow.get('connections', []):
+            source_id = conn.get('source')
+            target_id = conn.get('target')
+            
+            source_node = next((n for n in workflow['nodes'] if n['id'] == source_id), None)
+            target_node = next((n for n in workflow['nodes'] if n['id'] == target_id), None)
+            
+            if not source_node or not target_node:
+                logger.warning(f"Node not found: {source_id} -> {target_id}")
+                continue
+            
+            logger.info(f"Processing connection: {source_node['type']} -> {target_node['type']}")
+            
+            # Если источник - вопрос, а цель - ответ
+            if source_node['type'] == 'question' and target_node['type'] == 'answer':
+                question = node_to_question.get(source_id)
+                if question:
+                    answer = Answer.objects.create(
+                        question=question,
+                        text=target_node.get('title', 'Вариант ответа'),
+                        intermediate_text=target_node.get('text', ''),
+                        is_final=False,
+                        order=question.answers.count() + 1
+                    )
+                    answer_map[target_id] = answer
+                    logger.info(f"Created answer: {answer.text}")
+            
+            # Если источник - ответ, а цель - вывод
+            elif source_node['type'] == 'answer' and target_node['type'] == 'conclusion':
+                answer = answer_map.get(source_id)
+                conclusion = node_to_conclusion.get(target_id)
+                if answer and conclusion:
+                    AnswerConclusion.objects.create(answer=answer, conclusion=conclusion)
+                    answer.is_final = True
+                    answer.save()
+                    logger.info(f"Linked answer {answer.text} -> conclusion {conclusion.title}")
+            
+            # Если источник - ответ, а цель - вопрос (переход к следующему вопросу)
+            elif source_node['type'] == 'answer' and target_node['type'] == 'question':
+                answer = answer_map.get(source_id)
+                next_question = node_to_question.get(target_id)
+                if answer and next_question:
+                    answer.next_question = next_question
+                    answer.is_final = False
+                    answer.save()
+                    logger.info(f"Linked answer {answer.text} -> next question {next_question.text}")
+        
+        # Сохраняем workflow в JSON поле
+        questionnaire.workflow = workflow
+        questionnaire.save()
+        
+        return JsonResponse({
+            'success': True, 
+            'message': f'Синхронизировано: {len(workflow.get("nodes", []))} узлов, {len(workflow.get("connections", []))} связей'
+        })
+        
+    except Exception as e:
+        logger.error(f"Sync workflow error: {e}")
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)

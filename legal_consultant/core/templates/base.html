@@ -7,11 +7,20 @@
     
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
+    
+    <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- jQuery (для jsPlumb) -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    
+    <!-- jsPlumb для визуального редактора (drag&drop) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsPlumb/2.15.6/js/jsplumb.min.js"></script>
+    
     <!-- Custom CSS -->
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    
     {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -31,11 +40,50 @@
                             <i class="fas fa-home"></i> Главная
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'core:admin_login' %}">
-                            <i class="fas fa-user-cog"></i> Админ
-                        </a>
-                    </li>
+                    
+                    {% if user.is_authenticated %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-user-circle"></i> {{ user.username }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                {% if user.is_staff %}
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'core:admin_dashboard' %}">
+                                            <i class="fas fa-chart-line"></i> Админ-панель
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'core:admin_add_questionnaire' %}">
+                                            <i class="fas fa-plus-circle"></i> Создать опросник
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'core:admin_generate_ai' %}">
+                                            <i class="fas fa-robot"></i> AI Генерация
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'core:admin_test_rules' %}">
+                                            <i class="fas fa-flask"></i> Тест AI правил
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                {% endif %}
+                                <li>
+                                    <a class="dropdown-item text-danger" href="{% url 'core:admin_logout' %}">
+                                        <i class="fas fa-sign-out-alt"></i> Выйти
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'core:admin_login' %}">
+                                <i class="fas fa-user-cog"></i> Админ
+                            </a>
+                        </li>
+                    {% endif %}
                 </ul>
             </div>
         </div>
@@ -67,10 +115,41 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    
+    <!-- CSRF Token для AJAX -->
+    <script>
+        // Получаем CSRF токен из cookie
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        // Устанавливаем CSRF токен для всех AJAX запросов
+        const csrftoken = getCookie('csrftoken');
+        if (csrftoken) {
+            document.addEventListener('DOMContentLoaded', function() {
+                // Добавляем мета-тег с CSRF токеном
+                const meta = document.createElement('meta');
+                meta.name = 'csrfmiddlewaretoken';
+                meta.content = csrftoken;
+                document.head.appendChild(meta);
+            });
+        }
+    </script>
+    
     <!-- Custom JS -->
     <script src="{% static 'js/script.js' %}"></script>
+    
     {% block extra_js %}{% endblock %}
 </body>
 </html>

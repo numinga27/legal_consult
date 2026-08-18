@@ -33,6 +33,7 @@ class Questionnaire(models.Model):
     name = models.CharField('Название опросника', max_length=200)
     description = models.TextField('Описание', blank=True)
     is_active = models.BooleanField('Активен', default=True)
+    workflow = models.JSONField('Визуальный алгоритм', default=dict, blank=True)
     created_at = models.DateTimeField('Дата создания', auto_now_add=True)
     updated_at = models.DateTimeField('Дата обновления', auto_now=True)
     views_count = models.PositiveIntegerField('Просмотров', default=0)  # Добавить
