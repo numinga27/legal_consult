@@ -175,3 +175,10 @@ CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:8000', 'http://localhost:8000']
 LOGIN_URL = '/admin-login/'
 LOGIN_REDIRECT_URL = '/admin-dashboard/'
 LOGOUT_REDIRECT_URL = '/'
+
+AI_TYPE = 'yandex'
+
+# YandexGPT настройки
+YANDEX_API_KEY = 'ajedhpmaapg71bcdf1sf'
+YANDEX_FOLDER_ID = 'b1g1lod5i6u2oo5q4qlu'
+YANDEX_MODEL = 'yandexgpt-lite'  # или 'yandexgpt-pro' для более мощной модели

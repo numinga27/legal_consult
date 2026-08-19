@@ -127,6 +127,12 @@ class Conclusion(models.Model):
     views_count = models.PositiveIntegerField('Просмотров', default=0)  # Добавить
     purchases_count = models.PositiveIntegerField('Покупок', default=0)  # Добавить
     short_text = models.TextField('Краткий вывод (бесплатно)')
+    user_data_fields = models.JSONField(
+        'Поля для сбора данных',
+        default=list,
+        blank=True,
+        help_text='Список полей, которые нужно заполнить пользователю. Формат: [{"name": "full_name", "label": "ФИО", "type": "text", "required": true}]'
+    )
     full_text = models.TextField('Итоговый вывод (платно)')
     pros = models.TextField('Плюсы ситуации', blank=True, help_text='Положительные аспекты для пользователя')
     cons = models.TextField('Минусы ситуации', blank=True, help_text='Негативные аспекты для пользователя')
@@ -433,3 +439,34 @@ class AIRules(models.Model):
                     prompt = prompt.replace(f'{{{{{key}}}}}', str(value))
             return prompt
         return self.get_rules_with_variables(context)
+
+
+class UserDocumentData(models.Model):
+    """Данные пользователя для заполнения документов"""
+    session = models.ForeignKey(
+        UserSession,
+        on_delete=models.CASCADE,
+        verbose_name='Сессия',
+        related_name='document_data'
+    )
+    conclusion = models.ForeignKey(
+        Conclusion,
+        on_delete=models.CASCADE,
+        verbose_name='Вывод',
+        related_name='user_data_entries',
+        null=True,
+        blank=True
+    )
+    
+    # Данные хранятся в JSON
+    data = models.JSONField('Данные пользователя', default=dict)
+    
+    created_at = models.DateTimeField('Дата создания', auto_now_add=True)
+    updated_at = models.DateTimeField('Дата обновления', auto_now=True)
+
+    class Meta:
+        verbose_name = 'Данные пользователя'
+        verbose_name_plural = 'Данные пользователей'
+
+    def __str__(self):
+        return f"Данные пользователя #{self.id}"    

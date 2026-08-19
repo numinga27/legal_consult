@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 class AIConsultant:
     """
-    Класс для работы с AI с учетом правил от администратора
+    Класс для работы с AI с поддержкой YandexGPT, OpenAI и Mock
     """
     
     def __init__(self, api_type: str = 'mock', api_key: Optional[str] = None):
@@ -28,19 +28,24 @@ class AIConsultant:
             api_key: API ключ для сервиса
         """
         self.api_type = api_type
-        self.api_key = api_key or getattr(settings, 'AI_API_KEY', None)
+        self.api_key = api_key or getattr(settings, 'YANDEX_API_KEY', None) or getattr(settings, 'OPENAI_API_KEY', None)
+        self.folder_id = getattr(settings, 'YANDEX_FOLDER_ID', None)
         
         # Настройки провайдеров
         self.providers = {
             'openai': {
                 'url': 'https://api.openai.com/v1/chat/completions',
-                'model': 'gpt-4-turbo-preview',
+                'model': getattr(settings, 'OPENAI_MODEL', 'gpt-4-turbo-preview'),
                 'headers': {'Authorization': f'Bearer {self.api_key}'}
             },
             'yandex': {
                 'url': 'https://llm.api.cloud.yandex.net/v2/inference',
-                'model': 'yandexgpt-lite',
-                'headers': {'Authorization': f'Api-Key {self.api_key}'}
+                'model': getattr(settings, 'YANDEX_MODEL', 'yandexgpt-lite'),
+                'headers': {
+                    'Authorization': f'Api-Key {self.api_key}',
+                    'x-folder-id': self.folder_id,
+                    'Content-Type': 'application/json'
+                }
             },
             'mock': {
                 'url': None,
@@ -375,145 +380,6 @@ class AIConsultant:
                         'documents': ['Соглашение о разделе имущества.docx', 'Брачный договор.docx']
                     }
                 ]
-            },
-            'алименты': {
-                'questions': [
-                    {
-                        'id': 1,
-                        'text': 'У вас есть несовершеннолетний ребенок?',
-                        'help_text': 'Ребенок до 18 лет',
-                        'answers': [
-                            {
-                                'text': 'Да',
-                                'next_question': 2,
-                                'intermediate': 'Наличие ребенка дает право на взыскание алиментов (ст. 80 СК РФ).',
-                                'is_final': False
-                            },
-                            {
-                                'text': 'Нет',
-                                'next_question': None,
-                                'intermediate': 'Алименты взыскиваются только на содержание несовершеннолетних детей или нетрудоспособных членов семьи.',
-                                'is_final': True
-                            }
-                        ]
-                    },
-                    {
-                        'id': 2,
-                        'text': 'Второй родитель платит алименты добровольно?',
-                        'help_text': 'Добровольная оплата или по соглашению',
-                        'answers': [
-                            {
-                                'text': 'Нет, не платит',
-                                'next_question': None,
-                                'intermediate': 'Можно взыскать алименты в судебном порядке. Подавайте иск о взыскании алиментов.',
-                                'is_final': True
-                            },
-                            {
-                                'text': 'Платит, но мало',
-                                'next_question': None,
-                                'intermediate': 'Можно увеличить размер алиментов через суд. Представьте доказательства недостаточности.',
-                                'is_final': True
-                            },
-                            {
-                                'text': 'Платит добровольно',
-                                'next_question': None,
-                                'intermediate': 'Можно заключить нотариальное соглашение об уплате алиментов.',
-                                'is_final': True
-                            }
-                        ]
-                    }
-                ],
-                'conclusions': [
-                    {
-                        'id': 1,
-                        'title': 'Взыскание алиментов в судебном порядке',
-                        'short': 'Вы можете взыскать алименты на ребенка в судебном порядке.',
-                        'full': """ПОШАГОВЫЙ ПЛАН ДЕЙСТВИЙ:
-
-1. Подайте исковое заявление о взыскании алиментов
-   - В суд по месту жительства истца или ответчика
-   - Укажите размер алиментов (1/4 дохода на одного ребенка)
-
-2. Приложите документы:
-   - Свидетельство о рождении ребенка
-   - Свидетельство о браке/разводе
-   - Справка о доходах ответчика (если есть)
-
-3. Участвуйте в судебных заседаниях
-
-4. Получите исполнительный лист
-
-Основание: ст. 80-81 СК РФ""",
-                        'pros': [
-                            '✓ Законное основание для получения алиментов',
-                            '✓ Судебная защита',
-                            '✓ Возможность взыскания задолженности'
-                        ],
-                        'cons': [
-                            '✗ Длительный процесс (1-2 месяца)',
-                            '✗ Нужны доказательства доходов',
-                            '✗ Возможно обжалование'
-                        ],
-                        'success_rate': 90,
-                        'price': 2490,
-                        'documents': ['Исковое заявление о взыскании алиментов.docx']
-                    },
-                    {
-                        'id': 2,
-                        'title': 'Увеличение размера алиментов',
-                        'short': 'Вы можете увеличить размер алиментов через суд.',
-                        'full': """ПОШАГОВЫЙ ПЛАН ДЕЙСТВИЙ:
-
-1. Подайте иск об увеличении размера алиментов
-   - В суд по месту жительства ответчика
-   - Укажите причины (рост расходов, изменение доходов)
-
-2. Представьте доказательства:
-   - Расходы на ребенка
-   - Изменение доходов ответчика
-
-3. Получите решение суда
-
-Основание: ст. 83-84 СК РФ""",
-                        'pros': [
-                            '✓ Увеличение суммы алиментов',
-                            '✓ Учет инфляции и роста расходов',
-                            '✓ Защита прав ребенка'
-                        ],
-                        'cons': [
-                            '✗ Нужны убедительные доказательства',
-                            '✗ Сложный процесс'
-                        ],
-                        'success_rate': 70,
-                        'price': 2990,
-                        'documents': ['Исковое заявление об увеличении алиментов.docx']
-                    },
-                    {
-                        'id': 3,
-                        'title': 'Соглашение об уплате алиментов',
-                        'short': 'Заключите нотариальное соглашение об уплате алиментов.',
-                        'full': """ПОШАГОВЫЙ ПЛАН ДЕЙСТВИЙ:
-
-1. Договоритесь с другим родителем о размере алиментов
-2. Обратитесь к нотариусу
-3. Заключите соглашение
-4. Получите нотариально заверенный документ
-
-Основание: ст. 99-100 СК РФ""",
-                        'pros': [
-                            '✓ Быстрая процедура',
-                            '✓ Гибкие условия',
-                            '✓ Нотариальное заверение'
-                        ],
-                        'cons': [
-                            '✗ Требуется добровольное согласие',
-                            '✗ Нотариальные расходы'
-                        ],
-                        'success_rate': 95,
-                        'price': 1990,
-                        'documents': ['Соглашение об уплате алиментов.docx']
-                    }
-                ]
             }
         }
     
@@ -593,6 +459,117 @@ class AIConsultant:
         else:
             return "Создай юридическую консультацию на основе предоставленных данных."
     
+    def _call_ai_api(self, prompt: str, system_prompt: str = '') -> str:
+        """
+        Вызов AI API с поддержкой разных провайдеров
+        """
+        if self.api_type == 'openai' and self.api_key:
+            return self._call_openai(prompt, system_prompt)
+        elif self.api_type == 'yandex' and self.api_key:
+            return self._call_yandex(prompt, system_prompt)
+        else:
+            logger.info(f"Using mock mode for AI request")
+            return json.dumps(self._generate_mock_questionnaire('тест', 'general'))
+    
+    def _call_openai(self, prompt: str, system_prompt: str = '') -> str:
+        """
+        Вызов OpenAI API
+        """
+        try:
+            import openai
+            openai.api_key = self.api_key
+            
+            messages = []
+            if system_prompt:
+                messages.append({"role": "system", "content": system_prompt})
+            else:
+                messages.append({"role": "system", "content": "Ты профессиональный юрист-консультант с 20-летним опытом."})
+            
+            messages.append({"role": "user", "content": prompt})
+            
+            response = openai.ChatCompletion.create(
+                model=self.providers['openai']['model'],
+                messages=messages,
+                temperature=0.7,
+                max_tokens=2000,
+                timeout=30
+            )
+            return response.choices[0].message.content
+        except ImportError:
+            logger.error("OpenAI library not installed. Run: pip install openai")
+            return json.dumps(self._generate_mock_questionnaire('тест', 'general'))
+        except Exception as e:
+            logger.error(f"OpenAI API error: {e}")
+            return json.dumps(self._generate_mock_questionnaire('тест', 'general'))
+    
+    def _call_yandex(self, prompt: str, system_prompt: str = '') -> str:
+        """
+        Вызов YandexGPT API
+        """
+        try:
+            import requests
+            
+            # Формируем сообщения
+            messages = []
+            if system_prompt:
+                messages.append({
+                    "role": "system",
+                    "text": system_prompt
+                })
+            else:
+                messages.append({
+                    "role": "system",
+                    "text": "Ты профессиональный юрист-консультант с 20-летним опытом. Отвечай на русском языке."
+                })
+            
+            messages.append({
+                "role": "user",
+                "text": prompt
+            })
+            
+            # Заголовки
+            headers = self.providers['yandex']['headers']
+            
+            # Тело запроса
+            data = {
+                "model": self.providers['yandex']['model'],
+                "messages": messages,
+                "temperature": 0.6,
+                "max_tokens": 2000
+            }
+            
+            # Если есть folder_id, добавляем его
+            if self.folder_id:
+                data["folder_id"] = self.folder_id
+            
+            # Отправляем запрос
+            response = requests.post(
+                self.providers['yandex']['url'],
+                headers=headers,
+                json=data,
+                timeout=30
+            )
+            
+            response.raise_for_status()
+            result = response.json()
+            
+            # Извлекаем текст ответа
+            if 'result' in result and 'alternatives' in result['result']:
+                return result['result']['alternatives'][0]['message']['text']
+            else:
+                logger.error(f"Unexpected YandexGPT response: {result}")
+                return json.dumps(self._generate_mock_questionnaire('тест', 'general'))
+                
+        except ImportError:
+            logger.error("Requests library not installed. Run: pip install requests")
+            return json.dumps(self._generate_mock_questionnaire('тест', 'general'))
+        except requests.exceptions.RequestException as e:
+            logger.error(f"YandexGPT API request error: {e}")
+            return json.dumps(self._generate_mock_questionnaire('тест', 'general'))
+        except Exception as e:
+            logger.error(f"YandexGPT API error: {e}")
+            return json.dumps(self._generate_mock_questionnaire('тест', 'general'))
+    
     def generate_questionnaire(self, topic: str, category: str, 
                                instructions: str = '') -> Dict[str, Any]:
         """
@@ -608,7 +585,7 @@ class AIConsultant:
         """
         logger.info(f"Генерация опросника для темы: {topic}")
         
-        # Проверяем, есть ли в базе знаний
+        # Проверяем, есть ли в базе знаний (для мок-режима)
         topic_lower = topic.lower()
         for key in self.mock_knowledge_base:
             if key in topic_lower:
@@ -620,11 +597,14 @@ class AIConsultant:
             'instructions': instructions
         }
         
+        # Если мок-режим - возвращаем из базы знаний
         if self.api_type == 'mock':
             return self._generate_mock_questionnaire(topic, category)
         
+        # Для реальных API - отправляем запрос
         prompt = self._get_prompt_with_rules('questionnaire', context)
-        response = self._call_ai_api(prompt)
+        system_prompt = "Ты профессиональный юрист-консультант с 20-летним опытом. Отвечай на русском языке. Возвращай ответ строго в формате JSON."
+        response = self._call_ai_api(prompt, system_prompt)
         return self._parse_ai_response(response)
     
     def _generate_mock_questionnaire(self, topic: str, category: str) -> Dict[str, Any]:
@@ -768,6 +748,7 @@ class AIConsultant:
             'documents': ['Образец документа.docx', 'Список необходимых документов.docx']
         }
     
+    
     def generate_document(self, document_type: str, user_data: Dict[str, Any],
                          conclusion_text: str) -> Dict[str, Any]:
         """
@@ -892,68 +873,10 @@ Email: {email}
             'type': document_type
         }
     
-    def _call_ai_api(self, prompt: str) -> str:
-        """Вызов AI API"""
-        if self.api_type == 'openai' and self.api_key:
-            return self._call_openai(prompt)
-        elif self.api_type == 'yandex' and self.api_key:
-            return self._call_yandex(prompt)
-        else:
-            return json.dumps(self._generate_mock_questionnaire('тест', 'general'))
-    
-    def _call_openai(self, prompt: str) -> str:
-        """Вызов OpenAI API"""
-        try:
-            import requests
-            response = requests.post(
-                self.providers['openai']['url'],
-                headers=self.providers['openai']['headers'],
-                json={
-                    'model': self.providers['openai']['model'],
-                    'messages': [
-                        {'role': 'system', 'content': 'Ты профессиональный юрист-консультант.'},
-                        {'role': 'user', 'content': prompt}
-                    ],
-                    'temperature': 0.7,
-                    'max_tokens': 2000
-                },
-                timeout=30
-            )
-            response.raise_for_status()
-            data = response.json()
-            return data['choices'][0]['message']['content']
-        except Exception as e:
-            logger.error(f"OpenAI API error: {e}")
-            return json.dumps(self._generate_mock_questionnaire('тест', 'general'))
-    
-    def _call_yandex(self, prompt: str) -> str:
-        """Вызов YandexGPT API"""
-        try:
-            import requests
-            response = requests.post(
-                self.providers['yandex']['url'],
-                headers=self.providers['yandex']['headers'],
-                json={
-                    'model': self.providers['yandex']['model'],
-                    'messages': [
-                        {'role': 'system', 'content': 'Ты профессиональный юрист-консультант.'},
-                        {'role': 'user', 'content': prompt}
-                    ],
-                    'temperature': 0.6,
-                    'max_tokens': 2000
-                },
-                timeout=30
-            )
-            response.raise_for_status()
-            data = response.json()
-            return data['result']['alternatives'][0]['message']['text']
-        except Exception as e:
-            logger.error(f"Yandex API error: {e}")
-            return json.dumps(self._generate_mock_questionnaire('тест', 'general'))
-    
     def _parse_ai_response(self, response: str) -> Dict[str, Any]:
         """Парсит ответ от AI в JSON"""
         try:
+            # Пытаемся найти JSON в ответе
             json_match = re.search(r'\{.*\}', response, re.DOTALL)
             if json_match:
                 return json.loads(json_match.group())

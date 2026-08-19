@@ -148,6 +148,51 @@
 .spinner-overlay.active {
     display: flex;
 }
+
+/* Стили для динамических полей */
+.dynamic-field {
+    margin-bottom: 15px;
+}
+.dynamic-field label {
+    font-weight: 600;
+    font-size: 14px;
+    color: #2d3436;
+    display: block;
+    margin-bottom: 5px;
+}
+.dynamic-field label .required-star {
+    color: #dc3545;
+    margin-left: 3px;
+}
+.dynamic-field input,
+.dynamic-field textarea,
+.dynamic-field select {
+    width: 100%;
+    padding: 10px 14px;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    font-size: 14px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    background: #f8f9fa;
+}
+.dynamic-field input:focus,
+.dynamic-field textarea:focus,
+.dynamic-field select:focus {
+    border-color: #4a6cf7;
+    outline: none;
+    background: white;
+    box-shadow: 0 0 0 4px rgba(74, 108, 247, 0.1);
+}
+.dynamic-field input.is-invalid,
+.dynamic-field textarea.is-invalid {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.1);
+}
+.dynamic-field .field-help {
+    font-size: 12px;
+    color: #6c757d;
+    margin-top: 4px;
+}
 </style>
 {% endblock %}
 
@@ -224,71 +269,49 @@
         </p>
     </div>
 
-    <!-- Данные пользователя -->
+    <!-- ============================================================
+         СБОР ДАННЫХ ПОЛЬЗОВАТЕЛЯ (ДИНАМИЧЕСКИЕ ПОЛЯ)
+         ============================================================ -->
     <div class="result-card" id="userDataSection">
         <div class="section-title">
-            <i class="fas fa-user text-primary me-2"></i> Ваши данные
+            <i class="fas fa-user text-primary me-2"></i> Ваши данные для документов
         </div>
-        <div class="alert alert-secondary" id="userDataDisplay">
-            <div id="userDataContent">
-                {% if user_data.full_name %}
-                    <p class="mb-1"><strong>ФИО:</strong> {{ user_data.full_name }}</p>
-                    {% if user_data.address %}<p class="mb-1"><strong>Адрес:</strong> {{ user_data.address }}</p>{% endif %}
-                    {% if user_data.phone %}<p class="mb-1"><strong>Телефон:</strong> {{ user_data.phone }}</p>{% endif %}
-                    {% if user_data.email %}<p class="mb-1"><strong>Email:</strong> {{ user_data.email }}</p>{% endif %}
-                {% else %}
-                    <p class="text-muted mb-0"><i class="fas fa-info-circle"></i> Данные не заполнены</p>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-
-    <!-- Генерация документа -->
-    <div class="result-card" id="documentSection">
-        <div class="section-title">
-            <i class="fas fa-file-pdf text-danger me-2"></i> Генерация документа
-        </div>
+        <p class="text-muted">Заполните поля, чтобы получить персонализированные юридические документы</p>
         
-        {% if has_document and generated_doc %}
-            <div class="alert alert-success">
-                <i class="fas fa-check-circle text-success"></i> 
-                <strong>Документ готов!</strong>
-                <div class="mt-2">
-                    <a href="{% url 'core:download_document' generated_doc.id %}" class="btn btn-success">
-                        <i class="fas fa-download"></i> Скачать PDF
-                    </a>
-                    <button class="btn btn-outline-secondary ms-2" onclick="previewDocument()">
-                        <i class="fas fa-eye"></i> Предпросмотр
-                    </button>
+        <form id="userDataForm">
+            {% csrf_token %}
+            <div id="dynamicFields">
+                <!-- Поля будут генерироваться динамически через JavaScript -->
+                <div class="text-center text-muted py-3">
+                    <i class="fas fa-spinner fa-spin"></i> Загрузка полей...
                 </div>
             </div>
-            {% if generated_doc.content_text %}
-            <div id="documentPreview" style="display: none;" class="mt-3">
-                <div class="document-preview">{{ generated_doc.content_text }}</div>
+            
+            <div class="mt-3">
+                <button type="submit" class="btn btn-primary btn-lg w-100 generate-btn" id="saveUserDataBtn">
+                    <i class="fas fa-file-pdf"></i> Сгенерировать документ
+                </button>
             </div>
-            {% endif %}
-        {% else %}
-            <p class="text-muted">
-                <i class="fas fa-info-circle"></i> 
-                Сгенерируйте юридический документ на основе ваших данных
-            </p>
-            <button id="generatePdfBtn" class="btn btn-primary generate-btn w-100" 
-                    {% if not user_data.full_name %}disabled{% endif %}>
-                <i class="fas fa-file-pdf"></i> 
-                {% if user_data.full_name %}
-                    Сгенерировать документ
-                {% else %}
-                    Заполните данные для генерации документа
-                {% endif %}
-            </button>
-            <div id="generateStatus" style="display: none;" class="mt-2"></div>
-            <div id="documentPreviewContainer" style="display: none;" class="mt-3">
-                <div class="document-preview" id="documentPreviewContent"></div>
+        </form>
+        
+        <!-- Статус генерации -->
+        <div id="generationStatus" style="display: none;" class="mt-3"></div>
+        
+        <!-- Предпросмотр документа -->
+        <div id="documentPreviewContainer" style="display: none;" class="mt-3">
+            <h6><i class="fas fa-file-pdf text-danger"></i> Предпросмотр документа</h6>
+            <div class="document-preview" id="documentPreviewContent"></div>
+            <div class="mt-2">
+                <a href="#" id="downloadDocumentLink" class="btn btn-success btn-sm">
+                    <i class="fas fa-download"></i> Скачать PDF
+                </a>
             </div>
-        {% endif %}
+        </div>
     </div>
 
-    <!-- Блок с платными услугами -->
+    <!-- ============================================================
+         БЛОК С ПЛАТНЫМИ УСЛУГАМИ
+         ============================================================ -->
     <div class="result-card" id="paymentSection">
         <div class="section-title">
             <i class="fas fa-gem text-warning me-2"></i> Полная юридическая помощь
@@ -301,10 +324,11 @@
 
         <form id="paymentForm" method="post" action="{% url 'core:user_payment' conclusion.id %}">
             {% csrf_token %}
+            <input type="hidden" name="user_data_json" id="userDataJson" value="">
             
             <div class="payment-options mb-4">
                 <!-- Опция 1: Консультация -->
-                <div class="payment-option" onclick="toggleOption(this)">
+                <div class="payment-option selected" onclick="toggleOption(this)">
                     <input type="checkbox" name="services" value="consultation" checked>
                     <div class="label">Письменная консультация</div>
                     <div class="price">{{ conclusion.price|floatformat:0 }} ₽</div>
@@ -371,167 +395,305 @@
         <p class="mt-3 text-muted">Генерация документа...</p>
     </div>
 </div>
+{% endblock %}
 
+{% block extra_js %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // ===== ДАННЫЕ ПОЛЬЗОВАТЕЛЯ =====
-    let userData = {};
-    const userDataStr = localStorage.getItem('userDocumentData');
-    if (userDataStr) {
-        try {
-            userData = JSON.parse(userDataStr);
-            const display = document.getElementById('userDataContent');
-            if (userData.full_name) {
-                display.innerHTML = `
-                    <p class="mb-1"><strong>ФИО:</strong> ${userData.full_name}</p>
-                    ${userData.address ? `<p class="mb-1"><strong>Адрес:</strong> ${userData.address}</p>` : ''}
-                    ${userData.phone ? `<p class="mb-1"><strong>Телефон:</strong> ${userData.phone}</p>` : ''}
-                    ${userData.email ? `<p class="mb-1"><strong>Email:</strong> ${userData.email}</p>` : ''}
-                `;
-            }
-        } catch(e) {
-            console.error('Error parsing user data:', e);
-        }
-    }
+// ============================================================
+// ДИНАМИЧЕСКИЕ ПОЛЯ ДЛЯ СБОРА ДАННЫХ
+// ============================================================
 
-    // ===== ГЕНЕРАЦИЯ ДОКУМЕНТА =====
-    const generateBtn = document.getElementById('generatePdfBtn');
-    const statusDiv = document.getElementById('generateStatus');
+document.addEventListener('DOMContentLoaded', function() {
+    // Получаем поля из контекста Django
+    const fields = {{ conclusion.user_data_fields|default:'[]'|safe }};
+    const container = document.getElementById('dynamicFields');
+    const form = document.getElementById('userDataForm');
+    const saveBtn = document.getElementById('saveUserDataBtn');
+    const statusDiv = document.getElementById('generationStatus');
     const previewContainer = document.getElementById('documentPreviewContainer');
     const previewContent = document.getElementById('documentPreviewContent');
+    const downloadLink = document.getElementById('downloadDocumentLink');
     const spinner = document.getElementById('spinnerOverlay');
-
-    if (generateBtn) {
-        generateBtn.addEventListener('click', function() {
-            // Проверяем наличие данных
-            if (!userData.full_name) {
-                alert('Пожалуйста, заполните ваши данные (ФИО обязательно)');
-                return;
+    const userDataJson = document.getElementById('userDataJson');
+    
+    // Загружаем сохраненные данные из localStorage
+    let savedData = {};
+    try {
+        const saved = localStorage.getItem('userDocumentData');
+        if (saved) {
+            savedData = JSON.parse(saved);
+        }
+    } catch(e) {
+        console.error('Error loading saved data:', e);
+    }
+    
+    // Очищаем контейнер
+    container.innerHTML = '';
+    
+    // Если полей нет, показываем сообщение
+    if (!fields || fields.length === 0) {
+        container.innerHTML = `
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> 
+                Для этого вывода не настроены поля для сбора данных.
+            </div>
+        `;
+        return;
+    }
+    
+    // Генерируем поля
+    fields.forEach(function(field, index) {
+        const div = document.createElement('div');
+        div.className = 'dynamic-field';
+        
+        const label = document.createElement('label');
+        label.htmlFor = 'field_' + field.name;
+        label.textContent = field.label || field.name;
+        if (field.required) {
+            const star = document.createElement('span');
+            star.className = 'required-star';
+            star.textContent = ' *';
+            label.appendChild(star);
+        }
+        
+        const input = document.createElement('input');
+        input.id = 'field_' + field.name;
+        input.name = 'user_' + field.name;
+        input.type = field.type || 'text';
+        input.className = 'form-control';
+        input.placeholder = 'Введите ' + (field.label || field.name).toLowerCase();
+        input.dataset.required = field.required ? 'true' : 'false';
+        
+        // Если есть сохраненные данные - подставляем
+        if (savedData[field.name]) {
+            input.value = savedData[field.name];
+        }
+        
+        // Для email - добавляем валидацию
+        if (field.type === 'email') {
+            input.type = 'email';
+        }
+        
+        // Для tel - добавляем валидацию
+        if (field.type === 'tel') {
+            input.type = 'tel';
+        }
+        
+        // Для textarea - используем textarea
+        if (field.type === 'textarea') {
+            const textarea = document.createElement('textarea');
+            textarea.id = 'field_' + field.name;
+            textarea.name = 'user_' + field.name;
+            textarea.className = 'form-control';
+            textarea.placeholder = 'Введите ' + (field.label || field.name).toLowerCase();
+            textarea.rows = 3;
+            textarea.dataset.required = field.required ? 'true' : 'false';
+            if (savedData[field.name]) {
+                textarea.value = savedData[field.name];
             }
+            div.appendChild(label);
+            div.appendChild(textarea);
+            container.appendChild(div);
             
-            // Показываем спиннер
-            spinner.classList.add('active');
-            
-            // Отключаем кнопку
-            this.disabled = true;
-            this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Генерация...';
-            
-            // Отправляем запрос на генерацию
-            fetch('/api/generate-document/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || ''
-                },
-                body: JSON.stringify({
-                    conclusion_id: {{ conclusion.id }},
-                    user_data: userData
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                spinner.classList.remove('active');
-                
-                if (data.success) {
-                    // Показываем успех
-                    statusDiv.style.display = 'block';
-                    statusDiv.innerHTML = `
-                        <div class="alert alert-success">
-                            <i class="fas fa-check-circle"></i> 
-                            <strong>Документ успешно сгенерирован!</strong>
-                            <div class="mt-2">
-                                <a href="${data.pdf_url}" class="btn btn-success btn-sm" target="_blank">
-                                    <i class="fas fa-download"></i> Скачать PDF
-                                </a>
-                                <button class="btn btn-outline-secondary btn-sm ms-2" onclick="previewDocument()">
-                                    <i class="fas fa-eye"></i> Предпросмотр
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                    
-                    // Показываем предпросмотр
-                    if (data.content_text) {
-                        previewContent.textContent = data.content_text;
-                        previewContainer.style.display = 'block';
-                    }
-                    
-                    // Перезагружаем через 3 секунды для обновления состояния
-                    setTimeout(() => window.location.reload(), 3000);
-                } else {
-                    statusDiv.style.display = 'block';
-                    statusDiv.innerHTML = `
-                        <div class="alert alert-danger">
-                            <i class="fas fa-exclamation-circle"></i> 
-                            Ошибка: ${data.error || 'Неизвестная ошибка'}
-                            <button class="btn btn-outline-danger btn-sm mt-2" onclick="location.reload()">
-                                Попробовать снова
-                            </button>
-                        </div>
-                    `;
-                    generateBtn.disabled = false;
-                    generateBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Попробовать снова';
+            // Сохраняем при изменении
+            textarea.addEventListener('input', function() {
+                saveFieldData(field.name, this.value);
+                this.classList.remove('is-invalid');
+            });
+            textarea.addEventListener('blur', function() {
+                validateField(field, this);
+            });
+            return;
+        }
+        
+        div.appendChild(label);
+        div.appendChild(input);
+        container.appendChild(div);
+        
+        // Сохраняем при изменении
+        input.addEventListener('input', function() {
+            saveFieldData(field.name, this.value);
+            this.classList.remove('is-invalid');
+        });
+        input.addEventListener('blur', function() {
+            validateField(field, this);
+        });
+    });
+    
+    // Функция сохранения поля
+    function saveFieldData(name, value) {
+        savedData[name] = value;
+        localStorage.setItem('userDocumentData', JSON.stringify(savedData));
+    }
+    
+    // Функция валидации поля
+    function validateField(field, input) {
+        if (field.required && !input.value.trim()) {
+            input.classList.add('is-invalid');
+            return false;
+        }
+        input.classList.remove('is-invalid');
+        return true;
+    }
+    
+    // Валидация всех полей
+    function validateAllFields() {
+        let valid = true;
+        fields.forEach(function(field) {
+            const input = document.querySelector('[name="user_' + field.name + '"]');
+            if (input) {
+                if (!validateField(field, input)) {
+                    valid = false;
                 }
+            }
+        });
+        return valid;
+    }
+    
+    // Обработка отправки формы
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Валидация
+        if (!validateAllFields()) {
+            alert('Пожалуйста, заполните все обязательные поля');
+            return;
+        }
+        
+        // Собираем данные
+        const userData = {};
+        fields.forEach(function(field) {
+            const input = document.querySelector('[name="user_' + field.name + '"]');
+            if (input) {
+                userData[field.name] = input.value;
+            }
+        });
+        
+        // Сохраняем в localStorage
+        localStorage.setItem('userDocumentData', JSON.stringify(userData));
+        
+        // Сохраняем в скрытое поле для оплаты
+        if (userDataJson) {
+            userDataJson.value = JSON.stringify(userData);
+        }
+        
+        // Генерируем документ
+        generateDocument(userData);
+    });
+    
+    // Функция генерации документа
+    function generateDocument(userData) {
+        spinner.classList.add('active');
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Генерация...';
+        statusDiv.style.display = 'none';
+        previewContainer.style.display = 'none';
+        
+        fetch('/api/generate-document/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || ''
+            },
+            body: JSON.stringify({
+                conclusion_id: {{ conclusion.id }},
+                user_data: userData
             })
-            .catch(error => {
-                spinner.classList.remove('active');
+        })
+        .then(response => response.json())
+        .then(data => {
+            spinner.classList.remove('active');
+            
+            if (data.success) {
+                statusDiv.style.display = 'block';
+                statusDiv.innerHTML = `
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle"></i> 
+                        <strong>Документ успешно сгенерирован!</strong>
+                    </div>
+                `;
+                
+                // Показываем предпросмотр
+                if (data.content_text) {
+                    previewContainer.style.display = 'block';
+                    previewContent.textContent = data.content_text;
+                }
+                
+                // Устанавливаем ссылку на скачивание
+                if (data.pdf_url) {
+                    downloadLink.href = data.pdf_url;
+                    downloadLink.style.display = 'inline-block';
+                }
+                
+                // Обновляем страницу через 3 секунды
+                setTimeout(() => window.location.reload(), 3000);
+            } else {
                 statusDiv.style.display = 'block';
                 statusDiv.innerHTML = `
                     <div class="alert alert-danger">
                         <i class="fas fa-exclamation-circle"></i> 
-                        Ошибка: ${error.message}
+                        Ошибка: ${data.error || 'Неизвестная ошибка'}
                         <button class="btn btn-outline-danger btn-sm mt-2" onclick="location.reload()">
                             Попробовать снова
                         </button>
                     </div>
                 `;
-                generateBtn.disabled = false;
-                generateBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Попробовать снова';
-            });
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Сгенерировать документ';
+            }
+        })
+        .catch(error => {
+            spinner.classList.remove('active');
+            statusDiv.style.display = 'block';
+            statusDiv.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle"></i> 
+                    Ошибка: ${error.message}
+                    <button class="btn btn-outline-danger btn-sm mt-2" onclick="location.reload()">
+                        Попробовать снова
+                    </button>
+                </div>
+            `;
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Сгенерировать документ';
         });
     }
+});
 
-    // ===== ОПЛАТА =====
-    function toggleOption(element) {
-        const checkbox = element.querySelector('input[type="checkbox"]');
-        checkbox.checked = !checkbox.checked;
-        element.classList.toggle('selected');
-        updateTotalPrice();
-    }
+// ============================================================
+// ОПЛАТА
+// ============================================================
 
-    function updateTotalPrice() {
-        const checkboxes = document.querySelectorAll('input[name="services"]:checked');
-        const basePrice = {{ conclusion.price|floatformat:0 }};
-        const count = checkboxes.length || 1;
-        const total = basePrice * count;
-        document.getElementById('totalPrice').textContent = total + ' ₽';
-    }
+function toggleOption(element) {
+    const checkbox = element.querySelector('input[type="checkbox"]');
+    checkbox.checked = !checkbox.checked;
+    element.classList.toggle('selected');
+    updateTotalPrice();
+}
 
-    // Инициализация: выбираем первый вариант
+function updateTotalPrice() {
+    const checkboxes = document.querySelectorAll('input[name="services"]:checked');
+    const basePrice = {{ conclusion.price|floatformat:0 }};
+    const count = checkboxes.length || 1;
+    const total = basePrice * count;
+    document.getElementById('totalPrice').textContent = total + ' ₽';
+}
+
+// Инициализация: выбираем первый вариант
+document.addEventListener('DOMContentLoaded', function() {
     const firstOption = document.querySelector('.payment-option');
     if (firstOption) {
         firstOption.classList.add('selected');
     }
-
-    // ===== ПРЕДПРОСМОТР ДОКУМЕНТА =====
-    window.previewDocument = function() {
-        const preview = document.getElementById('documentPreview');
-        if (preview) {
-            if (preview.style.display === 'none') {
-                preview.style.display = 'block';
-            } else {
-                preview.style.display = 'none';
-            }
+    
+    // Предзаполняем email из сохраненных данных
+    const savedData = JSON.parse(localStorage.getItem('userDocumentData') || '{}');
+    if (savedData.email) {
+        const emailInput = document.querySelector('input[name="user_email"]');
+        if (emailInput) {
+            emailInput.value = savedData.email;
         }
-        const previewContainerElem = document.getElementById('documentPreviewContainer');
-        if (previewContainerElem) {
-            if (previewContainerElem.style.display === 'none') {
-                previewContainerElem.style.display = 'block';
-            } else {
-                previewContainerElem.style.display = 'none';
-            }
-        }
-    };
+    }
 });
 </script>
 {% endblock %}

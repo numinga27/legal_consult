@@ -439,3 +439,9 @@ Created conclusion: Вывод 1
 Created conclusion: Вывод 2
 Processing connection: answer -> conclusion
 Processing connection: start -> question
+/Users/andrejkrylov/Desktop/fist/legal_consultant/legal_consultant/core/models.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Not Found: /result/1/
+Генерация опросника для темы: Отмена судебного приказа
+YandexGPT API request error: 404 Client Error: Not Found for url: https://llm.api.cloud.yandex.net/v2/inference

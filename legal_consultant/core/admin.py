@@ -75,6 +75,13 @@ class ConclusionAdmin(admin.ModelAdmin):
     list_filter = ['questionnaire', 'created_at']
     search_fields = ['title', 'short_text', 'full_text']
     readonly_fields = ['created_at']
+    fieldsets = (
+        # ... существующие поля ...
+        ('Сбор данных пользователя', {
+            'fields': ('user_data_fields',),
+            'description': 'Укажите поля, которые пользователь должен заполнить. Формат JSON: [{"name": "full_name", "label": "ФИО", "type": "text", "required": true}]'
+        }),
+    )
     
     def document_link(self, obj):
         if obj.documents:
