@@ -446,3 +446,28 @@ Not Found: /result/1/
 Генерация опросника для темы: Отмена судебного приказа
 YandexGPT API request error: 404 Client Error: Not Found for url: https://llm.api.cloud.yandex.net/v2/inference
 Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+/Users/andrejkrylov/Desktop/fist/legal_consultant/legal_consultant/core/views.py changed, reloading.
+Watching for file changes with StatReloader
+/Users/andrejkrylov/Desktop/fist/legal_consultant/legal_consultant/core/views.py changed, reloading.
+Watching for file changes with StatReloader
+🔍 user_result: conclusion_id=20
+🔍 title=Приватизация не требуется
+🔍 user_data_fields=[{'name': 'full_name', 'label': 'ФИО', 'type': 'text', 'required': True}, {'name': 'address', 'label': 'Адрес', 'type': 'text', 'required': False}, {'name': 'phone', 'label': 'Телефон', 'type': 'tel', 'required': False}, {'name': 'email', 'label': 'Email', 'type': 'email', 'required': True}]
+🔍 type=<class 'list'>
+🔍 length=4
+🔍 user_result: conclusion_id=20
+🔍 title=Приватизация не требуется
+🔍 user_data_fields=[{'name': 'full_name', 'label': 'ФИО', 'type': 'text', 'required': True}, {'name': 'address', 'label': 'Адрес', 'type': 'text', 'required': False}, {'name': 'phone', 'label': 'Телефон', 'type': 'tel', 'required': False}, {'name': 'email', 'label': 'Email', 'type': 'email', 'required': True}]
+🔍 type=<class 'list'>
+🔍 length=4
+🔍 user_result: conclusion_id=20
+🔍 title=Приватизация не требуется
+🔍 user_data_fields=[{'name': 'full_name', 'label': 'ФИО', 'type': 'text', 'required': True}, {'name': 'address', 'label': 'Адрес', 'type': 'text', 'required': False}, {'name': 'phone', 'label': 'Телефон', 'type': 'tel', 'required': False}, {'name': 'email', 'label': 'Email', 'type': 'email', 'required': True}]
+🔍 type=<class 'list'>
+🔍 length=4
+🔍 user_result: conclusion_id=20
+🔍 title=Приватизация не требуется
+🔍 user_data_fields=[{'name': 'full_name', 'label': 'ФИО', 'type': 'text', 'required': True}, {'name': 'address', 'label': 'Адрес', 'type': 'text', 'required': False}, {'name': 'phone', 'label': 'Телефон', 'type': 'tel', 'required': False}, {'name': 'email', 'label': 'Email', 'type': 'email', 'required': True}]
+🔍 type=<class 'list'>
+🔍 length=4

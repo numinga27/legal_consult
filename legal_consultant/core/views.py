@@ -427,43 +427,33 @@ def user_questionnaire(request, q_id):
 
 
 def user_result(request, conclusion_id):
-    """Страница с результатом и генерацией документа"""
+    """Страница с результатом"""
+    import logging
+    logger = logging.getLogger(__name__)
+    
     conclusion = get_object_or_404(Conclusion, id=conclusion_id)
     
-    session_key = request.session.session_key
-    user_session = UserSession.objects.filter(
-        session_key=session_key,
-        conclusion=conclusion
-    ).first()
+    # Отладочная информация
+    logger.info(f"🔍 user_result: conclusion_id={conclusion_id}")
+    logger.info(f"🔍 title={conclusion.title}")
+    logger.info(f"🔍 user_data_fields={conclusion.user_data_fields}")
+    logger.info(f"🔍 type={type(conclusion.user_data_fields)}")
+    logger.info(f"🔍 length={len(conclusion.user_data_fields) if conclusion.user_data_fields else 0}")
     
-    user_data = {}
-    if request.GET.get('full_name'):
-        user_data = {
-            'full_name': request.GET.get('full_name'),
-            'address': request.GET.get('address', ''),
-            'phone': request.GET.get('phone', ''),
-            'email': request.GET.get('email', ''),
-            'additional_info': request.GET.get('additional_info', '')
-        }
-    
-    generated_doc = None
-    has_document = False
-    if user_session:
-        generated_doc = GeneratedDocument.objects.filter(
-            user_session=user_session,
-            conclusion=conclusion,
-            status='ready'
-        ).first()
-        has_document = bool(generated_doc and generated_doc.pdf_file)
+    # Если полей нет - добавляем
+    if not conclusion.user_data_fields:
+        logger.warning("⚠️ Поля пустые! Добавляем стандартные...")
+        conclusion.user_data_fields = [
+            {"name": "full_name", "label": "ФИО", "type": "text", "required": True},
+            {"name": "email", "label": "Email", "type": "email", "required": True}
+        ]
+        conclusion.save()
+        logger.info("✅ Поля добавлены!")
     
     context = {
         'conclusion': conclusion,
-        'user_data': user_data,
-        'generated_doc': generated_doc,
-        'has_document': has_document,
     }
     return render(request, 'user/result.html', context)
-
 
 def user_payment(request, conclusion_id):
     """Страница оплаты"""

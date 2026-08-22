@@ -278,6 +278,9 @@
         </div>
         <p class="text-muted">Заполните поля, чтобы получить персонализированные юридические документы</p>
         
+        <!-- Передаем данные через json_script -->
+        {{ conclusion.user_data_fields|json_script:"user-data-fields" }}
+        
         <form id="userDataForm">
             {% csrf_token %}
             <div id="dynamicFields">
@@ -296,17 +299,6 @@
         
         <!-- Статус генерации -->
         <div id="generationStatus" style="display: none;" class="mt-3"></div>
-        
-        <!-- Предпросмотр документа -->
-        <div id="documentPreviewContainer" style="display: none;" class="mt-3">
-            <h6><i class="fas fa-file-pdf text-danger"></i> Предпросмотр документа</h6>
-            <div class="document-preview" id="documentPreviewContent"></div>
-            <div class="mt-2">
-                <a href="#" id="downloadDocumentLink" class="btn btn-success btn-sm">
-                    <i class="fas fa-download"></i> Скачать PDF
-                </a>
-            </div>
-        </div>
     </div>
 
     <!-- ============================================================
@@ -403,63 +395,100 @@
 // ДИНАМИЧЕСКИЕ ПОЛЯ ДЛЯ СБОРА ДАННЫХ
 // ============================================================
 
+console.log('🚀 [START] result.html загружен');
+
 document.addEventListener('DOMContentLoaded', function() {
-    // Получаем поля из контекста Django
-    const fields = {{ conclusion.user_data_fields|default:'[]'|safe }};
-    const container = document.getElementById('dynamicFields');
-    const form = document.getElementById('userDataForm');
-    const saveBtn = document.getElementById('saveUserDataBtn');
-    const statusDiv = document.getElementById('generationStatus');
-    const previewContainer = document.getElementById('documentPreviewContainer');
-    const previewContent = document.getElementById('documentPreviewContent');
-    const downloadLink = document.getElementById('downloadDocumentLink');
-    const spinner = document.getElementById('spinnerOverlay');
-    const userDataJson = document.getElementById('userDataJson');
+    console.log('🚀 [DOM] DOM полностью загружен');
     
-    // Загружаем сохраненные данные из localStorage
-    let savedData = {};
-    try {
-        const saved = localStorage.getItem('userDocumentData');
-        if (saved) {
-            savedData = JSON.parse(saved);
+    // ============================================================
+    // ПОЛУЧАЕМ ПОЛЯ ИЗ json_script
+    // ============================================================
+    
+    var fieldsElement = document.getElementById('user-data-fields');
+    var fields = [];
+    
+    if (fieldsElement) {
+        try {
+            fields = JSON.parse(fieldsElement.textContent);
+            console.log('🚀 [FIELDS] Получены поля из json_script:', fields);
+        } catch(e) {
+            console.error('❌ [ERROR] Ошибка парсинга JSON:', e);
+            fields = [];
         }
-    } catch(e) {
-        console.error('Error loading saved data:', e);
+    } else {
+        console.error('❌ [ERROR] Элемент user-data-fields не найден');
     }
+    
+    console.log('🚀 [FIELDS] Тип:', typeof fields);
+    console.log('🚀 [FIELDS] Длина:', fields ? fields.length : 0);
+    console.log('🚀 [FIELDS] JSON:', JSON.stringify(fields));
+    
+    var container = document.getElementById('dynamicFields');
+    var form = document.getElementById('userDataForm');
+    var saveBtn = document.getElementById('saveUserDataBtn');
+    var statusDiv = document.getElementById('generationStatus');
     
     // Очищаем контейнер
     container.innerHTML = '';
     
     // Если полей нет, показываем сообщение
     if (!fields || fields.length === 0) {
+        console.log('❌ [ERROR] Поля не найдены!');
         container.innerHTML = `
-            <div class="alert alert-info">
-                <i class="fas fa-info-circle"></i> 
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i> 
                 Для этого вывода не настроены поля для сбора данных.
+                <br>
+                <small class="text-muted">Обратитесь к администратору для настройки полей.</small>
             </div>
         `;
         return;
     }
     
+    // Загружаем сохраненные данные из localStorage
+    var savedData = {};
+    try {
+        var saved = localStorage.getItem('userDocumentData');
+        if (saved) {
+            savedData = JSON.parse(saved);
+            console.log('💾 [SAVED] Загружены сохраненные данные:', savedData);
+        }
+    } catch(e) {
+        console.error('❌ [ERROR] Ошибка загрузки данных:', e);
+    }
+    
     // Генерируем поля
+    console.log('🔄 [GENERATE] Начинаем генерацию полей...');
+    var fieldCount = 0;
+    
     fields.forEach(function(field, index) {
-        const div = document.createElement('div');
+        fieldCount++;
+        console.log('📝 [FIELD] Генерация поля', index + 1, ':', field);
+        
+        var div = document.createElement('div');
         div.className = 'dynamic-field';
         
-        const label = document.createElement('label');
+        var label = document.createElement('label');
         label.htmlFor = 'field_' + field.name;
         label.textContent = field.label || field.name;
         if (field.required) {
-            const star = document.createElement('span');
+            var star = document.createElement('span');
             star.className = 'required-star';
             star.textContent = ' *';
             label.appendChild(star);
         }
         
-        const input = document.createElement('input');
+        var input;
+        if (field.type === 'textarea') {
+            input = document.createElement('textarea');
+            input.rows = 3;
+        } else {
+            input = document.createElement('input');
+            input.type = field.type || 'text';
+        }
+        
         input.id = 'field_' + field.name;
         input.name = 'user_' + field.name;
-        input.type = field.type || 'text';
         input.className = 'form-control';
         input.placeholder = 'Введите ' + (field.label || field.name).toLowerCase();
         input.dataset.required = field.required ? 'true' : 'false';
@@ -469,82 +498,36 @@ document.addEventListener('DOMContentLoaded', function() {
             input.value = savedData[field.name];
         }
         
-        // Для email - добавляем валидацию
-        if (field.type === 'email') {
-            input.type = 'email';
-        }
-        
-        // Для tel - добавляем валидацию
-        if (field.type === 'tel') {
-            input.type = 'tel';
-        }
-        
-        // Для textarea - используем textarea
-        if (field.type === 'textarea') {
-            const textarea = document.createElement('textarea');
-            textarea.id = 'field_' + field.name;
-            textarea.name = 'user_' + field.name;
-            textarea.className = 'form-control';
-            textarea.placeholder = 'Введите ' + (field.label || field.name).toLowerCase();
-            textarea.rows = 3;
-            textarea.dataset.required = field.required ? 'true' : 'false';
-            if (savedData[field.name]) {
-                textarea.value = savedData[field.name];
-            }
-            div.appendChild(label);
-            div.appendChild(textarea);
-            container.appendChild(div);
-            
-            // Сохраняем при изменении
-            textarea.addEventListener('input', function() {
-                saveFieldData(field.name, this.value);
-                this.classList.remove('is-invalid');
-            });
-            textarea.addEventListener('blur', function() {
-                validateField(field, this);
-            });
-            return;
-        }
-        
         div.appendChild(label);
         div.appendChild(input);
         container.appendChild(div);
         
         // Сохраняем при изменении
         input.addEventListener('input', function() {
-            saveFieldData(field.name, this.value);
+            savedData[field.name] = this.value;
+            localStorage.setItem('userDocumentData', JSON.stringify(savedData));
             this.classList.remove('is-invalid');
         });
+        
         input.addEventListener('blur', function() {
-            validateField(field, this);
+            if (field.required && !this.value.trim()) {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+            }
         });
     });
     
-    // Функция сохранения поля
-    function saveFieldData(name, value) {
-        savedData[name] = value;
-        localStorage.setItem('userDocumentData', JSON.stringify(savedData));
-    }
-    
-    // Функция валидации поля
-    function validateField(field, input) {
-        if (field.required && !input.value.trim()) {
-            input.classList.add('is-invalid');
-            return false;
-        }
-        input.classList.remove('is-invalid');
-        return true;
-    }
+    console.log('✅ [SUCCESS] Сгенерировано полей:', fieldCount);
     
     // Валидация всех полей
     function validateAllFields() {
-        let valid = true;
+        var valid = true;
         fields.forEach(function(field) {
-            const input = document.querySelector('[name="user_' + field.name + '"]');
-            if (input) {
-                if (!validateField(field, input)) {
-                    valid = false;
-                }
+            var input = document.querySelector('[name="user_' + field.name + '"]');
+            if (input && field.required && !input.value.trim()) {
+                input.classList.add('is-invalid');
+                valid = false;
             }
         });
         return valid;
@@ -553,6 +536,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Обработка отправки формы
     form.addEventListener('submit', function(e) {
         e.preventDefault();
+        console.log('📤 [SUBMIT] Форма отправлена');
         
         // Валидация
         if (!validateAllFields()) {
@@ -561,21 +545,18 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // Собираем данные
-        const userData = {};
+        var userData = {};
         fields.forEach(function(field) {
-            const input = document.querySelector('[name="user_' + field.name + '"]');
+            var input = document.querySelector('[name="user_' + field.name + '"]');
             if (input) {
                 userData[field.name] = input.value;
             }
         });
         
+        console.log('📦 [DATA] Собранные данные:', userData);
+        
         // Сохраняем в localStorage
         localStorage.setItem('userDocumentData', JSON.stringify(userData));
-        
-        // Сохраняем в скрытое поле для оплаты
-        if (userDataJson) {
-            userDataJson.value = JSON.stringify(userData);
-        }
         
         // Генерируем документ
         generateDocument(userData);
@@ -583,81 +564,78 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Функция генерации документа
     function generateDocument(userData) {
-        spinner.classList.add('active');
+        console.log('🔄 [GENERATE] Начинаем генерацию документа...');
         saveBtn.disabled = true;
         saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Генерация...';
         statusDiv.style.display = 'none';
-        previewContainer.style.display = 'none';
+        
+        var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+        console.log('🔑 [CSRF] Токен:', csrfToken ? 'Найден' : 'НЕ НАЙДЕН');
+        
+        var requestData = {
+            conclusion_id: {{ conclusion.id }},
+            user_data: userData
+        };
+        console.log('📤 [REQUEST] Запрос:', requestData);
         
         fetch('/api/generate-document/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || ''
+                'X-CSRFToken': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest'
             },
-            body: JSON.stringify({
-                conclusion_id: {{ conclusion.id }},
-                user_data: userData
-            })
+            body: JSON.stringify(requestData),
+            credentials: 'same-origin'
         })
-        .then(response => response.json())
-        .then(data => {
-            spinner.classList.remove('active');
-            
+        .then(function(response) {
+            console.log('📥 [RESPONSE] Статус:', response.status);
+            return response.json();
+        })
+        .then(function(data) {
+            console.log('📥 [DATA] Ответ:', data);
             if (data.success) {
                 statusDiv.style.display = 'block';
                 statusDiv.innerHTML = `
                     <div class="alert alert-success">
                         <i class="fas fa-check-circle"></i> 
                         <strong>Документ успешно сгенерирован!</strong>
+                        <div class="mt-2">
+                            <a href="${data.pdf_url}" class="btn btn-success btn-sm" target="_blank">
+                                <i class="fas fa-download"></i> Скачать PDF
+                            </a>
+                        </div>
                     </div>
                 `;
-                
-                // Показываем предпросмотр
-                if (data.content_text) {
-                    previewContainer.style.display = 'block';
-                    previewContent.textContent = data.content_text;
-                }
-                
-                // Устанавливаем ссылку на скачивание
-                if (data.pdf_url) {
-                    downloadLink.href = data.pdf_url;
-                    downloadLink.style.display = 'inline-block';
-                }
-                
-                // Обновляем страницу через 3 секунды
-                setTimeout(() => window.location.reload(), 3000);
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Сгенерировать документ';
             } else {
                 statusDiv.style.display = 'block';
                 statusDiv.innerHTML = `
                     <div class="alert alert-danger">
                         <i class="fas fa-exclamation-circle"></i> 
                         Ошибка: ${data.error || 'Неизвестная ошибка'}
-                        <button class="btn btn-outline-danger btn-sm mt-2" onclick="location.reload()">
-                            Попробовать снова
-                        </button>
                     </div>
                 `;
                 saveBtn.disabled = false;
                 saveBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Сгенерировать документ';
             }
         })
-        .catch(error => {
-            spinner.classList.remove('active');
+        .catch(function(error) {
+            console.error('❌ [ERROR] Ошибка:', error);
             statusDiv.style.display = 'block';
             statusDiv.innerHTML = `
                 <div class="alert alert-danger">
                     <i class="fas fa-exclamation-circle"></i> 
                     Ошибка: ${error.message}
-                    <button class="btn btn-outline-danger btn-sm mt-2" onclick="location.reload()">
-                        Попробовать снова
-                    </button>
                 </div>
             `;
             saveBtn.disabled = false;
             saveBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Сгенерировать документ';
         });
     }
+    
+    console.log('✅ [READY] Страница готова!');
 });
 
 // ============================================================
@@ -665,34 +643,38 @@ document.addEventListener('DOMContentLoaded', function() {
 // ============================================================
 
 function toggleOption(element) {
-    const checkbox = element.querySelector('input[type="checkbox"]');
+    var checkbox = element.querySelector('input[type="checkbox"]');
     checkbox.checked = !checkbox.checked;
     element.classList.toggle('selected');
     updateTotalPrice();
 }
 
 function updateTotalPrice() {
-    const checkboxes = document.querySelectorAll('input[name="services"]:checked');
-    const basePrice = {{ conclusion.price|floatformat:0 }};
-    const count = checkboxes.length || 1;
-    const total = basePrice * count;
+    var checkboxes = document.querySelectorAll('input[name="services"]:checked');
+    var basePrice = {{ conclusion.price|floatformat:0 }};
+    var count = checkboxes.length || 1;
+    var total = basePrice * count;
     document.getElementById('totalPrice').textContent = total + ' ₽';
 }
 
-// Инициализация: выбираем первый вариант
+// Инициализация оплаты
 document.addEventListener('DOMContentLoaded', function() {
-    const firstOption = document.querySelector('.payment-option');
+    var firstOption = document.querySelector('.payment-option');
     if (firstOption) {
         firstOption.classList.add('selected');
     }
     
     // Предзаполняем email из сохраненных данных
-    const savedData = JSON.parse(localStorage.getItem('userDocumentData') || '{}');
-    if (savedData.email) {
-        const emailInput = document.querySelector('input[name="user_email"]');
-        if (emailInput) {
-            emailInput.value = savedData.email;
+    try {
+        var savedData = JSON.parse(localStorage.getItem('userDocumentData') || '{}');
+        if (savedData.email) {
+            var emailInput = document.querySelector('input[name="user_email"]');
+            if (emailInput) {
+                emailInput.value = savedData.email;
+            }
         }
+    } catch(e) {
+        console.error('Error loading saved data:', e);
     }
 });
 </script>
