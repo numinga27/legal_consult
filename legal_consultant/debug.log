@@ -471,3 +471,632 @@ Watching for file changes with StatReloader
 🔍 user_data_fields=[{'name': 'full_name', 'label': 'ФИО', 'type': 'text', 'required': True}, {'name': 'address', 'label': 'Адрес', 'type': 'text', 'required': False}, {'name': 'phone', 'label': 'Телефон', 'type': 'tel', 'required': False}, {'name': 'email', 'label': 'Email', 'type': 'email', 'required': True}]
 🔍 type=<class 'list'>
 🔍 length=4
+🔍 user_result: conclusion_id=20
+🔍 title=Приватизация не требуется
+🔍 user_data_fields=[{'name': 'full_name', 'label': 'ФИО', 'type': 'text', 'required': True}, {'name': 'address', 'label': 'Адрес', 'type': 'text', 'required': False}, {'name': 'phone', 'label': 'Телефон', 'type': 'tel', 'required': False}, {'name': 'email', 'label': 'Email', 'type': 'email', 'required': True}]
+🔍 type=<class 'list'>
+🔍 length=4
+🔍 user_result: conclusion_id=14
+🔍 title=все ок 
+🔍 user_data_fields=[{'name': 'full_name', 'label': 'ФИО', 'type': 'text', 'required': True}, {'name': 'address', 'label': 'Адрес', 'type': 'text', 'required': False}, {'name': 'phone', 'label': 'Телефон', 'type': 'tel', 'required': False}, {'name': 'email', 'label': 'Email', 'type': 'email', 'required': True}]
+🔍 type=<class 'list'>
+🔍 length=4
+Not Found: /api/generate-document/
+/Users/andrejkrylov/Desktop/fist/legal_consultant/legal_consultant/core/urls.py changed, reloading.
+Watching for file changes with StatReloader
+🔍 user_result: conclusion_id=14
+🔍 title=все ок 
+🔍 user_data_fields=[{'name': 'full_name', 'label': 'ФИО', 'type': 'text', 'required': True}, {'name': 'address', 'label': 'Адрес', 'type': 'text', 'required': False}, {'name': 'phone', 'label': 'Телефон', 'type': 'tel', 'required': False}, {'name': 'email', 'label': 'Email', 'type': 'email', 'required': True}]
+🔍 type=<class 'list'>
+🔍 length=4
+Forbidden (CSRF token from the 'X-Csrftoken' HTTP header has incorrect length.): /api/generate-document/
+Forbidden (CSRF token from the 'X-Csrftoken' HTTP header has incorrect length.): /api/generate-document/
+🔍 user_result: conclusion_id=14
+🔍 title=все ок 
+🔍 user_data_fields=[{'name': 'full_name', 'label': 'ФИО', 'type': 'text', 'required': True}, {'name': 'address', 'label': 'Адрес', 'type': 'text', 'required': False}, {'name': 'phone', 'label': 'Телефон', 'type': 'tel', 'required': False}, {'name': 'email', 'label': 'Email', 'type': 'email', 'required': True}]
+🔍 type=<class 'list'>
+🔍 length=4
+🔍 user_result: conclusion_id=14
+🔍 title=все ок 
+🔍 user_data_fields=[{'name': 'full_name', 'label': 'ФИО', 'type': 'text', 'required': True}, {'name': 'address', 'label': 'Адрес', 'type': 'text', 'required': False}, {'name': 'phone', 'label': 'Телефон', 'type': 'tel', 'required': False}, {'name': 'email', 'label': 'Email', 'type': 'email', 'required': True}]
+🔍 type=<class 'list'>
+🔍 length=4
+🔍 user_result: conclusion_id=14
+🔍 title=все ок 
+🔍 user_data_fields=[{'name': 'full_name', 'label': 'ФИО', 'type': 'text', 'required': True}, {'name': 'address', 'label': 'Адрес', 'type': 'text', 'required': False}, {'name': 'phone', 'label': 'Телефон', 'type': 'tel', 'required': False}, {'name': 'email', 'label': 'Email', 'type': 'email', 'required': True}]
+🔍 type=<class 'list'>
+🔍 length=4
+🔍 user_result: conclusion_id=14
+🔍 title=все ок 
+🔍 user_data_fields=[{'name': 'full_name', 'label': 'ФИО', 'type': 'text', 'required': True}, {'name': 'address', 'label': 'Адрес', 'type': 'text', 'required': False}, {'name': 'phone', 'label': 'Телефон', 'type': 'tel', 'required': False}, {'name': 'email', 'label': 'Email', 'type': 'email', 'required': True}]
+🔍 type=<class 'list'>
+🔍 length=4
+/Users/andrejkrylov/Desktop/fist/legal_consultant/legal_consultant/core/pdf_generator.py changed, reloading.
+Watching for file changes with StatReloader
+ℹ️ Шаблон для вывода не найден, используем: Заявление в ЗАГС
+📄 Подготовлены данные для PDF: {'full_name': 'Андрей Крылов', 'address': '', 'phone': '', 'email': 'dick@mal.ew', 'additional_info': '', 'conclusion_title': 'все ок ', 'conclusion_short': 'Введите текст вывода...', 'conclusion_full': 'Введите текст вывода...', 'current_date': '23.08.2026', 'current_year': '2026'}
+📄 HTML для PDF: <!DOCTYPE html>
+<html>
+<head>
+<meta charset='UTF-8'>
+<style>
+  body { font-family: Arial, sans-serif; font-size: 12pt; margin: 40px; }
+  h1 { color: #1a1a2e; font-size: 18pt; text-align: center; margin-bottom: 30px; }
+  .header { margin-bottom: 30px; }
+  .content { line-height: 1.8; }
+  .footer { margin-top: 50px; text-align: right; }
+</style>
+</head>
+<body>
+  <div class='header'>
+    <p><strong>В ЗАГС [Название]</strong></p>
+    <p>Адрес: [Адрес ЗАГСа]</p>
+    <p><br></p>
+    <p><strong>От:</st...
+✅ PDF создан, размер: 2497 байт
+📄 Подготовлены данные для PDF: {'full_name': 'Андрей Крылов', 'address': '', 'phone': '', 'email': 'dick@mal.ew', 'additional_info': '', 'conclusion_title': 'все ок ', 'conclusion_short': 'Введите текст вывода...', 'conclusion_full': 'Введите текст вывода...', 'current_date': '23.08.2026', 'current_year': '2026'}
+✅ Документ сохранен: document_22_14_20260823_212238.pdf
+🔍 user_result: conclusion_id=14
+🔍 title=все ок 
+🔍 user_data_fields=[{'name': 'full_name', 'label': 'ФИО', 'type': 'text', 'required': True}, {'name': 'address', 'label': 'Адрес', 'type': 'text', 'required': False}, {'name': 'phone', 'label': 'Телефон', 'type': 'tel', 'required': False}, {'name': 'email', 'label': 'Email', 'type': 'email', 'required': True}]
+🔍 type=<class 'list'>
+🔍 length=4
+🔍 user_result: conclusion_id=14
+🔍 title=все ок 
+🔍 user_data_fields=[{'name': 'full_name', 'label': 'ФИО', 'type': 'text', 'required': True}, {'name': 'address', 'label': 'Адрес', 'type': 'text', 'required': False}, {'name': 'phone', 'label': 'Телефон', 'type': 'tel', 'required': False}, {'name': 'email', 'label': 'Email', 'type': 'email', 'required': True}]
+🔍 type=<class 'list'>
+🔍 length=4
+Not Found: /apple-touch-icon-precomposed.png
+Not Found: /favicon.ico
+Not Found: /apple-touch-icon.png
+Not Found: /favicon.ico
+ℹ️ Шаблон для вывода не найден, используем: Заявление в ЗАГС
+📄 Подготовлены данные для PDF: {'full_name': 'Андрей Крылов', 'address': '', 'phone': '', 'email': 'dick@mal.ew', 'additional_info': '', 'conclusion_title': 'все ок ', 'conclusion_short': 'Введите текст вывода...', 'conclusion_full': 'Введите текст вывода...', 'current_date': '25.08.2026', 'current_year': '2026'}
+📄 HTML для PDF: <!DOCTYPE html>
+<html>
+<head>
+<meta charset='UTF-8'>
+<style>
+  body { font-family: Arial, sans-serif; font-size: 12pt; margin: 40px; }
+  h1 { color: #1a1a2e; font-size: 18pt; text-align: center; margin-bottom: 30px; }
+  .header { margin-bottom: 30px; }
+  .content { line-height: 1.8; }
+  .footer { margin-top: 50px; text-align: right; }
+</style>
+</head>
+<body>
+  <div class='header'>
+    <p><strong>В ЗАГС [Название]</strong></p>
+    <p>Адрес: [Адрес ЗАГСа]</p>
+    <p><br></p>
+    <p><strong>От:</st...
+✅ PDF создан, размер: 2497 байт
+📄 Подготовлены данные для PDF: {'full_name': 'Андрей Крылов', 'address': '', 'phone': '', 'email': 'dick@mal.ew', 'additional_info': '', 'conclusion_title': 'все ок ', 'conclusion_short': 'Введите текст вывода...', 'conclusion_full': 'Введите текст вывода...', 'current_date': '25.08.2026', 'current_year': '2026'}
+✅ Документ сохранен: document_22_14_20260825_135116.pdf
+🔍 user_result: conclusion_id=14
+🔍 title=все ок 
+🔍 user_data_fields=[{'name': 'full_name', 'label': 'ФИО', 'type': 'text', 'required': True}, {'name': 'address', 'label': 'Адрес', 'type': 'text', 'required': False}, {'name': 'phone', 'label': 'Телефон', 'type': 'tel', 'required': False}, {'name': 'email', 'label': 'Email', 'type': 'email', 'required': True}]
+🔍 type=<class 'list'>
+🔍 length=4
+🔍 user_result: conclusion_id=17
+🔍 title=Увеличение размера алиментов
+🔍 user_data_fields=[{'name': 'full_name', 'label': 'ФИО', 'type': 'text', 'required': True}, {'name': 'address', 'label': 'Адрес', 'type': 'text', 'required': False}, {'name': 'phone', 'label': 'Телефон', 'type': 'tel', 'required': False}, {'name': 'email', 'label': 'Email', 'type': 'email', 'required': True}]
+🔍 type=<class 'list'>
+🔍 length=4
+ℹ️ Шаблон для вывода не найден, используем: Заявление в ЗАГС
+📄 Подготовлены данные для PDF: {'full_name': 'Андрей Крылов', 'address': '', 'phone': '', 'email': 'dick@mal.ew', 'additional_info': '', 'conclusion_title': 'Увеличение размера алиментов', 'conclusion_short': 'Вы можете увеличить размер алиментов через суд.', 'conclusion_full': 'ПОШАГОВЫЙ ПЛАН ДЕЙСТВИЙ:\n\n1. Подайте иск об увеличении размера алиментов\n   - В суд по месту жительства ответчика\n   - Укажите причины (рост расходов, изменение доходов)\n\n2. Представьте доказательства:\n   - Расходы на ребенка\n   - Изменение доходов ответчика\n\n3. Получите решение суда\n\nОснование: ст. 83-84 СК РФ', 'current_date': '25.08.2026', 'current_year': '2026'}
+📄 HTML для PDF: <!DOCTYPE html>
+<html>
+<head>
+<meta charset='UTF-8'>
+<style>
+  body { font-family: Arial, sans-serif; font-size: 12pt; margin: 40px; }
+  h1 { color: #1a1a2e; font-size: 18pt; text-align: center; margin-bottom: 30px; }
+  .header { margin-bottom: 30px; }
+  .content { line-height: 1.8; }
+  .footer { margin-top: 50px; text-align: right; }
+</style>
+</head>
+<body>
+  <div class='header'>
+    <p><strong>В ЗАГС [Название]</strong></p>
+    <p>Адрес: [Адрес ЗАГСа]</p>
+    <p><br></p>
+    <p><strong>От:</st...
+✅ PDF создан, размер: 2497 байт
+📄 Подготовлены данные для PDF: {'full_name': 'Андрей Крылов', 'address': '', 'phone': '', 'email': 'dick@mal.ew', 'additional_info': '', 'conclusion_title': 'Увеличение размера алиментов', 'conclusion_short': 'Вы можете увеличить размер алиментов через суд.', 'conclusion_full': 'ПОШАГОВЫЙ ПЛАН ДЕЙСТВИЙ:\n\n1. Подайте иск об увеличении размера алиментов\n   - В суд по месту жительства ответчика\n   - Укажите причины (рост расходов, изменение доходов)\n\n2. Представьте доказательства:\n   - Расходы на ребенка\n   - Изменение доходов ответчика\n\n3. Получите решение суда\n\nОснование: ст. 83-84 СК РФ', 'current_date': '25.08.2026', 'current_year': '2026'}
+✅ Документ сохранен: document_21_17_20260825_135233.pdf
+🔍 user_result: conclusion_id=17
+🔍 title=Увеличение размера алиментов
+🔍 user_data_fields=[{'name': 'full_name', 'label': 'ФИО', 'type': 'text', 'required': True}, {'name': 'address', 'label': 'Адрес', 'type': 'text', 'required': False}, {'name': 'phone', 'label': 'Телефон', 'type': 'tel', 'required': False}, {'name': 'email', 'label': 'Email', 'type': 'email', 'required': True}]
+🔍 type=<class 'list'>
+🔍 length=4
+Watching for file changes with StatReloader
+🔍 user_result: conclusion_id=17
+🔍 title=Увеличение размера алиментов
+🔍 user_data_fields=[{'name': 'full_name', 'label': 'ФИО', 'type': 'text', 'required': True}, {'name': 'address', 'label': 'Адрес', 'type': 'text', 'required': False}, {'name': 'phone', 'label': 'Телефон', 'type': 'tel', 'required': False}, {'name': 'email', 'label': 'Email', 'type': 'email', 'required': True}]
+🔍 type=<class 'list'>
+🔍 length=4
+ℹ️ Шаблон для вывода не найден, используем: Заявление в ЗАГС
+📄 Подготовлены данные для PDF: {'full_name': 'Андрей Крылов', 'address': '', 'phone': '', 'email': 'dick@mal.ew', 'additional_info': '', 'conclusion_title': 'Увеличение размера алиментов', 'conclusion_short': 'Вы можете увеличить размер алиментов через суд.', 'conclusion_full': 'ПОШАГОВЫЙ ПЛАН ДЕЙСТВИЙ:\n\n1. Подайте иск об увеличении размера алиментов\n   - В суд по месту жительства ответчика\n   - Укажите причины (рост расходов, изменение доходов)\n\n2. Представьте доказательства:\n   - Расходы на ребенка\n   - Изменение доходов ответчика\n\n3. Получите решение суда\n\nОснование: ст. 83-84 СК РФ', 'current_date': '25.08.2026', 'current_year': '2026'}
+📄 HTML для PDF: <!DOCTYPE html>
+<html>
+<head>
+<meta charset='UTF-8'>
+<style>
+  body { font-family: Arial, sans-serif; font-size: 12pt; margin: 40px; }
+  h1 { color: #1a1a2e; font-size: 18pt; text-align: center; margin-bottom: 30px; }
+  .header { margin-bottom: 30px; }
+  .content { line-height: 1.8; }
+  .footer { margin-top: 50px; text-align: right; }
+</style>
+</head>
+<body>
+  <div class='header'>
+    <p><strong>В ЗАГС [Название]</strong></p>
+    <p>Адрес: [Адрес ЗАГСа]</p>
+    <p><br></p>
+    <p><strong>От:</st...
+✅ PDF создан, размер: 2497 байт
+📄 Подготовлены данные для PDF: {'full_name': 'Андрей Крылов', 'address': '', 'phone': '', 'email': 'dick@mal.ew', 'additional_info': '', 'conclusion_title': 'Увеличение размера алиментов', 'conclusion_short': 'Вы можете увеличить размер алиментов через суд.', 'conclusion_full': 'ПОШАГОВЫЙ ПЛАН ДЕЙСТВИЙ:\n\n1. Подайте иск об увеличении размера алиментов\n   - В суд по месту жительства ответчика\n   - Укажите причины (рост расходов, изменение доходов)\n\n2. Представьте доказательства:\n   - Расходы на ребенка\n   - Изменение доходов ответчика\n\n3. Получите решение суда\n\nОснование: ст. 83-84 СК РФ', 'current_date': '25.08.2026', 'current_year': '2026'}
+✅ Документ сохранен: document_21_17_20260825_204447.pdf
+🔍 user_result: conclusion_id=17
+🔍 title=Увеличение размера алиментов
+🔍 user_data_fields=[{'name': 'full_name', 'label': 'ФИО', 'type': 'text', 'required': True}, {'name': 'address', 'label': 'Адрес', 'type': 'text', 'required': False}, {'name': 'phone', 'label': 'Телефон', 'type': 'tel', 'required': False}, {'name': 'email', 'label': 'Email', 'type': 'email', 'required': True}]
+🔍 type=<class 'list'>
+🔍 length=4
+ℹ️ Шаблон для вывода не найден, используем: Заявление в ЗАГС
+📄 Подготовлены данные для PDF: {'full_name': 'Андрей Крылов', 'address': '', 'phone': '', 'email': 'dick@mal.ew', 'additional_info': '', 'conclusion_title': 'Увеличение размера алиментов', 'conclusion_short': 'Вы можете увеличить размер алиментов через суд.', 'conclusion_full': 'ПОШАГОВЫЙ ПЛАН ДЕЙСТВИЙ:\n\n1. Подайте иск об увеличении размера алиментов\n   - В суд по месту жительства ответчика\n   - Укажите причины (рост расходов, изменение доходов)\n\n2. Представьте доказательства:\n   - Расходы на ребенка\n   - Изменение доходов ответчика\n\n3. Получите решение суда\n\nОснование: ст. 83-84 СК РФ', 'current_date': '25.08.2026', 'current_year': '2026'}
+📄 HTML для PDF: <!DOCTYPE html>
+<html>
+<head>
+<meta charset='UTF-8'>
+<style>
+  body { font-family: Arial, sans-serif; font-size: 12pt; margin: 40px; }
+  h1 { color: #1a1a2e; font-size: 18pt; text-align: center; margin-bottom: 30px; }
+  .header { margin-bottom: 30px; }
+  .content { line-height: 1.8; }
+  .footer { margin-top: 50px; text-align: right; }
+</style>
+</head>
+<body>
+  <div class='header'>
+    <p><strong>В ЗАГС [Название]</strong></p>
+    <p>Адрес: [Адрес ЗАГСа]</p>
+    <p><br></p>
+    <p><strong>От:</st...
+✅ PDF создан, размер: 2497 байт
+📄 Подготовлены данные для PDF: {'full_name': 'Андрей Крылов', 'address': '', 'phone': '', 'email': 'dick@mal.ew', 'additional_info': '', 'conclusion_title': 'Увеличение размера алиментов', 'conclusion_short': 'Вы можете увеличить размер алиментов через суд.', 'conclusion_full': 'ПОШАГОВЫЙ ПЛАН ДЕЙСТВИЙ:\n\n1. Подайте иск об увеличении размера алиментов\n   - В суд по месту жительства ответчика\n   - Укажите причины (рост расходов, изменение доходов)\n\n2. Представьте доказательства:\n   - Расходы на ребенка\n   - Изменение доходов ответчика\n\n3. Получите решение суда\n\nОснование: ст. 83-84 СК РФ', 'current_date': '25.08.2026', 'current_year': '2026'}
+✅ Документ сохранен: document_21_17_20260825_204452.pdf
+🔍 user_result: conclusion_id=17
+🔍 title=Увеличение размера алиментов
+🔍 user_data_fields=[{'name': 'full_name', 'label': 'ФИО', 'type': 'text', 'required': True}, {'name': 'address', 'label': 'Адрес', 'type': 'text', 'required': False}, {'name': 'phone', 'label': 'Телефон', 'type': 'tel', 'required': False}, {'name': 'email', 'label': 'Email', 'type': 'email', 'required': True}]
+🔍 type=<class 'list'>
+🔍 length=4
+ℹ️ Шаблон для вывода не найден, используем: Заявление в ЗАГС
+📄 Подготовлены данные для PDF: {'full_name': 'Андрей Крылов', 'address': '', 'phone': '', 'email': 'dick@mal.ew', 'additional_info': '', 'conclusion_title': 'Увеличение размера алиментов', 'conclusion_short': 'Вы можете увеличить размер алиментов через суд.', 'conclusion_full': 'ПОШАГОВЫЙ ПЛАН ДЕЙСТВИЙ:\n\n1. Подайте иск об увеличении размера алиментов\n   - В суд по месту жительства ответчика\n   - Укажите причины (рост расходов, изменение доходов)\n\n2. Представьте доказательства:\n   - Расходы на ребенка\n   - Изменение доходов ответчика\n\n3. Получите решение суда\n\nОснование: ст. 83-84 СК РФ', 'current_date': '25.08.2026', 'current_year': '2026'}
+📄 HTML для PDF: <!DOCTYPE html>
+<html>
+<head>
+<meta charset='UTF-8'>
+<style>
+  body { font-family: Arial, sans-serif; font-size: 12pt; margin: 40px; }
+  h1 { color: #1a1a2e; font-size: 18pt; text-align: center; margin-bottom: 30px; }
+  .header { margin-bottom: 30px; }
+  .content { line-height: 1.8; }
+  .footer { margin-top: 50px; text-align: right; }
+</style>
+</head>
+<body>
+  <div class='header'>
+    <p><strong>В ЗАГС [Название]</strong></p>
+    <p>Адрес: [Адрес ЗАГСа]</p>
+    <p><br></p>
+    <p><strong>От:</st...
+✅ PDF создан, размер: 2497 байт
+📄 Подготовлены данные для PDF: {'full_name': 'Андрей Крылов', 'address': '', 'phone': '', 'email': 'dick@mal.ew', 'additional_info': '', 'conclusion_title': 'Увеличение размера алиментов', 'conclusion_short': 'Вы можете увеличить размер алиментов через суд.', 'conclusion_full': 'ПОШАГОВЫЙ ПЛАН ДЕЙСТВИЙ:\n\n1. Подайте иск об увеличении размера алиментов\n   - В суд по месту жительства ответчика\n   - Укажите причины (рост расходов, изменение доходов)\n\n2. Представьте доказательства:\n   - Расходы на ребенка\n   - Изменение доходов ответчика\n\n3. Получите решение суда\n\nОснование: ст. 83-84 СК РФ', 'current_date': '25.08.2026', 'current_year': '2026'}
+✅ Документ сохранен: document_21_17_20260825_204916.pdf
+🔍 user_result: conclusion_id=17
+🔍 title=Увеличение размера алиментов
+🔍 user_data_fields=[{'name': 'full_name', 'label': 'ФИО', 'type': 'text', 'required': True}, {'name': 'address', 'label': 'Адрес', 'type': 'text', 'required': False}, {'name': 'phone', 'label': 'Телефон', 'type': 'tel', 'required': False}, {'name': 'email', 'label': 'Email', 'type': 'email', 'required': True}]
+🔍 type=<class 'list'>
+🔍 length=4
+🔍 user_result: conclusion_id=17
+🔍 title=Увеличение размера алиментов
+🔍 user_data_fields=[{'name': 'full_name', 'label': 'ФИО', 'type': 'text', 'required': True}, {'name': 'address', 'label': 'Адрес', 'type': 'text', 'required': False}, {'name': 'phone', 'label': 'Телефон', 'type': 'tel', 'required': False}, {'name': 'email', 'label': 'Email', 'type': 'email', 'required': True}]
+🔍 type=<class 'list'>
+🔍 length=4
+ℹ️ Шаблон для вывода не найден, используем: Заявление в ЗАГС
+📄 Подготовлены данные для PDF: {'full_name': 'Андрей Крылов', 'address': '', 'phone': '', 'email': 'dick@mal.ew', 'additional_info': '', 'conclusion_title': 'Увеличение размера алиментов', 'conclusion_short': 'Вы можете увеличить размер алиментов через суд.', 'conclusion_full': 'ПОШАГОВЫЙ ПЛАН ДЕЙСТВИЙ:\n\n1. Подайте иск об увеличении размера алиментов\n   - В суд по месту жительства ответчика\n   - Укажите причины (рост расходов, изменение доходов)\n\n2. Представьте доказательства:\n   - Расходы на ребенка\n   - Изменение доходов ответчика\n\n3. Получите решение суда\n\nОснование: ст. 83-84 СК РФ', 'current_date': '25.08.2026', 'current_year': '2026'}
+📄 HTML для PDF: <!DOCTYPE html>
+<html>
+<head>
+<meta charset='UTF-8'>
+<style>
+  body { font-family: Arial, sans-serif; font-size: 12pt; margin: 40px; }
+  h1 { color: #1a1a2e; font-size: 18pt; text-align: center; margin-bottom: 30px; }
+  .header { margin-bottom: 30px; }
+  .content { line-height: 1.8; }
+  .footer { margin-top: 50px; text-align: right; }
+</style>
+</head>
+<body>
+  <div class='header'>
+    <p><strong>В ЗАГС [Название]</strong></p>
+    <p>Адрес: [Адрес ЗАГСа]</p>
+    <p><br></p>
+    <p><strong>От:</st...
+✅ PDF создан, размер: 2497 байт
+📄 Подготовлены данные для PDF: {'full_name': 'Андрей Крылов', 'address': '', 'phone': '', 'email': 'dick@mal.ew', 'additional_info': '', 'conclusion_title': 'Увеличение размера алиментов', 'conclusion_short': 'Вы можете увеличить размер алиментов через суд.', 'conclusion_full': 'ПОШАГОВЫЙ ПЛАН ДЕЙСТВИЙ:\n\n1. Подайте иск об увеличении размера алиментов\n   - В суд по месту жительства ответчика\n   - Укажите причины (рост расходов, изменение доходов)\n\n2. Представьте доказательства:\n   - Расходы на ребенка\n   - Изменение доходов ответчика\n\n3. Получите решение суда\n\nОснование: ст. 83-84 СК РФ', 'current_date': '25.08.2026', 'current_year': '2026'}
+✅ Документ сохранен: document_21_17_20260825_204930.pdf
+🔍 user_result: conclusion_id=17
+🔍 title=Увеличение размера алиментов
+🔍 user_data_fields=[{'name': 'full_name', 'label': 'ФИО', 'type': 'text', 'required': True}, {'name': 'address', 'label': 'Адрес', 'type': 'text', 'required': False}, {'name': 'phone', 'label': 'Телефон', 'type': 'tel', 'required': False}, {'name': 'email', 'label': 'Email', 'type': 'email', 'required': True}]
+🔍 type=<class 'list'>
+🔍 length=4
+Watching for file changes with StatReloader
+🔍 user_result: conclusion_id=14
+🔍 title=все ок 
+🔍 user_data_fields=[{'name': 'full_name', 'label': 'ФИО', 'type': 'text', 'required': True}, {'name': 'address', 'label': 'Адрес', 'type': 'text', 'required': False}, {'name': 'phone', 'label': 'Телефон', 'type': 'tel', 'required': False}, {'name': 'email', 'label': 'Email', 'type': 'email', 'required': True}]
+🔍 type=<class 'list'>
+🔍 length=4
+📄 Подготовлены данные для PDF: {'full_name': 'Андрей Крылов', 'address': '', 'phone': '', 'email': 'dick@mal.ew', 'additional_info': '', 'conclusion_title': 'все ок ', 'conclusion_short': 'Введите текст вывода...', 'conclusion_full': 'Введите текст вывода...', 'current_date': '25.08.2026', 'current_year': '2026'}
+📄 HTML для PDF: 
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+body { font-family: Arial, sans-serif; font-size: 12pt; margin: 40px; }
+h1 { color: #1a1a2e; font-size: 18pt; text-align: center; margin-bottom: 30px; }
+.header { text-align: right; margin-bottom: 30px; }
+.content { line-height: 1.8; }
+.footer { margin-top: 50px; text-align: right; }
+.document-title { font-size: 20pt; font-weight: bold; text-align: center; margin: 30px 0; }
+</style>
+</head>
+<body>
+<div class="header">
+    <p><strong>Д...
+✅ PDF создан, размер: 1862 байт
+📄 Подготовлены данные для PDF: {'full_name': 'Андрей Крылов', 'address': '', 'phone': '', 'email': 'dick@mal.ew', 'additional_info': '', 'conclusion_title': 'все ок ', 'conclusion_short': 'Введите текст вывода...', 'conclusion_full': 'Введите текст вывода...', 'current_date': '25.08.2026', 'current_year': '2026'}
+✅ Документ сохранен: document_22_14_20260825_205131.pdf
+🔍 user_result: conclusion_id=14
+🔍 title=все ок 
+🔍 user_data_fields=[{'name': 'full_name', 'label': 'ФИО', 'type': 'text', 'required': True}, {'name': 'address', 'label': 'Адрес', 'type': 'text', 'required': False}, {'name': 'phone', 'label': 'Телефон', 'type': 'tel', 'required': False}, {'name': 'email', 'label': 'Email', 'type': 'email', 'required': True}]
+🔍 type=<class 'list'>
+🔍 length=4
+📄 Подготовлены данные для PDF: {'full_name': 'Иван Иванов', 'address': 'г. Москва, ул. Примерная, д.1', 'phone': '+7 900 123-45-67', 'email': 'ivanov@mail.ru', 'additional_info': '', 'conclusion_title': 'все ок ', 'conclusion_short': 'Введите текст вывода...', 'conclusion_full': 'Введите текст вывода...', 'current_date': '25.08.2026', 'current_year': '2026'}
+📄 HTML для PDF: 
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+body { font-family: Arial, sans-serif; font-size: 12pt; margin: 40px; }
+h1 { color: #1a1a2e; font-size: 18pt; text-align: center; margin-bottom: 30px; }
+.header { text-align: right; margin-bottom: 30px; }
+.content { line-height: 1.8; }
+.footer { margin-top: 50px; text-align: right; }
+.document-title { font-size: 20pt; font-weight: bold; text-align: center; margin: 30px 0; }
+</style>
+</head>
+<body>
+<div class="header">
+    <p><strong>Д...
+✅ PDF создан, размер: 1862 байт
+📄 Подготовлены данные для PDF: {'full_name': 'Иван Иванов', 'address': 'г. Москва, ул. Примерная, д.1', 'phone': '+7 900 123-45-67', 'email': 'ivanov@mail.ru', 'additional_info': '', 'conclusion_title': 'все ок ', 'conclusion_short': 'Введите текст вывода...', 'conclusion_full': 'Введите текст вывода...', 'current_date': '25.08.2026', 'current_year': '2026'}
+✅ Документ сохранен: document_2_14_20260825_205811.pdf
+📄 Подготовлены данные для PDF: {'full_name': 'Андрей Крылов', 'address': '', 'phone': '', 'email': 'dick@mal.ew', 'additional_info': '', 'conclusion_title': 'все ок ', 'conclusion_short': 'Введите текст вывода...', 'conclusion_full': '\nВы не можете приватизировать квартиру, так как она уже находится в частной собственности или вы не имеете права на приватизацию.\n\nОднако вы можете:\n\n1. Зарегистрировать право собственности в Росреестре, если у вас есть договор приватизации\n\n2. Обратиться в МФЦ для получения выписки из ЕГРН\n\n3. Если вы хотите продать квартиру - обратитесь к риелтору\n\nРекомендуем обратиться к юристу для консультации по вашему конкретному случаю.\n', 'current_date': '25.08.2026', 'current_year': '2026'}
+📄 HTML для PDF: 
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+body { font-family: Arial, sans-serif; font-size: 12pt; margin: 40px; }
+h1 { color: #1a1a2e; font-size: 18pt; text-align: center; margin-bottom: 30px; }
+.header { text-align: right; margin-bottom: 30px; }
+.content { line-height: 1.8; }
+.footer { margin-top: 50px; text-align: right; }
+.document-title { font-size: 20pt; font-weight: bold; text-align: center; margin: 30px 0; }
+</style>
+</head>
+<body>
+<div class="header">
+    <p><strong>Д...
+✅ PDF создан, размер: 1862 байт
+📄 Подготовлены данные для PDF: {'full_name': 'Андрей Крылов', 'address': '', 'phone': '', 'email': 'dick@mal.ew', 'additional_info': '', 'conclusion_title': 'все ок ', 'conclusion_short': 'Введите текст вывода...', 'conclusion_full': '\nВы не можете приватизировать квартиру, так как она уже находится в частной собственности или вы не имеете права на приватизацию.\n\nОднако вы можете:\n\n1. Зарегистрировать право собственности в Росреестре, если у вас есть договор приватизации\n\n2. Обратиться в МФЦ для получения выписки из ЕГРН\n\n3. Если вы хотите продать квартиру - обратитесь к риелтору\n\nРекомендуем обратиться к юристу для консультации по вашему конкретному случаю.\n', 'current_date': '25.08.2026', 'current_year': '2026'}
+✅ Документ сохранен: document_22_14_20260825_210138.pdf
+🔍 user_result: conclusion_id=14
+🔍 title=все ок 
+🔍 user_data_fields=[{'name': 'full_name', 'label': 'ФИО', 'type': 'text', 'required': True}, {'name': 'address', 'label': 'Адрес', 'type': 'text', 'required': False}, {'name': 'phone', 'label': 'Телефон', 'type': 'tel', 'required': False}, {'name': 'email', 'label': 'Email', 'type': 'email', 'required': True}]
+🔍 type=<class 'list'>
+🔍 length=4
+🔍 user_result: conclusion_id=14
+🔍 title=все ок 
+🔍 user_data_fields=[{'name': 'full_name', 'label': 'ФИО', 'type': 'text', 'required': True}, {'name': 'address', 'label': 'Адрес', 'type': 'text', 'required': False}, {'name': 'phone', 'label': 'Телефон', 'type': 'tel', 'required': False}, {'name': 'email', 'label': 'Email', 'type': 'email', 'required': True}]
+🔍 type=<class 'list'>
+🔍 length=4
+📄 Подготовлены данные для PDF: {'full_name': 'Андрей Крылов', 'address': '', 'phone': '', 'email': 'dick@mal.ew', 'additional_info': '', 'conclusion_title': 'все ок ', 'conclusion_short': 'Введите текст вывода...', 'conclusion_full': '\nВы не можете приватизировать квартиру, так как она уже находится в частной собственности или вы не имеете права на приватизацию.\n\nОднако вы можете:\n\n1. Зарегистрировать право собственности в Росреестре, если у вас есть договор приватизации\n\n2. Обратиться в МФЦ для получения выписки из ЕГРН\n\n3. Если вы хотите продать квартиру - обратитесь к риелтору\n\nРекомендуем обратиться к юристу для консультации по вашему конкретному случаю.\n', 'current_date': '25.08.2026', 'current_year': '2026'}
+📄 HTML для PDF: 
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+body { font-family: Arial, sans-serif; font-size: 12pt; margin: 40px; }
+h1 { color: #1a1a2e; font-size: 18pt; text-align: center; margin-bottom: 30px; }
+.header { text-align: right; margin-bottom: 30px; }
+.content { line-height: 1.8; }
+.footer { margin-top: 50px; text-align: right; }
+.document-title { font-size: 20pt; font-weight: bold; text-align: center; margin: 30px 0; }
+</style>
+</head>
+<body>
+<div class="header">
+    <p><strong>Д...
+✅ PDF создан, размер: 1862 байт
+📄 Подготовлены данные для PDF: {'full_name': 'Андрей Крылов', 'address': '', 'phone': '', 'email': 'dick@mal.ew', 'additional_info': '', 'conclusion_title': 'все ок ', 'conclusion_short': 'Введите текст вывода...', 'conclusion_full': '\nВы не можете приватизировать квартиру, так как она уже находится в частной собственности или вы не имеете права на приватизацию.\n\nОднако вы можете:\n\n1. Зарегистрировать право собственности в Росреестре, если у вас есть договор приватизации\n\n2. Обратиться в МФЦ для получения выписки из ЕГРН\n\n3. Если вы хотите продать квартиру - обратитесь к риелтору\n\nРекомендуем обратиться к юристу для консультации по вашему конкретному случаю.\n', 'current_date': '25.08.2026', 'current_year': '2026'}
+✅ Документ сохранен: document_22_14_20260825_210203.pdf
+🔍 user_result: conclusion_id=14
+🔍 title=все ок 
+🔍 user_data_fields=[{'name': 'full_name', 'label': 'ФИО', 'type': 'text', 'required': True}, {'name': 'address', 'label': 'Адрес', 'type': 'text', 'required': False}, {'name': 'phone', 'label': 'Телефон', 'type': 'tel', 'required': False}, {'name': 'email', 'label': 'Email', 'type': 'email', 'required': True}]
+🔍 type=<class 'list'>
+🔍 length=4
+📄 Подготовлены данные для PDF: {'full_name': 'Андрей Крылов', 'address': '', 'phone': '', 'email': 'dick@mal.ew', 'additional_info': '', 'conclusion_title': 'все ок ', 'conclusion_short': 'Введите текст вывода...', 'conclusion_full': '\nВы не можете приватизировать квартиру, так как она уже находится в частной собственности или вы не имеете права на приватизацию.\n\nОднако вы можете:\n\n1. Зарегистрировать право собственности в Росреестре, если у вас есть договор приватизации\n\n2. Обратиться в МФЦ для получения выписки из ЕГРН\n\n3. Если вы хотите продать квартиру - обратитесь к риелтору\n\nРекомендуем обратиться к юристу для консультации по вашему конкретному случаю.\n', 'current_date': '25.08.2026', 'current_year': '2026'}
+📄 HTML для PDF: 
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+body { font-family: Arial, sans-serif; font-size: 12pt; margin: 40px; }
+h1 { color: #1a1a2e; font-size: 18pt; text-align: center; margin-bottom: 30px; }
+.header { text-align: right; margin-bottom: 30px; }
+.content { line-height: 1.8; }
+.footer { margin-top: 50px; text-align: right; }
+.document-title { font-size: 20pt; font-weight: bold; text-align: center; margin: 30px 0; }
+</style>
+</head>
+<body>
+<div class="header">
+    <p><strong>Д...
+✅ PDF создан, размер: 1862 байт
+📄 Подготовлены данные для PDF: {'full_name': 'Андрей Крылов', 'address': '', 'phone': '', 'email': 'dick@mal.ew', 'additional_info': '', 'conclusion_title': 'все ок ', 'conclusion_short': 'Введите текст вывода...', 'conclusion_full': '\nВы не можете приватизировать квартиру, так как она уже находится в частной собственности или вы не имеете права на приватизацию.\n\nОднако вы можете:\n\n1. Зарегистрировать право собственности в Росреестре, если у вас есть договор приватизации\n\n2. Обратиться в МФЦ для получения выписки из ЕГРН\n\n3. Если вы хотите продать квартиру - обратитесь к риелтору\n\nРекомендуем обратиться к юристу для консультации по вашему конкретному случаю.\n', 'current_date': '25.08.2026', 'current_year': '2026'}
+✅ Документ сохранен: document_22_14_20260825_210607.pdf
+🔍 user_result: conclusion_id=14
+🔍 title=все ок 
+🔍 user_data_fields=[{'name': 'full_name', 'label': 'ФИО', 'type': 'text', 'required': True}, {'name': 'address', 'label': 'Адрес', 'type': 'text', 'required': False}, {'name': 'phone', 'label': 'Телефон', 'type': 'tel', 'required': False}, {'name': 'email', 'label': 'Email', 'type': 'email', 'required': True}]
+🔍 type=<class 'list'>
+🔍 length=4
+🔍 user_result: conclusion_id=14
+🔍 title=все ок 
+🔍 user_data_fields=[{'name': 'full_name', 'label': 'ФИО', 'type': 'text', 'required': True}, {'name': 'address', 'label': 'Адрес', 'type': 'text', 'required': False}, {'name': 'phone', 'label': 'Телефон', 'type': 'tel', 'required': False}, {'name': 'email', 'label': 'Email', 'type': 'email', 'required': True}]
+🔍 type=<class 'list'>
+🔍 length=4
+📄 Подготовлены данные для PDF: {'full_name': 'Андрей Крылов', 'address': '', 'phone': '', 'email': 'dick@mal.ew', 'additional_info': '', 'conclusion_title': 'все ок ', 'conclusion_short': 'Введите текст вывода...', 'conclusion_full': '\nВы не можете приватизировать квартиру, так как она уже находится в частной собственности или вы не имеете права на приватизацию.\n\nОднако вы можете:\n\n1. Зарегистрировать право собственности в Росреестре, если у вас есть договор приватизации\n\n2. Обратиться в МФЦ для получения выписки из ЕГРН\n\n3. Если вы хотите продать квартиру - обратитесь к риелтору\n\nРекомендуем обратиться к юристу для консультации по вашему конкретному случаю.\n', 'current_date': '25.08.2026', 'current_year': '2026'}
+📄 HTML для PDF: 
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+body { font-family: Arial, sans-serif; font-size: 12pt; margin: 40px; }
+h1 { color: #1a1a2e; font-size: 18pt; text-align: center; margin-bottom: 30px; }
+.header { text-align: right; margin-bottom: 30px; }
+.content { line-height: 1.8; }
+.footer { margin-top: 50px; text-align: right; }
+.document-title { font-size: 20pt; font-weight: bold; text-align: center; margin: 30px 0; }
+</style>
+</head>
+<body>
+<div class="header">
+    <p><strong>Д...
+✅ PDF создан, размер: 1862 байт
+📄 Подготовлены данные для PDF: {'full_name': 'Андрей Крылов', 'address': '', 'phone': '', 'email': 'dick@mal.ew', 'additional_info': '', 'conclusion_title': 'все ок ', 'conclusion_short': 'Введите текст вывода...', 'conclusion_full': '\nВы не можете приватизировать квартиру, так как она уже находится в частной собственности или вы не имеете права на приватизацию.\n\nОднако вы можете:\n\n1. Зарегистрировать право собственности в Росреестре, если у вас есть договор приватизации\n\n2. Обратиться в МФЦ для получения выписки из ЕГРН\n\n3. Если вы хотите продать квартиру - обратитесь к риелтору\n\nРекомендуем обратиться к юристу для консультации по вашему конкретному случаю.\n', 'current_date': '25.08.2026', 'current_year': '2026'}
+✅ Документ сохранен: document_22_14_20260825_210614.pdf
+🔍 user_result: conclusion_id=14
+🔍 title=все ок 
+🔍 user_data_fields=[{'name': 'full_name', 'label': 'ФИО', 'type': 'text', 'required': True}, {'name': 'address', 'label': 'Адрес', 'type': 'text', 'required': False}, {'name': 'phone', 'label': 'Телефон', 'type': 'tel', 'required': False}, {'name': 'email', 'label': 'Email', 'type': 'email', 'required': True}]
+🔍 type=<class 'list'>
+🔍 length=4
+🔍 user_result: conclusion_id=14
+🔍 title=все ок 
+🔍 user_data_fields=[{'name': 'full_name', 'label': 'ФИО', 'type': 'text', 'required': True}, {'name': 'address', 'label': 'Адрес', 'type': 'text', 'required': False}, {'name': 'phone', 'label': 'Телефон', 'type': 'tel', 'required': False}, {'name': 'email', 'label': 'Email', 'type': 'email', 'required': True}]
+🔍 type=<class 'list'>
+🔍 length=4
+📄 Подготовлены данные для PDF: {'full_name': 'Андрей Крылов', 'address': 'wefr', 'phone': 'dsw', 'email': 'dick@mal.ew', 'additional_info': '', 'conclusion_title': 'все ок ', 'conclusion_short': 'Введите текст вывода...', 'conclusion_full': '\nВы не можете приватизировать квартиру, так как она уже находится в частной собственности или вы не имеете права на приватизацию.\n\nОднако вы можете:\n\n1. Зарегистрировать право собственности в Росреестре, если у вас есть договор приватизации\n\n2. Обратиться в МФЦ для получения выписки из ЕГРН\n\n3. Если вы хотите продать квартиру - обратитесь к риелтору\n\nРекомендуем обратиться к юристу для консультации по вашему конкретному случаю.\n', 'current_date': '25.08.2026', 'current_year': '2026'}
+📄 HTML для PDF: 
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+body { font-family: Arial, sans-serif; font-size: 12pt; margin: 40px; }
+h1 { color: #1a1a2e; font-size: 18pt; text-align: center; margin-bottom: 30px; }
+.header { text-align: right; margin-bottom: 30px; }
+.content { line-height: 1.8; }
+.footer { margin-top: 50px; text-align: right; }
+.document-title { font-size: 20pt; font-weight: bold; text-align: center; margin: 30px 0; }
+</style>
+</head>
+<body>
+<div class="header">
+    <p><strong>Д...
+✅ PDF создан, размер: 1862 байт
+📄 Подготовлены данные для PDF: {'full_name': 'Андрей Крылов', 'address': 'wefr', 'phone': 'dsw', 'email': 'dick@mal.ew', 'additional_info': '', 'conclusion_title': 'все ок ', 'conclusion_short': 'Введите текст вывода...', 'conclusion_full': '\nВы не можете приватизировать квартиру, так как она уже находится в частной собственности или вы не имеете права на приватизацию.\n\nОднако вы можете:\n\n1. Зарегистрировать право собственности в Росреестре, если у вас есть договор приватизации\n\n2. Обратиться в МФЦ для получения выписки из ЕГРН\n\n3. Если вы хотите продать квартиру - обратитесь к риелтору\n\nРекомендуем обратиться к юристу для консультации по вашему конкретному случаю.\n', 'current_date': '25.08.2026', 'current_year': '2026'}
+✅ Документ сохранен: document_22_14_20260825_210637.pdf
+🔍 user_result: conclusion_id=14
+🔍 title=все ок 
+🔍 user_data_fields=[{'name': 'full_name', 'label': 'ФИО', 'type': 'text', 'required': True}, {'name': 'address', 'label': 'Адрес', 'type': 'text', 'required': False}, {'name': 'phone', 'label': 'Телефон', 'type': 'tel', 'required': False}, {'name': 'email', 'label': 'Email', 'type': 'email', 'required': True}]
+🔍 type=<class 'list'>
+🔍 length=4
+Watching for file changes with StatReloader
+📄 Подготовлены данные для PDF: {'full_name': 'Андрей Крылов', 'address': 'wefr', 'phone': 'dsw', 'email': 'dick@mal.ew', 'additional_info': '', 'conclusion_title': 'все ок ', 'conclusion_short': 'Введите текст вывода...', 'conclusion_full': '\nВы не можете приватизировать квартиру, так как она уже находится в частной собственности или вы не имеете права на приватизацию.\n\nОднако вы можете:\n\n1. Зарегистрировать право собственности в Росреестре, если у вас есть договор приватизации\n\n2. Обратиться в МФЦ для получения выписки из ЕГРН\n\n3. Если вы хотите продать квартиру - обратитесь к риелтору\n\nРекомендуем обратиться к юристу для консультации по вашему конкретному случаю.\n', 'current_date': '25.08.2026', 'current_year': '2026'}
+📄 HTML для PDF: 
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+body { font-family: Arial, sans-serif; font-size: 12pt; margin: 40px; }
+h1 { color: #1a1a2e; font-size: 18pt; text-align: center; margin-bottom: 30px; }
+.header { text-align: right; margin-bottom: 30px; }
+.content { line-height: 1.8; }
+.footer { margin-top: 50px; text-align: right; }
+.document-title { font-size: 20pt; font-weight: bold; text-align: center; margin: 30px 0; }
+</style>
+</head>
+<body>
+<div class="header">
+    <p><strong>Д...
+✅ PDF создан, размер: 1862 байт
+📄 Подготовлены данные для PDF: {'full_name': 'Андрей Крылов', 'address': 'wefr', 'phone': 'dsw', 'email': 'dick@mal.ew', 'additional_info': '', 'conclusion_title': 'все ок ', 'conclusion_short': 'Введите текст вывода...', 'conclusion_full': '\nВы не можете приватизировать квартиру, так как она уже находится в частной собственности или вы не имеете права на приватизацию.\n\nОднако вы можете:\n\n1. Зарегистрировать право собственности в Росреестре, если у вас есть договор приватизации\n\n2. Обратиться в МФЦ для получения выписки из ЕГРН\n\n3. Если вы хотите продать квартиру - обратитесь к риелтору\n\nРекомендуем обратиться к юристу для консультации по вашему конкретному случаю.\n', 'current_date': '25.08.2026', 'current_year': '2026'}
+✅ Документ сохранен: document_22_14_20260825_210744.pdf
+🔍 user_result: conclusion_id=14
+🔍 title=все ок 
+🔍 user_data_fields=[{'name': 'full_name', 'label': 'ФИО', 'type': 'text', 'required': True}, {'name': 'address', 'label': 'Адрес', 'type': 'text', 'required': False}, {'name': 'phone', 'label': 'Телефон', 'type': 'tel', 'required': False}, {'name': 'email', 'label': 'Email', 'type': 'email', 'required': True}]
+🔍 type=<class 'list'>
+🔍 length=4
+📄 Подготовлены данные для PDF: {'full_name': 'Андрей Крылов', 'address': 'wefr', 'phone': 'dsw', 'email': 'dick@mal.ew', 'additional_info': '', 'conclusion_title': 'все ок ', 'conclusion_short': 'Введите текст вывода...', 'conclusion_full': '\nВы не можете приватизировать квартиру, так как она уже находится в частной собственности или вы не имеете права на приватизацию.\n\nОднако вы можете:\n\n1. Зарегистрировать право собственности в Росреестре, если у вас есть договор приватизации\n\n2. Обратиться в МФЦ для получения выписки из ЕГРН\n\n3. Если вы хотите продать квартиру - обратитесь к риелтору\n\nРекомендуем обратиться к юристу для консультации по вашему конкретному случаю.\n', 'current_date': '25.08.2026', 'current_year': '2026'}
+📄 HTML для PDF: 
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+body { font-family: Arial, sans-serif; font-size: 12pt; margin: 40px; }
+h1 { color: #1a1a2e; font-size: 18pt; text-align: center; margin-bottom: 30px; }
+.header { text-align: right; margin-bottom: 30px; }
+.content { line-height: 1.8; }
+.footer { margin-top: 50px; text-align: right; }
+.document-title { font-size: 20pt; font-weight: bold; text-align: center; margin: 30px 0; }
+</style>
+</head>
+<body>
+<div class="header">
+    <p><strong>Д...
+✅ PDF создан, размер: 1862 байт
+📄 Подготовлены данные для PDF: {'full_name': 'Андрей Крылов', 'address': 'wefr', 'phone': 'dsw', 'email': 'dick@mal.ew', 'additional_info': '', 'conclusion_title': 'все ок ', 'conclusion_short': 'Введите текст вывода...', 'conclusion_full': '\nВы не можете приватизировать квартиру, так как она уже находится в частной собственности или вы не имеете права на приватизацию.\n\nОднако вы можете:\n\n1. Зарегистрировать право собственности в Росреестре, если у вас есть договор приватизации\n\n2. Обратиться в МФЦ для получения выписки из ЕГРН\n\n3. Если вы хотите продать квартиру - обратитесь к риелтору\n\nРекомендуем обратиться к юристу для консультации по вашему конкретному случаю.\n', 'current_date': '25.08.2026', 'current_year': '2026'}
+✅ Документ сохранен: document_22_14_20260825_210823.pdf
+🔍 user_result: conclusion_id=14
+🔍 title=все ок 
+🔍 user_data_fields=[{'name': 'full_name', 'label': 'ФИО', 'type': 'text', 'required': True}, {'name': 'address', 'label': 'Адрес', 'type': 'text', 'required': False}, {'name': 'phone', 'label': 'Телефон', 'type': 'tel', 'required': False}, {'name': 'email', 'label': 'Email', 'type': 'email', 'required': True}]
+🔍 type=<class 'list'>
+🔍 length=4
+🔍 user_result: conclusion_id=14
+🔍 title=все ок 
+🔍 user_data_fields=[{'name': 'full_name', 'label': 'ФИО', 'type': 'text', 'required': True}, {'name': 'address', 'label': 'Адрес', 'type': 'text', 'required': False}, {'name': 'phone', 'label': 'Телефон', 'type': 'tel', 'required': False}, {'name': 'email', 'label': 'Email', 'type': 'email', 'required': True}]
+🔍 type=<class 'list'>
+🔍 length=4
+📄 Подготовлены данные для PDF: {'full_name': 'Андрей Крылов', 'address': 'wefr', 'phone': 'dsw', 'email': 'dick@mal.ew', 'additional_info': '', 'conclusion_title': 'все ок ', 'conclusion_short': 'Введите текст вывода...', 'conclusion_full': '\nВы не можете приватизировать квартиру, так как она уже находится в частной собственности или вы не имеете права на приватизацию.\n\nОднако вы можете:\n\n1. Зарегистрировать право собственности в Росреестре, если у вас есть договор приватизации\n\n2. Обратиться в МФЦ для получения выписки из ЕГРН\n\n3. Если вы хотите продать квартиру - обратитесь к риелтору\n\nРекомендуем обратиться к юристу для консультации по вашему конкретному случаю.\n', 'current_date': '26.08.2026', 'current_year': '2026'}
+📄 HTML для PDF: 
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+body { font-family: Arial, sans-serif; font-size: 12pt; margin: 40px; }
+h1 { color: #1a1a2e; font-size: 18pt; text-align: center; margin-bottom: 30px; }
+.header { text-align: right; margin-bottom: 30px; }
+.content { line-height: 1.8; }
+.footer { margin-top: 50px; text-align: right; }
+.document-title { font-size: 20pt; font-weight: bold; text-align: center; margin: 30px 0; }
+</style>
+</head>
+<body>
+<div class="header">
+    <p><strong>Д...
+✅ PDF создан, размер: 1862 байт
+📄 Подготовлены данные для PDF: {'full_name': 'Андрей Крылов', 'address': 'wefr', 'phone': 'dsw', 'email': 'dick@mal.ew', 'additional_info': '', 'conclusion_title': 'все ок ', 'conclusion_short': 'Введите текст вывода...', 'conclusion_full': '\nВы не можете приватизировать квартиру, так как она уже находится в частной собственности или вы не имеете права на приватизацию.\n\nОднако вы можете:\n\n1. Зарегистрировать право собственности в Росреестре, если у вас есть договор приватизации\n\n2. Обратиться в МФЦ для получения выписки из ЕГРН\n\n3. Если вы хотите продать квартиру - обратитесь к риелтору\n\nРекомендуем обратиться к юристу для консультации по вашему конкретному случаю.\n', 'current_date': '26.08.2026', 'current_year': '2026'}
+✅ Документ сохранен: document_22_14_20260826_063441.pdf
+🔍 user_result: conclusion_id=14
+🔍 title=все ок 
+🔍 user_data_fields=[{'name': 'full_name', 'label': 'ФИО', 'type': 'text', 'required': True}, {'name': 'address', 'label': 'Адрес', 'type': 'text', 'required': False}, {'name': 'phone', 'label': 'Телефон', 'type': 'tel', 'required': False}, {'name': 'email', 'label': 'Email', 'type': 'email', 'required': True}]
+🔍 type=<class 'list'>
+🔍 length=4
+📄 Подготовлены данные для PDF: {'full_name': 'andrei', 'address': 'wefr', 'phone': 'dsw', 'email': 'dick@mal.ew', 'additional_info': '', 'conclusion_title': 'все ок ', 'conclusion_short': 'Введите текст вывода...', 'conclusion_full': '\nВы не можете приватизировать квартиру, так как она уже находится в частной собственности или вы не имеете права на приватизацию.\n\nОднако вы можете:\n\n1. Зарегистрировать право собственности в Росреестре, если у вас есть договор приватизации\n\n2. Обратиться в МФЦ для получения выписки из ЕГРН\n\n3. Если вы хотите продать квартиру - обратитесь к риелтору\n\nРекомендуем обратиться к юристу для консультации по вашему конкретному случаю.\n', 'current_date': '26.08.2026', 'current_year': '2026'}
+📄 HTML для PDF: 
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+body { font-family: Arial, sans-serif; font-size: 12pt; margin: 40px; }
+h1 { color: #1a1a2e; font-size: 18pt; text-align: center; margin-bottom: 30px; }
+.header { text-align: right; margin-bottom: 30px; }
+.content { line-height: 1.8; }
+.footer { margin-top: 50px; text-align: right; }
+.document-title { font-size: 20pt; font-weight: bold; text-align: center; margin: 30px 0; }
+</style>
+</head>
+<body>
+<div class="header">
+    <p><strong>Д...
+✅ PDF создан, размер: 1862 байт
+📄 Подготовлены данные для PDF: {'full_name': 'andrei', 'address': 'wefr', 'phone': 'dsw', 'email': 'dick@mal.ew', 'additional_info': '', 'conclusion_title': 'все ок ', 'conclusion_short': 'Введите текст вывода...', 'conclusion_full': '\nВы не можете приватизировать квартиру, так как она уже находится в частной собственности или вы не имеете права на приватизацию.\n\nОднако вы можете:\n\n1. Зарегистрировать право собственности в Росреестре, если у вас есть договор приватизации\n\n2. Обратиться в МФЦ для получения выписки из ЕГРН\n\n3. Если вы хотите продать квартиру - обратитесь к риелтору\n\nРекомендуем обратиться к юристу для консультации по вашему конкретному случаю.\n', 'current_date': '26.08.2026', 'current_year': '2026'}
+✅ Документ сохранен: document_22_14_20260826_063517.pdf
+🔍 user_result: conclusion_id=14
+🔍 title=все ок 
+🔍 user_data_fields=[{'name': 'full_name', 'label': 'ФИО', 'type': 'text', 'required': True}, {'name': 'address', 'label': 'Адрес', 'type': 'text', 'required': False}, {'name': 'phone', 'label': 'Телефон', 'type': 'tel', 'required': False}, {'name': 'email', 'label': 'Email', 'type': 'email', 'required': True}]
+🔍 type=<class 'list'>
+🔍 length=4
+🔍 user_result: conclusion_id=14
+🔍 title=все ок 
+🔍 user_data_fields=[{'name': 'full_name', 'label': 'ФИО', 'type': 'text', 'required': True}, {'name': 'address', 'label': 'Адрес', 'type': 'text', 'required': False}, {'name': 'phone', 'label': 'Телефон', 'type': 'tel', 'required': False}, {'name': 'email', 'label': 'Email', 'type': 'email', 'required': True}]
+🔍 type=<class 'list'>
+🔍 length=4
+📄 Подготовлены данные для PDF: {'full_name': 'andrei', 'address': 'wefr', 'phone': 'dsw', 'email': 'dick@mal.ew', 'additional_info': '', 'conclusion_title': 'все ок ', 'conclusion_short': 'Введите текст вывода...', 'conclusion_full': '\nВы не можете приватизировать квартиру, так как она уже находится в частной собственности или вы не имеете права на приватизацию.\n\nОднако вы можете:\n\n1. Зарегистрировать право собственности в Росреестре, если у вас есть договор приватизации\n\n2. Обратиться в МФЦ для получения выписки из ЕГРН\n\n3. Если вы хотите продать квартиру - обратитесь к риелтору\n\nРекомендуем обратиться к юристу для консультации по вашему конкретному случаю.\n', 'current_date': '26.08.2026', 'current_year': '2026'}
+📄 HTML для PDF: 
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+body { font-family: Arial, sans-serif; font-size: 12pt; margin: 40px; }
+h1 { color: #1a1a2e; font-size: 18pt; text-align: center; margin-bottom: 30px; }
+.header { text-align: right; margin-bottom: 30px; }
+.content { line-height: 1.8; }
+.footer { margin-top: 50px; text-align: right; }
+.document-title { font-size: 20pt; font-weight: bold; text-align: center; margin: 30px 0; }
+</style>
+</head>
+<body>
+<div class="header">
+    <p><strong>Д...
+✅ PDF создан, размер: 1862 байт
+📄 Подготовлены данные для PDF: {'full_name': 'andrei', 'address': 'wefr', 'phone': 'dsw', 'email': 'dick@mal.ew', 'additional_info': '', 'conclusion_title': 'все ок ', 'conclusion_short': 'Введите текст вывода...', 'conclusion_full': '\nВы не можете приватизировать квартиру, так как она уже находится в частной собственности или вы не имеете права на приватизацию.\n\nОднако вы можете:\n\n1. Зарегистрировать право собственности в Росреестре, если у вас есть договор приватизации\n\n2. Обратиться в МФЦ для получения выписки из ЕГРН\n\n3. Если вы хотите продать квартиру - обратитесь к риелтору\n\nРекомендуем обратиться к юристу для консультации по вашему конкретному случаю.\n', 'current_date': '26.08.2026', 'current_year': '2026'}
+✅ Документ сохранен: document_22_14_20260826_063719.pdf
+🔍 user_result: conclusion_id=14
+🔍 title=все ок 
+🔍 user_data_fields=[{'name': 'full_name', 'label': 'ФИО', 'type': 'text', 'required': True}, {'name': 'address', 'label': 'Адрес', 'type': 'text', 'required': False}, {'name': 'phone', 'label': 'Телефон', 'type': 'tel', 'required': False}, {'name': 'email', 'label': 'Email', 'type': 'email', 'required': True}]
+🔍 type=<class 'list'>
+🔍 length=4
+/Users/andrejkrylov/Desktop/fist/legal_consultant/legal_consultant/core/pdf_generator.py changed, reloading.
+Watching for file changes with StatReloader
+📄 generate_document_for_user вызван
+📄 Вывод: все ок  (ID: 14)
+📄 Данные пользователя: {'full_name': 'andrei', 'address': 'wefr', 'phone': 'dsw', 'email': 'dick@mal.ew'}
+📄 Подготовлены данные для PDF: {'full_name': 'andrei', 'address': 'wefr', 'phone': 'dsw', 'email': 'dick@mal.ew', 'additional_info': '', 'conclusion_title': 'все ок ', 'conclusion_short': 'Введите текст вывода...', 'conclusion_full': '\nВы не можете приватизировать квартиру, так как она уже находится в частной собственности или вы не имеете права на приватизацию.\n\nОднако вы можете:\n\n1. Зарегистрировать право собственности в Росреестре, если у вас есть договор приватизации\n\n2. Обратиться в МФЦ для получения выписки из ЕГРН\n\n3. Если вы хотите продать квартиру - обратитесь к риелтору\n\nРекомендуем обратиться к юристу для консультации по вашему конкретному случаю.\n', 'current_date': '26.08.2026', 'current_year': '2026'}
+✅ PDF создан, размер: 2365 байт
+✅ Документ сохранен: document_22_14_20260826_063815.pdf
+🔍 user_result: conclusion_id=14
+🔍 title=все ок 
+🔍 user_data_fields=[{'name': 'full_name', 'label': 'ФИО', 'type': 'text', 'required': True}, {'name': 'address', 'label': 'Адрес', 'type': 'text', 'required': False}, {'name': 'phone', 'label': 'Телефон', 'type': 'tel', 'required': False}, {'name': 'email', 'label': 'Email', 'type': 'email', 'required': True}]
+🔍 type=<class 'list'>
+🔍 length=4
+/Users/andrejkrylov/Desktop/fist/legal_consultant/legal_consultant/core/pdf_generator.py changed, reloading.
+Watching for file changes with StatReloader
+✅ Шрифт загружен: /System/Library/Fonts/Supplemental/Arial.ttf
+📄 generate_document_for_user вызван
+📄 Вывод: все ок  (ID: 14)
+📄 Данные пользователя: {'full_name': 'andrei', 'address': 'wefr', 'phone': 'dsw', 'email': 'dick@mal.ew'}
+📄 Подготовлены данные для PDF: {'full_name': 'andrei', 'address': 'wefr', 'phone': 'dsw', 'email': 'dick@mal.ew', 'additional_info': '', 'conclusion_title': 'все ок ', 'conclusion_short': 'Введите текст вывода...', 'conclusion_full': '\nВы не можете приватизировать квартиру, так как она уже находится в частной собственности или вы не имеете права на приватизацию.\n\nОднако вы можете:\n\n1. Зарегистрировать право собственности в Росреестре, если у вас есть договор приватизации\n\n2. Обратиться в МФЦ для получения выписки из ЕГРН\n\n3. Если вы хотите продать квартиру - обратитесь к риелтору\n\nРекомендуем обратиться к юристу для консультации по вашему конкретному случаю.\n', 'current_date': '26.08.2026', 'current_year': '2026'}
+✅ PDF создан, размер: 43749 байт
+✅ Документ сохранен: document_22_14_20260826_064215.pdf
+🔍 user_result: conclusion_id=14
+🔍 title=все ок 
+🔍 user_data_fields=[{'name': 'full_name', 'label': 'ФИО', 'type': 'text', 'required': True}, {'name': 'address', 'label': 'Адрес', 'type': 'text', 'required': False}, {'name': 'phone', 'label': 'Телефон', 'type': 'tel', 'required': False}, {'name': 'email', 'label': 'Email', 'type': 'email', 'required': True}]
+🔍 type=<class 'list'>
+🔍 length=4

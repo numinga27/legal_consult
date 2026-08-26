@@ -1,66 +1,84 @@
-#!/usr/bin/env python
-"""
-Тестирование YandexGPT
-Запуск: python test_yandex.py
-"""
-
-import os
-import sys
-import django
-
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'legal_consultant.settings')
-django.setup()
-
-from core.ai_integration import get_ai_consultant
-
-def test_yandex():
-    """Тестирует YandexGPT"""
-    
-    print("=" * 60)
-    print("ТЕСТИРОВАНИЕ YANDEXGPT")
-    print("=" * 60)
-    
-    # Создаем AI консультанта с YandexGPT
-    print("\n🔄 Создание AI консультанта...")
-    ai = get_ai_consultant('yandex')
-    print(f"   ✅ AI консультант создан (тип: {ai.api_type})")
-    
-    print("\n🔄 Отправка запроса к YandexGPT...")
-    
+def generate(self) -> bytes:
+    """Генерирует PDF с подставленными данными"""
     try:
-        result = ai.generate_questionnaire(
-            topic='Отмена судебного приказа',
-            category='family_law',
-            instructions='Создай подробный опросник'
+        data = self._prepare_data()
+        html_content = self._render_html(data)
+        
+        logger.info(f"📄 HTML для PDF (первые 500 символов): {html_content[:500]}...")
+        
+        # Добавляем правильную кодировку и шрифты для кириллицы
+        full_html = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+            <style>
+                @page {{
+                    size: A4;
+                    margin: 2cm;
+                }}
+                body {{ 
+                    font-family: 'DejaVu Sans', 'Arial', sans-serif; 
+                    font-size: 12pt; 
+                    margin: 40px;
+                    color: #1a1a2e;
+                }}
+                h1 {{ 
+                    color: #1a1a2e; 
+                    font-size: 18pt; 
+                    text-align: center; 
+                    margin-bottom: 30px;
+                }}
+                .header {{ 
+                    text-align: right; 
+                    margin-bottom: 30px;
+                }}
+                .content {{ 
+                    line-height: 1.8;
+                }}
+                .footer {{ 
+                    margin-top: 50px; 
+                    text-align: right;
+                }}
+                p {{ 
+                    margin: 5px 0;
+                }}
+                .document-title {{ 
+                    font-size: 20pt; 
+                    font-weight: bold; 
+                    text-align: center; 
+                    margin: 30px 0;
+                }}
+                .field-label {{ 
+                    font-weight: bold;
+                }}
+            </style>
+        </head>
+        <body>
+            {html_content}
+        </body>
+        </html>
+        """
+        
+        buffer = io.BytesIO()
+        
+        # Создаем PDF с правильной кодировкой
+        pisa_status = pisa.CreatePDF(
+            full_html,
+            dest=buffer,
+            encoding='utf-8',
+            link_callback=None
         )
         
-        print("\n📊 РЕЗУЛЬТАТ:")
-        print("-" * 40)
+        if pisa_status.err:
+            logger.error(f"❌ Ошибка при создании PDF: {pisa_status.err}")
+            raise Exception(f"Ошибка при создании PDF: {pisa_status.err}")
         
-        if result and result.get('questions'):
-            print(f"✅ YandexGPT работает!")
-            print(f"   Вопросов: {len(result['questions'])}")
-            print(f"   Выводов: {len(result.get('conclusions', []))}")
-            print("\n📋 Пример вопроса:")
-            if result['questions']:
-                print(f"   {result['questions'][0]['text']}")
-                if result['questions'][0].get('answers'):
-                    print("   Варианты ответов:")
-                    for ans in result['questions'][0]['answers']:
-                        print(f"     - {ans['text']}")
-        else:
-            print("❌ YandexGPT не вернул данные")
-            print(f"   Ответ: {result}")
-            
+        pdf_bytes = buffer.getvalue()
+        logger.info(f"✅ PDF создан, размер: {len(pdf_bytes)} байт")
+        return pdf_bytes
+        
     except Exception as e:
-        print(f"\n❌ ОШИБКА:")
-        print(f"   {e}")
-        import traceback
-        traceback.print_exc()
-    
-    print("\n" + "=" * 60)
-    print("ТЕСТ ЗАВЕРШЕН")
-    print("=" * 60)
-
-if __name__ == '__main__':
-    test_yandex()
+        logger.error(f"❌ PDF generation error: {e}")
+        raise

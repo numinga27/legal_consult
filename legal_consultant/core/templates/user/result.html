@@ -278,7 +278,7 @@
         </div>
         <p class="text-muted">Заполните поля, чтобы получить персонализированные юридические документы</p>
         
-        <!-- Передаем данные через json_script -->
+        <!-- Передаем поля через json_script -->
         {{ conclusion.user_data_fields|json_script:"user-data-fields" }}
         
         <form id="userDataForm">
@@ -411,17 +411,15 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             fields = JSON.parse(fieldsElement.textContent);
             console.log('🚀 [FIELDS] Получены поля из json_script:', fields);
+            console.log('🚀 [FIELDS] Количество:', fields.length);
         } catch(e) {
             console.error('❌ [ERROR] Ошибка парсинга JSON:', e);
             fields = [];
         }
     } else {
         console.error('❌ [ERROR] Элемент user-data-fields не найден');
+        fields = [];
     }
-    
-    console.log('🚀 [FIELDS] Тип:', typeof fields);
-    console.log('🚀 [FIELDS] Длина:', fields ? fields.length : 0);
-    console.log('🚀 [FIELDS] JSON:', JSON.stringify(fields));
     
     var container = document.getElementById('dynamicFields');
     var form = document.getElementById('userDataForm');
@@ -569,8 +567,31 @@ document.addEventListener('DOMContentLoaded', function() {
         saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Генерация...';
         statusDiv.style.display = 'none';
         
-        var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+        // Получаем CSRF токен
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        var csrfToken = getCookie('csrftoken');
         console.log('🔑 [CSRF] Токен:', csrfToken ? 'Найден' : 'НЕ НАЙДЕН');
+        
+        if (!csrfToken) {
+            alert('❌ Ошибка: CSRF токен не найден. Обновите страницу и попробуйте снова.');
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Сгенерировать документ';
+            return;
+        }
         
         var requestData = {
             conclusion_id: {{ conclusion.id }},
@@ -590,6 +611,12 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(function(response) {
             console.log('📥 [RESPONSE] Статус:', response.status);
+            if (response.status === 403) {
+                throw new Error('CSRF ошибка. Обновите страницу и попробуйте снова.');
+            }
+            if (!response.ok) {
+                throw new Error('Ошибка сервера: ' + response.status);
+            }
             return response.json();
         })
         .then(function(data) {
@@ -607,8 +634,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                     </div>
                 `;
-                saveBtn.disabled = false;
-                saveBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Сгенерировать документ';
+                // Обновляем страницу через 3 секунды
+                setTimeout(function() {
+                    window.location.reload();
+                }, 3000);
             } else {
                 statusDiv.style.display = 'block';
                 statusDiv.innerHTML = `
@@ -617,9 +646,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         Ошибка: ${data.error || 'Неизвестная ошибка'}
                     </div>
                 `;
-                saveBtn.disabled = false;
-                saveBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Сгенерировать документ';
             }
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Сгенерировать документ';
         })
         .catch(function(error) {
             console.error('❌ [ERROR] Ошибка:', error);
@@ -628,6 +657,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="alert alert-danger">
                     <i class="fas fa-exclamation-circle"></i> 
                     Ошибка: ${error.message}
+                    <br>
+                    <small class="text-muted">Попробуйте обновить страницу и повторить попытку.</small>
                 </div>
             `;
             saveBtn.disabled = false;
@@ -657,14 +688,13 @@ function updateTotalPrice() {
     document.getElementById('totalPrice').textContent = total + ' ₽';
 }
 
-// Инициализация оплаты
+// Инициализация
 document.addEventListener('DOMContentLoaded', function() {
     var firstOption = document.querySelector('.payment-option');
     if (firstOption) {
         firstOption.classList.add('selected');
     }
     
-    // Предзаполняем email из сохраненных данных
     try {
         var savedData = JSON.parse(localStorage.getItem('userDocumentData') || '{}');
         if (savedData.email) {

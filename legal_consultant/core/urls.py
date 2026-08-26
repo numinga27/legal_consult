@@ -23,6 +23,7 @@ urlpatterns = [
     path('api/test-rules/', views.api_test_rules, name='api_test_rules'),
     path('admin-generate-ai/', views.admin_generate_with_ai, name='admin_generate_ai'),
     path('', views.user_select_problem, name='user_select_problem'),
+    path('api/generate-document/', views.api_generate_document, name='api_generate_document'),
     path('questionnaire/<int:q_id>/', views.user_questionnaire, name='user_questionnaire'),
     path('api/get-next-question/', views.api_get_next_question, name='api_get_next_question'),
     path('result/<int:conclusion_id>/', views.user_result, name='user_result'),
