@@ -5,6 +5,7 @@ from django.http import JsonResponse, FileResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
 from django.utils import timezone
+from django.db.models import Exists, OuterRef, Prefetch
 import json
 import logging
 from datetime import datetime
@@ -345,44 +346,20 @@ def admin_test_rules(request):
 # ============ ПОЛЬЗОВАТЕЛЬСКАЯ ЧАСТЬ ============
 
 def user_select_problem(request):
-    """Страница выбора юридической проблемы"""
-    directions = LegalDirection.objects.prefetch_related('questionnaires').all()
-    
-    if not directions.exists():
-        direction = LegalDirection.objects.create(
-            name='Тестовое направление',
-            description='Для проверки работы сервиса',
-            icon='balance-scale'
-        )
-        questionnaire = Questionnaire.objects.create(
-            direction=direction,
-            name='Тестовый опросник',
-            description='Проверка работы',
-            is_active=True
-        )
-        question = Question.objects.create(
-            questionnaire=questionnaire,
-            order=1,
-            text='Это тестовый вопрос?'
-        )
-        answer = Answer.objects.create(
-            question=question,
-            text='Да',
-            intermediate_text='Вы выбрали "Да"',
-            is_final=True
-        )
-        conclusion = Conclusion.objects.create(
-            questionnaire=questionnaire,
-            order=1,
-            title='Тестовый вывод',
-            short_text='Это тестовый вывод. Все работает!',
-            full_text='Полная консультация для теста.',
-            success_rate=100,
-            price=0
-        )
-        AnswerConclusion.objects.create(answer=answer, conclusion=conclusion)
-        directions = LegalDirection.objects.prefetch_related('questionnaires').all()
-    
+    """Показываем темы без создания тестовых данных при посещении страницы."""
+    questionnaires = Questionnaire.objects.filter(
+        is_active=True, questions__isnull=False, conclusions__isnull=False,
+    ).distinct()
+    directions = (
+        LegalDirection.objects.filter(is_active=True)
+        .annotate(has_available_questionnaires=Exists(
+            questionnaires.filter(direction_id=OuterRef('pk'))
+        ))
+        .order_by('-has_available_questionnaires', 'name')
+        .prefetch_related(Prefetch(
+            'questionnaires', queryset=questionnaires, to_attr='available_questionnaires'
+        ))
+    )
     return render(request, 'user/select_problem.html', {'directions': directions})
 
 
