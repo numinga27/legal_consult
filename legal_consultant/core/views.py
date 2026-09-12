@@ -17,6 +17,16 @@ from .models import (
 )
 from .pdf_generator import generate_document_for_user
 from .ai_integration import get_ai_consultant
+from .guided_views import imported
+from django.urls import reverse
+
+
+def imported_editor_redirect(questionnaire):
+    return redirect(reverse('core:import_questionnaire') + f'?q={questionnaire.id}')
+
+
+def imported_legacy_error():
+    return JsonResponse({'error': 'Для импортированного опросника используйте новый интерфейс прохождения и импорта.'}, status=409)
 
 logger = logging.getLogger(__name__)
 
@@ -140,6 +150,8 @@ def admin_add_questionnaire(request):
 def admin_questionnaire(request, q_id):
     """Редактирование опросника"""
     questionnaire = get_object_or_404(Questionnaire, id=q_id)
+    if imported(questionnaire):
+        return imported_editor_redirect(questionnaire)
     questions = Question.objects.filter(questionnaire=questionnaire).order_by('order')
     conclusions = Conclusion.objects.filter(questionnaire=questionnaire).order_by('order')
     all_questions = questions
@@ -233,6 +245,8 @@ def admin_questionnaire(request, q_id):
 def admin_delete_question(request, q_id):
     """Удаление вопроса"""
     question = get_object_or_404(Question, id=q_id)
+    if imported(question.questionnaire):
+        return imported_legacy_error()
     questionnaire_id = question.questionnaire.id
     question.delete()
     messages.success(request, 'Вопрос удален!')
@@ -243,6 +257,8 @@ def admin_delete_question(request, q_id):
 def admin_delete_answer(request, a_id):
     """Удаление ответа"""
     answer = get_object_or_404(Answer, id=a_id)
+    if imported(answer.question.questionnaire):
+        return imported_legacy_error()
     questionnaire_id = answer.question.questionnaire.id
     answer.delete()
     messages.success(request, 'Ответ удален!')
@@ -366,6 +382,8 @@ def user_select_problem(request):
 def user_questionnaire(request, q_id):
     """Страница прохождения опросника"""
     questionnaire = get_object_or_404(Questionnaire, id=q_id, is_active=True)
+    if imported(questionnaire):
+        return redirect('core:guided_questionnaire', q_id=q_id)
     
     session_key = request.session.session_key
     if not session_key:
@@ -409,6 +427,8 @@ def user_result(request, conclusion_id):
     logger = logging.getLogger(__name__)
     
     conclusion = get_object_or_404(Conclusion, id=conclusion_id)
+    if imported(conclusion.questionnaire):
+        return redirect('core:guided_questionnaire', q_id=conclusion.questionnaire_id)
     
     # Отладочная информация
     logger.info(f"🔍 user_result: conclusion_id={conclusion_id}")
@@ -435,6 +455,8 @@ def user_result(request, conclusion_id):
 def user_payment(request, conclusion_id):
     """Страница оплаты"""
     conclusion = get_object_or_404(Conclusion, id=conclusion_id)
+    if imported(conclusion.questionnaire):
+        return imported_legacy_error()
     
     if request.method == 'POST':
         email = request.POST.get('email', '').strip()
@@ -510,6 +532,8 @@ def api_get_next_question(request):
         session_id = data.get('session_id')
         
         answer = get_object_or_404(Answer, id=answer_id)
+        if imported(answer.question.questionnaire):
+            return imported_legacy_error()
         user_session = get_object_or_404(UserSession, id=session_id)
         
         history = user_session.answers_history or []
@@ -566,6 +590,8 @@ def api_questionnaire_data(request, q_id):
     """API для получения данных опросника"""
     try:
         questionnaire = get_object_or_404(Questionnaire, id=q_id)
+        if imported(questionnaire):
+            return imported_legacy_error()
         questions = Question.objects.filter(questionnaire=questionnaire).order_by('order')
         
         data = {
@@ -617,6 +643,8 @@ def api_check_answer(request):
             return JsonResponse({'error': 'ID ответа не указан'}, status=400)
         
         answer = get_object_or_404(Answer, id=answer_id)
+        if imported(answer.question.questionnaire):
+            return imported_legacy_error()
         
         if session_id:
             try:
@@ -773,6 +801,8 @@ def api_generate_document(request):
             return JsonResponse({'error': 'ID вывода не указан'}, status=400)
         
         conclusion = get_object_or_404(Conclusion, id=conclusion_id)
+        if imported(conclusion.questionnaire):
+            return imported_legacy_error()
         
         session_key = request.session.session_key
         if not session_key:
@@ -878,6 +908,8 @@ def api_save_workflow(request):
         workflow = data.get('workflow', {})
         
         questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
+        if imported(questionnaire):
+            return imported_legacy_error()
         
         # Сохраняем workflow в JSON поле
         questionnaire.workflow = workflow
@@ -1026,6 +1058,8 @@ def api_save_workflow(request):
 def visual_editor(request, q_id):
     """Визуальный редактор алгоритмов"""
     questionnaire = get_object_or_404(Questionnaire, id=q_id)
+    if imported(questionnaire):
+        return imported_editor_redirect(questionnaire)
     return render(request, 'admin/visual_editor.html', {
         'questionnaire': questionnaire
     })    
@@ -1035,6 +1069,8 @@ def api_load_workflow(request, q_id):
     """API для загрузки сохраненного алгоритма"""
     try:
         questionnaire = get_object_or_404(Questionnaire, id=q_id)
+        if imported(questionnaire) and not request.user.is_staff:
+            return JsonResponse({'error': 'Доступ только администратору.'}, status=403)
         workflow = questionnaire.workflow or {}
         return JsonResponse({
             'success': True,
@@ -1063,6 +1099,8 @@ def api_sync_workflow(request):
         logger.info(f"Connections: {len(workflow.get('connections', []))}")
         
         questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
+        if imported(questionnaire):
+            return imported_legacy_error()
         
         # Проверяем, есть ли данные
         if not workflow.get('nodes'):

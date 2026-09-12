@@ -1,9 +1,12 @@
 from django.urls import path
 from . import views
+from . import import_views, guided_views
 
 app_name = 'core'
 
 urlpatterns = [
+    path('admin-import/', import_views.import_questionnaire, name='import_questionnaire'),
+    path('guided/<int:q_id>/', guided_views.guided_questionnaire, name='guided_questionnaire'),
     # Админ-панель
     path('admin-login/', views.admin_login, name='admin_login'),
     path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard'),
