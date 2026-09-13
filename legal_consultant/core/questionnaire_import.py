@@ -201,6 +201,10 @@ def validate_package(package):
     errors = []
     if not isinstance(package, dict) or package.get('format') != FORMAT:
         return ['Неподдерживаемый формат импорта.']
+    prices = package.get('offer_prices', ['', '', ''])
+    if (not isinstance(prices, list) or len(prices) != 3 or
+            any(not isinstance(price, str) or (price != '' and not re.fullmatch(r'[1-9][0-9]{0,6}', price)) for price in prices)):
+        errors.append('Укажите три цены пакетов: целые рубли от 1 до 9999999 или пустое поле.')
     nodes, results = package.get('nodes'), package.get('conclusions')
     if not isinstance(nodes, dict) or not isinstance(results, dict) or not nodes or not results:
         return ['Нужны вопросы и результаты.']

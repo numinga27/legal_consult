@@ -64,6 +64,12 @@ class SourceParserTests(SimpleTestCase):
         self.assertTrue(validate_package(package))
         self.assertEqual(package['nodes']['q']['answers'][1]['target'], '')
 
+    def test_invalid_bundle_prices_are_rejected(self):
+        for prices in [None, [], ['298', '498'], ['-1', '0', 'foo'], ['1.5', '2', '3'], [298, 498, 697]]:
+            package = example()
+            package['offer_prices'] = prices
+            self.assertTrue(validate_package(package), prices)
+
     def test_conflicting_arrows_require_explicit_resolution(self):
         graph = GRAPH.replace('</root>', '<mxCell id="e3" edge="1" source="q" target="c2" value="Да"/></root>')
         package = prepare_import(graph.encode(), word_bytes(WORD), 'Пример')
@@ -168,6 +174,9 @@ class ImportedQuestionnaireTests(TestCase):
                 self.assertNotContains(response, 'Продолжить')
                 self.assertNotContains(response, 'Что это значит для вас')
             self.assertEqual(response.context['result']['title'], self.package['conclusions'][expected]['title'])
+            self.assertContains(response, 'Краткий вывод:')
+            self.assertContains(response, 'Получить помощь', count=3)
+            self.assertEqual([offer['price'] for offer in response.context['offers']], ['298', '498', '697'])
             self.assertNotIn('full_text', response.context['result'])
             self.assertNotContains(response, self.package['conclusions'][expected]['full_text'].split('\n\n')[0])
             reached.add(expected)
@@ -192,8 +201,8 @@ class ImportedQuestionnaireTests(TestCase):
         self.post_action('answer', answer=1)
         response = self.client.get(self.url)
         self.assertContains(response, 'Пройти опрос заново')
-        self.assertLess(response.content.index('Пройти опрос заново'.encode()),
-                        response.content.index('Ваша бесплатная оценка'.encode()))
+        self.assertLess(response.content.index('Краткий вывод:'.encode()),
+                        response.content.index('Пройти опрос заново'.encode()))
         response = self.client.post(self.url, {'action': 'restart', 'revision': 0}, follow=True)
         self.assertIsNone(response.context['result'])
         self.assertEqual(response.context['node']['code'], '1')
@@ -252,6 +261,34 @@ class ImportedQuestionnaireTests(TestCase):
         self.assertContains(response, 'Бесплатно один.')
         self.assertNotContains(response, 'Платно один.')
         self.assertNotContains(response, 'Объяснение да.')
+        self.assertContains(response, 'Цена уточняется', count=3)
+
+    def test_reference_result_has_exact_bundles_without_creating_a_payment(self):
+        self.client.get(self.url)
+        response = self.post_action('answer', answer=1)
+        self.assertContains(response, 'Судебный приказ можно отменить с вероятностью 100%!')
+        self.assertContains(response, 'Причина: срок в 10 дней на обжалование приказа не пропущен.')
+        for text in ['Правовая оценка ситуации', 'Документальное сопровождение', 'Максимальная помощь', '298 ₽', '498 ₽', '697 ₽']:
+            self.assertContains(response, text, count=1)
+        self.assertEqual([list(offer['services']) for offer in response.context['offers']], [
+            ['Консультация', 'Пошаговый план действий'],
+            ['Пошаговый план действий', 'Подготовка документов'],
+            ['Консультация', 'Пошаговый план действий', 'Подготовка документов'],
+        ])
+        self.assertContains(response, 'disabled aria-describedby="payment-status"', count=3)
+        self.assertEqual(Payment.objects.count(), 0)
+
+    def test_owner_can_set_bundle_prices_for_future_import_and_export_them(self):
+        user = get_user_model().objects.create_user(username='price-editor', is_staff=True)
+        self.client.force_login(user)
+        url = reverse('core:import_questionnaire')
+        self.client.post(url, {'action': 'analyze', 'name': 'Новый импорт',
+            'graph': SimpleUploadedFile('graph.drawio', GRAPH.encode()),
+            'word': SimpleUploadedFile('text.docx', word_bytes(WORD))})
+        response = self.post_import({'action': 'download', 'offer_price_0': '300', 'offer_price_1': '500', 'offer_price_2': '700'})
+        package = json.loads(response.content)
+        self.assertEqual(package['offer_prices'], ['300', '500', '700'])
+        self.assertEqual(package['conclusions']['1']['source_prices'], ['99', '199', '299'])
 
     def test_private_drafts_csrf_and_anonymous_session_isolation(self):
         self.client.get(self.url)

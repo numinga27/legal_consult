@@ -1,18 +1,21 @@
 {% load static %}<!doctype html>
 <html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{{ questionnaire.name }} — Карманный юрист</title><link rel="stylesheet" href="{% static 'css/guided.css' %}"></head>
-<body><a class="skip" href="#main">К содержанию</a>
+<title>{{ questionnaire.name }} — Карманный юрист</title><link rel="stylesheet" href="{% static 'css/guided.css' %}?v=20260913-result"></head>
+<body{% if result %} class="result-page"{% endif %}><a class="skip" href="#main">К содержанию</a>
 <header class="top"><a class="brand" href="{% url 'core:user_select_problem' %}"><span class="brand-icon">§</span> Карманный юрист</a><a href="{% url 'core:user_select_problem' %}#topics">Все темы ↗</a></header>
 <main class="journey" id="main">
 <p class="eyebrow">{{ questionnaire.name }}</p>
 {% if not questionnaire.is_active %}<p class="notice">Предпросмотр владельца. Опросник ещё не опубликован.</p>{% endif %}
 <div class="stages" aria-label="Этапы"><span class="{% if not result %}current{% endif %}">01 · Ваша ситуация</span><span class="{% if result %}current{% endif %}">02 · Оценка</span><span>03 · Помощь</span></div>
 {% if result %}
-<div class="notice"><p>Опрос завершён. Обновление страницы сохраняет этот результат. Чтобы проверить другую ситуацию, начните новое прохождение.</p><form method="post">{% csrf_token %}<input type="hidden" name="revision" value="{{ state.revision }}"><button class="primary" name="action" value="restart">Пройти опрос заново →</button></form></div>
-<section class="panel result"><p class="eyebrow">Ваша бесплатная оценка</p><h1>{{ result.title }}</h1><div class="prose">{{ result.short_text|linebreaks }}</div></section>
-<section class="help-section"><h2>Помощь со следующим шагом</h2><p>При необходимости можно дополнить оценку консультацией, планом действий и документами.</p>
-<div class="help-grid"><article><span>01</span><h3>Консультация</h3><p>Подробный разбор вашей ситуации.</p></article><article><span>02</span><h3>План действий</h3><p>Что делать и в каком порядке.</p></article><article><span>03</span><h3>Документы</h3><p>Материалы для решения вашей задачи.</p></article></div>
-<p class="notice">Заказ дополнительной помощи пока недоступен.</p></section>
+<section class="reference-result" aria-label="Ваша бесплатная оценка"><h1>Краткий вывод:</h1><div class="result-copy"><p>{{ result.title }}</p>{{ result.short_text|linebreaks }}</div></section>
+<section class="help-section" aria-label="Пакеты платной помощи"><p class="offer-intro">Чтобы получить электронный доступ выберите из списка требуемых услуг:</p>
+<div class="reference-offers">{% for offer in offers %}<article class="reference-offer">
+<span class="offer-icon" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">{% if offer.icon == 'consultation' %}<path d="M18 18c-2 3-7 4-10 2l-4 2 1-5C0 9 7 4 13 5c6 0 9 5 7 9"/><path d="M29 21c0-5-4-8-9-8s-8 3-8 7 4 7 8 7h3l5 3-1-5z"/><path d="M8 12h1m4 0h1m4 7h1m4 0h1"/>{% elif offer.icon == 'plan' %}<path d="M12 7h16M12 16h16M12 25h16M4 6l2-1v5M3 15c1-3 5-2 4 0l-4 4h5M3 24c4-3 6 2 2 2 4 0 3 4-2 2"/>{% else %}<path d="M8 3h13l6 6v19H8zM21 3v7h6M4 8v23h18M12 14h11M12 19h11M12 24h8"/>{% endif %}</svg></span>
+<h2>{{ offer.title }}</h2><ul>{% for service in offer.services %}<li>{{ service }}</li>{% endfor %}</ul>
+<p class="offer-price">{% if offer.price %}{{ offer.price }} ₽{% else %}Цена уточняется{% endif %}</p><button type="button" class="offer-button" disabled aria-describedby="payment-status">Получить помощь</button>
+</article>{% endfor %}</div><p class="payment-status" id="payment-status">Оплата пока не подключена. Выбор и покупка пакетов станут доступны после её подключения.</p></section>
+<form method="post" class="result-restart">{% csrf_token %}<input type="hidden" name="revision" value="{{ state.revision }}"><button class="text-button" name="action" value="restart">Пройти опрос заново →</button></form>
 {% else %}
 <section class="panel"><p class="step">Вопрос {{ step }}</p>
 <h1>{{ node.text }}</h1>

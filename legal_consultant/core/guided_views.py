@@ -6,6 +6,7 @@ from django.views.decorators.http import require_http_methods
 
 from .models import Questionnaire
 from .questionnaire_import import FORMAT
+from .paid_help import help_offers
 
 
 def imported(questionnaire):
@@ -89,11 +90,12 @@ def guided_questionnaire(request, q_id):
     node, result = None, None
     if current.startswith('result:'):
         source = package['conclusions'][current[7:]]
-        # Paid text and unassigned prices never leave the server in the public result.
+        # Paid text and unassigned Word prices never leave the server in the public result.
         result = {key: source[key] for key in ['title', 'short_text']}
     else:
         node = package['nodes'][current]
     return render(request, 'user/guided_questionnaire.html', {
         'questionnaire': questionnaire, 'state': state, 'node': node, 'result': result,
         'step': len(history) + 1, 'can_back': bool(history),
+        'offers': help_offers(package) if result else [],
     })

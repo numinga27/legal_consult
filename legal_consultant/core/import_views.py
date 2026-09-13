@@ -7,6 +7,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods
 
 from .models import LegalDirection, Questionnaire
+from .paid_help import help_offers
 from .questionnaire_import import (FORMAT, MAX_BYTES, ImportProblem, prepare_import,
                                    save_package, validate_package)
 
@@ -64,6 +65,9 @@ def import_questionnaire(request):
                 selected_direction = request.POST.get('direction', selected_direction)
                 package['name'] = request.POST.get('name', package['name']).strip()
                 package['start'] = request.POST.get('start', package['start'])
+                if any(f'offer_price_{i}' in request.POST for i in range(3)):
+                    old_prices = package.get('offer_prices', ['', '', ''])
+                    package['offer_prices'] = [request.POST.get(f'offer_price_{i}', old_prices[i]).strip() for i in range(3)]
                 for i, node in enumerate(package['nodes'].values()):
                     node['text'] = request.POST.get(f'q{i}', node['text']).strip()
                     for j, answer in enumerate(node['answers']):
@@ -100,6 +104,7 @@ def import_questionnaire(request):
         errors = errors or validate_package(package)
     return render(request, 'admin/questionnaire_import.html', {
         'package': package, 'errors': errors, 'saved': saved,
+        'offers': help_offers(package) if package else [],
         'draft_revision': draft_revision, 'selected_direction': selected_direction,
         'directions': LegalDirection.objects.all(),
         'imports': [q for q in Questionnaire.objects.all() if q.workflow.get('format') == FORMAT],

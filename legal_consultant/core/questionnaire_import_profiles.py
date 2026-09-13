@@ -37,8 +37,11 @@ def refine_court_order(package, cells, paragraphs):
         body_end = next((n for n in range(body_start + 1, len(group)) if re.match(r'^\d\s*[–—-]', group[n])), len(group))
         result['full_text'] = '\n\n'.join(group[body_start:body_end])
     package['start'] = 'HgjSNt0WqrnvkYVKWa35-45'
+    # Owner requested the live reference's bundle prices (2026-09-13), not Word's older numbers.
+    package['offer_prices'] = ['298', '498', '697']
     package['notes'] = [
         'Применён проверенный разбор именно этой пары файлов (сверены SHA-256).',
+        'По поручению владельца три пакета помощи скопированы с эталона 13.09.2026: 298 / 498 / 697 ₽. Исходные числа Word сохранены отдельно и не используются как цены пакетов.',
         'Подробное дерево используется отдельно от поясняющего эскиза. Зелёные стрелки — Да, красные — Нет.',
         'Восстановлены 5 непривязанных стрелок подробного дерева по их конечным координатам и содержанию блоков; ветка В8 Нет уточнена по Word.',
         'Добавлен отсутствующий переход В7.3 Нет → Вывод 2.3 из Word. В8 Нет → 2.2, В8.1 Нет → 2.1, В8.1 Да → 2.',
