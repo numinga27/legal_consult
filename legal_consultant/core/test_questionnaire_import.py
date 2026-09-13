@@ -180,10 +180,38 @@ class ImportedQuestionnaireTests(TestCase):
         self.post_action('answer', answer=1)
         self.post_action('continue')
         self.assertIsNotNone(self.client.get(self.url).context['result'])
-        response = self.client.post(self.url, {'action': 'restart', 'revision': 0}, follow=True)
+        response = self.client.post(self.url, {'action': 'answer', 'answer': 0, 'revision': 0}, follow=True)
         self.assertIsNotNone(response.context['result'])
         self.post_action('back')
         self.assertEqual(self.client.get(self.url).context['node']['code'], '1')
+
+    def test_completed_result_can_restart_from_an_old_tab(self):
+        self.client.get(self.url)
+        self.post_action('answer', answer=1)
+        self.post_action('continue')
+        response = self.client.get(self.url)
+        self.assertContains(response, 'Пройти опрос заново')
+        self.assertLess(response.content.index('Пройти опрос заново'.encode()),
+                        response.content.index('Ваша бесплатная оценка'.encode()))
+        response = self.client.post(self.url, {'action': 'restart', 'revision': 0}, follow=True)
+        self.assertIsNone(response.context['result'])
+        self.assertEqual(response.context['node']['code'], '1')
+        self.assertEqual(response.context['state']['history'], [])
+        self.assertEqual(self.client.get(self.url).context['node']['code'], '1')
+
+    def test_catalogue_reentry_restarts_completed_but_keeps_unfinished_progress(self):
+        entry = reverse('core:user_questionnaire', args=[self.questionnaire.id])
+        self.client.get(entry, follow=True)
+        self.post_action('answer', answer=0)
+        self.post_action('continue')
+        response = self.client.get(entry, follow=True)
+        self.assertEqual(response.context['node']['code'], '2')
+        self.post_action('restart')
+        self.post_action('answer', answer=1)
+        self.post_action('continue')
+        response = self.client.get(entry, follow=True)
+        self.assertEqual(response.context['node']['code'], '1')
+        self.assertIsNone(response.context['result'])
 
     def test_import_idempotent_versioned_and_invalid_is_atomic(self):
         self.assertFalse(save_package(self.package, self.direction)[1])

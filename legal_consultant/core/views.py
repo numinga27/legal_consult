@@ -17,7 +17,7 @@ from .models import (
 )
 from .pdf_generator import generate_document_for_user
 from .ai_integration import get_ai_consultant
-from .guided_views import imported
+from .guided_views import imported, reset_completed_on_entry
 from django.urls import reverse
 
 
@@ -383,6 +383,7 @@ def user_questionnaire(request, q_id):
     """Страница прохождения опросника"""
     questionnaire = get_object_or_404(Questionnaire, id=q_id, is_active=True)
     if imported(questionnaire):
+        reset_completed_on_entry(request, questionnaire)
         return redirect('core:guided_questionnaire', q_id=q_id)
     
     session_key = request.session.session_key

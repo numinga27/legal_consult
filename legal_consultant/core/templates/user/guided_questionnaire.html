@@ -8,6 +8,7 @@
 {% if not questionnaire.is_active %}<p class="notice">Предпросмотр владельца. Опросник ещё не опубликован.</p>{% endif %}
 <div class="stages" aria-label="Этапы"><span class="{% if not result %}current{% endif %}">01 · Ваша ситуация</span><span class="{% if result %}current{% endif %}">02 · Оценка</span><span>03 · Помощь</span></div>
 {% if result %}
+<div class="notice"><p>Опрос завершён. Обновление страницы сохраняет этот результат. Чтобы проверить другую ситуацию, начните новое прохождение.</p><form method="post">{% csrf_token %}<input type="hidden" name="revision" value="{{ state.revision }}"><button class="primary" name="action" value="restart">Пройти опрос заново →</button></form></div>
 <section class="panel result"><p class="eyebrow">Ваша бесплатная оценка</p><h1>{{ result.title }}</h1><div class="prose">{{ result.short_text|linebreaks }}</div></section>
 <section class="help-section"><h2>Помощь со следующим шагом</h2><p>При необходимости можно дополнить оценку консультацией, планом действий и документами.</p>
 <div class="help-grid"><article><span>01</span><h3>Консультация</h3><p>Подробный разбор вашей ситуации.</p></article><article><span>02</span><h3>План действий</h3><p>Что делать и в каком порядке.</p></article><article><span>03</span><h3>Документы</h3><p>Материалы для решения вашей задачи.</p></article></div>
@@ -24,6 +25,6 @@
 {% for answer in node.answers %}<button class="answer" name="answer" value="{{ forloop.counter0 }}"><span>{{ answer.text }}</span><span aria-hidden="true">→</span></button>{% endfor %}</form>
 {% endif %}</section>{% endif %}
 <div class="journey-nav"><form method="post">{% csrf_token %}<input type="hidden" name="revision" value="{{ state.revision }}">{% if can_back %}<button class="text-button" name="action" value="back">← {% if explanation %}Изменить ответ{% else %}Назад{% endif %}</button>{% endif %}</form>
-{% if can_back or result %}<form method="post">{% csrf_token %}<input type="hidden" name="revision" value="{{ state.revision }}"><button class="text-button" name="action" value="restart">Начать заново</button></form>{% endif %}</div>
+{% if can_back and not result %}<form method="post">{% csrf_token %}<input type="hidden" name="revision" value="{{ state.revision }}"><button class="text-button" name="action" value="restart">Начать заново</button></form>{% endif %}</div>
 <p class="privacy">Без регистрации. Прогресс сохраняется в текущей сессии браузера.</p>
 </main><footer class="footer">Карманный юрист · Шаг за шагом к решению</footer></body></html>

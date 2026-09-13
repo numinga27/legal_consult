@@ -22,6 +22,21 @@ def position(package, history):
     return current
 
 
+def reset_completed_on_entry(request, questionnaire):
+    """Choosing a completed questionnaire from the catalogue starts a new attempt."""
+    key = f'guided_questionnaire_{questionnaire.id}'
+    state = request.session.get(key)
+    if not isinstance(state, dict):
+        return
+    try:
+        completed = position(questionnaire.workflow, state.get('history', [])).startswith('result:')
+    except (ValueError, KeyError, IndexError, TypeError):
+        completed = True
+    if completed:
+        request.session[key] = {'history': [], 'pending': None,
+                                'revision': state.get('revision', 0) + 1}
+
+
 @never_cache
 @require_http_methods(['GET', 'POST'])
 def guided_questionnaire(request, q_id):
@@ -38,9 +53,11 @@ def guided_questionnaire(request, q_id):
         state = {'history': [], 'pending': None, 'revision': 0}
         history, current = [], package['start']
     if request.method == 'POST':
-        if request.POST.get('revision') != str(state['revision']):
-            return redirect('core:guided_questionnaire', q_id=q_id)
         action = request.POST.get('action')
+        # Restart is explicit user intent even from a cached page or an older tab.
+        # Answers and continue still require the exact revision to avoid duplicates.
+        if action != 'restart' and request.POST.get('revision') != str(state['revision']):
+            return redirect('core:guided_questionnaire', q_id=q_id)
         if action == 'restart':
             state = {'history': [], 'pending': None, 'revision': state['revision']}
         elif action == 'back':
