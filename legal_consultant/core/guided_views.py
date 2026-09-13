@@ -1,4 +1,4 @@
-"""Server-owned branching state with explicit explanation/continue and PRG navigation."""
+"""Server-owned branching: one answer advances one question, with PRG navigation."""
 from django.http import Http404, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import never_cache
@@ -52,47 +52,48 @@ def guided_questionnaire(request, q_id):
     except (ValueError, KeyError, IndexError, TypeError):
         state = {'history': [], 'pending': None, 'revision': 0}
         history, current = [], package['start']
+    # Finish an answer selected in the former explanation screen exactly once.
+    if state.get('pending') is not None:
+        choice = state['pending']
+        if current in package['nodes'] and isinstance(choice, int) and 0 <= choice < len(package['nodes'][current]['answers']):
+            history.append({'node': current, 'answer': choice})
+            current = position(package, history)
+        state['pending'] = None
+        state['revision'] += 1
+        request.session[state_key] = state
     if request.method == 'POST':
         action = request.POST.get('action')
         # Restart is explicit user intent even from a cached page or an older tab.
-        # Answers and continue still require the exact revision to avoid duplicates.
+        # Answers still require the exact revision to avoid duplicate submissions.
         if action != 'restart' and request.POST.get('revision') != str(state['revision']):
             return redirect('core:guided_questionnaire', q_id=q_id)
         if action == 'restart':
             state = {'history': [], 'pending': None, 'revision': state['revision']}
         elif action == 'back':
-            if state['pending'] is not None:
-                state['pending'] = None
-            elif history:
+            if history:
                 history.pop()
-        elif action == 'answer' and state['pending'] is None and current in package['nodes']:
+        elif action == 'answer' and current in package['nodes']:
             try:
                 choice = int(request.POST['answer'])
                 if not 0 <= choice < len(package['nodes'][current]['answers']):
                     raise ValueError
-                state['pending'] = choice
+                history.append({'node': current, 'answer': choice})
             except (ValueError, KeyError):
                 return HttpResponseBadRequest('Выберите один из предложенных ответов.')
-        elif action == 'continue' and state['pending'] is not None:
-            history.append({'node': current, 'answer': state['pending']})
-            state['pending'] = None
         else:
             return HttpResponseBadRequest('Недопустимый переход.')
         state['revision'] += 1
         request.session[state_key] = state
         return redirect('core:guided_questionnaire', q_id=q_id)
     request.session[state_key] = state
-    node, explanation, result = None, None, None
+    node, result = None, None
     if current.startswith('result:'):
         source = package['conclusions'][current[7:]]
         # Paid text and unassigned prices never leave the server in the public result.
         result = {key: source[key] for key in ['title', 'short_text']}
     else:
         node = package['nodes'][current]
-        if state['pending'] is not None:
-            explanation = node['answers'][state['pending']]
     return render(request, 'user/guided_questionnaire.html', {
         'questionnaire': questionnaire, 'state': state, 'node': node, 'result': result,
-        'explanation': explanation, 'step': len(history) + 1,
-        'can_back': bool(history) or state['pending'] is not None,
+        'step': len(history) + 1, 'can_back': bool(history),
     })

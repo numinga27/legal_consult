@@ -14,17 +14,13 @@
 <div class="help-grid"><article><span>01</span><h3>Консультация</h3><p>Подробный разбор вашей ситуации.</p></article><article><span>02</span><h3>План действий</h3><p>Что делать и в каком порядке.</p></article><article><span>03</span><h3>Документы</h3><p>Материалы для решения вашей задачи.</p></article></div>
 <p class="notice">Заказ дополнительной помощи пока недоступен.</p></section>
 {% else %}
-<section class="panel"><p class="step">Шаг {{ step }}{% if explanation %} · Ваш ответ: {{ explanation.text }}{% endif %}</p>
+<section class="panel"><p class="step">Вопрос {{ step }}</p>
 <h1>{{ node.text }}</h1>
-{% if explanation %}
-<div class="explanation"><p class="eyebrow">Что это значит для вас</p>{% if explanation.intermediate_text %}<div class="prose">{{ explanation.intermediate_text|linebreaks }}</div>{% else %}<p>Ответ учтён. Перейдём к следующему шагу.</p>{% endif %}</div>
-<form method="post">{% csrf_token %}<input type="hidden" name="revision" value="{{ state.revision }}"><button class="primary" name="action" value="continue">Продолжить <span aria-hidden="true">→</span></button></form>
-{% else %}
-<p class="muted">Выберите подходящий ответ. На следующем шаге объясним, что он означает.</p>
+<p class="muted">Выберите подходящий ответ. Количество вопросов зависит от вашей ситуации. Оценку получите в конце опроса.</p>
 <form method="post" class="answers">{% csrf_token %}<input type="hidden" name="revision" value="{{ state.revision }}"><input type="hidden" name="action" value="answer">
 {% for answer in node.answers %}<button class="answer" name="answer" value="{{ forloop.counter0 }}"><span>{{ answer.text }}</span><span aria-hidden="true">→</span></button>{% endfor %}</form>
-{% endif %}</section>{% endif %}
-<div class="journey-nav"><form method="post">{% csrf_token %}<input type="hidden" name="revision" value="{{ state.revision }}">{% if can_back %}<button class="text-button" name="action" value="back">← {% if explanation %}Изменить ответ{% else %}Назад{% endif %}</button>{% endif %}</form>
+</section>{% endif %}
+<div class="journey-nav"><form method="post">{% csrf_token %}<input type="hidden" name="revision" value="{{ state.revision }}">{% if can_back %}<button class="text-button" name="action" value="back">← Предыдущий вопрос</button>{% endif %}</form>
 {% if can_back and not result %}<form method="post">{% csrf_token %}<input type="hidden" name="revision" value="{{ state.revision }}"><button class="text-button" name="action" value="restart">Начать заново</button></form>{% endif %}</div>
 <p class="privacy">Без регистрации. Прогресс сохраняется в текущей сессии браузера.</p>
 </main><footer class="footer">Карманный юрист · Шаг за шагом к решению</footer></body></html>

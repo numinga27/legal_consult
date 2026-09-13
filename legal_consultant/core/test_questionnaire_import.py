@@ -149,7 +149,7 @@ class ImportedQuestionnaireTests(TestCase):
         return self.client.post(reverse('core:import_questionnaire'), {
             'draft_revision': self.client.session.get('questionnaire_import_revision'), **fields})
 
-    def test_every_path_matches_source_matrix_and_has_all_explanations(self):
+    def test_every_path_advances_directly_and_matches_source_matrix(self):
         reached = set()
         for history, expected in all_paths(self.package):
             self.assertEqual(expected, source_expected_result(self.package, history))
@@ -157,11 +157,16 @@ class ImportedQuestionnaireTests(TestCase):
             self.client.get(self.url)
             self.post_action('restart')
             for step in history:
+                before = self.client.get(self.url)
+                self.assertEqual(before.context['node'], self.package['nodes'][step['node']])
+                self.assertIsNone(before.context['result'])
+                self.assertNotContains(before, 'Что это значит для вас')
+                for answer in self.package['nodes'][step['node']]['answers']:
+                    if answer['intermediate_text']:
+                        self.assertNotContains(before, answer['intermediate_text'].split('\n\n')[0])
                 response = self.post_action('answer', answer=step['answer'])
-                self.assertContains(response, 'Продолжить')
-                self.assertIsNone(response.context['result'])
-                self.assertEqual(response.context['explanation'], self.package['nodes'][step['node']]['answers'][step['answer']])
-                response = self.post_action('continue')
+                self.assertNotContains(response, 'Продолжить')
+                self.assertNotContains(response, 'Что это значит для вас')
             self.assertEqual(response.context['result']['title'], self.package['conclusions'][expected]['title'])
             self.assertNotIn('full_text', response.context['result'])
             self.assertNotContains(response, self.package['conclusions'][expected]['full_text'].split('\n\n')[0])
@@ -172,13 +177,10 @@ class ImportedQuestionnaireTests(TestCase):
     def test_reload_back_change_answer_and_stale_post(self):
         self.client.get(self.url)
         self.post_action('answer', answer=0)
-        self.assertIsNotNone(self.client.get(self.url).context['explanation'])
-        self.post_action('continue')
         self.assertEqual(self.client.get(self.url).context['node']['code'], '2')
         self.post_action('back')
         self.assertEqual(self.client.get(self.url).context['node']['code'], '1')
         self.post_action('answer', answer=1)
-        self.post_action('continue')
         self.assertIsNotNone(self.client.get(self.url).context['result'])
         response = self.client.post(self.url, {'action': 'answer', 'answer': 0, 'revision': 0}, follow=True)
         self.assertIsNotNone(response.context['result'])
@@ -188,7 +190,6 @@ class ImportedQuestionnaireTests(TestCase):
     def test_completed_result_can_restart_from_an_old_tab(self):
         self.client.get(self.url)
         self.post_action('answer', answer=1)
-        self.post_action('continue')
         response = self.client.get(self.url)
         self.assertContains(response, 'Пройти опрос заново')
         self.assertLess(response.content.index('Пройти опрос заново'.encode()),
@@ -203,12 +204,10 @@ class ImportedQuestionnaireTests(TestCase):
         entry = reverse('core:user_questionnaire', args=[self.questionnaire.id])
         self.client.get(entry, follow=True)
         self.post_action('answer', answer=0)
-        self.post_action('continue')
         response = self.client.get(entry, follow=True)
         self.assertEqual(response.context['node']['code'], '2')
         self.post_action('restart')
         self.post_action('answer', answer=1)
-        self.post_action('continue')
         response = self.client.get(entry, follow=True)
         self.assertEqual(response.context['node']['code'], '1')
         self.assertIsNone(response.context['result'])
@@ -226,11 +225,39 @@ class ImportedQuestionnaireTests(TestCase):
             save_package(changed, self.direction)
         self.assertEqual(Questionnaire.objects.count(), 2)
 
+    def test_old_explanation_session_advances_once_and_stale_continue_is_safe(self):
+        for choice in [0, 1]:
+            with self.subTest(choice=choice):
+                session = self.client.session
+                key = f'guided_questionnaire_{self.questionnaire.id}'
+                session[key] = {'history': [], 'pending': choice, 'revision': 5}
+                session.save()
+                response = self.client.post(self.url, {'action': 'continue', 'revision': 5}, follow=True)
+                self.assertEqual(response.context['state']['history'], [{'node': self.package['start'], 'answer': choice}])
+                self.assertIsNone(response.context['state']['pending'])
+                self.assertEqual(response.context['state']['revision'], 6)
+                self.assertEqual(self.client.get(self.url).context['state'], response.context['state'])
+                if choice == 0:
+                    self.assertEqual(response.context['node']['code'], '2')
+                else:
+                    self.assertIsNotNone(response.context['result'])
+
+    def test_another_import_uses_direct_answers_without_special_profile(self):
+        package = prepare_import(GRAPH.encode(), word_bytes(WORD), 'Другой алгоритм')
+        item, _ = save_package(package, self.direction, activate=True)
+        url = reverse('core:guided_questionnaire', args=[item.id])
+        response = self.client.get(url)
+        self.assertNotContains(response, 'Объяснение да.')
+        response = self.client.post(url, {'action': 'answer', 'answer': 0, 'revision': 0}, follow=True)
+        self.assertContains(response, 'Бесплатно один.')
+        self.assertNotContains(response, 'Платно один.')
+        self.assertNotContains(response, 'Объяснение да.')
+
     def test_private_drafts_csrf_and_anonymous_session_isolation(self):
         self.client.get(self.url)
         self.post_action('answer', answer=1)
         other = Client()
-        self.assertIsNone(other.get(self.url).context['explanation'])
+        self.assertEqual(other.get(self.url).context['node']['code'], '1')
         csrf_client = Client(enforce_csrf_checks=True)
         csrf_client.get(self.url)
         self.assertEqual(csrf_client.post(self.url, {'action': 'answer', 'answer': 0, 'revision': 0}).status_code, 403)
