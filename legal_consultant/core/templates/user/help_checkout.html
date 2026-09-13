@@ -1,0 +1,8 @@
+{% load static %}<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Получить помощь — Карманный юрист</title><link rel="stylesheet" href="{% static 'css/guided.css' %}?v=20260913-help"></head><body>
+<header class="top"><a class="brand" href="/">§ Карманный юрист</a><a href="{% url 'core:help_orders' %}">Мои заказы</a></header>
+<main class="journey"><a href="{% url 'core:guided_questionnaire' questionnaire.id %}">← Изменить пакет</a><p class="eyebrow">{{ questionnaire.name }}</p>
+<section class="panel"><h1>{{ offer.title }}</h1><ul>{% for service in offer.services %}<li>{{ service }}</li>{% endfor %}</ul><p class="offer-price">{{ offer.price }} ₽</p>
+<h2>Форма персональных данных</h2><p>Укажите ваши данные для заказа помощи.</p><form method="post" class="customer-form">{% csrf_token %}<input type="hidden" name="revision" value="{{ revision }}"><input type="hidden" name="selection" value="{{ selection }}">
+{{ form.non_field_errors }}{% for field in form %}<div class="customer-field">{{ field.label_tag }}{{ field }}{{ field.errors }}</div>{% endfor %}
+<p class="notice">Пока можно сохранить заказ. Приём оплаты и выдача материалов ещё недоступны. Деньги не списываются.</p><button class="primary" type="submit">Сохранить заказ</button></form></section>
+</main></body></html>

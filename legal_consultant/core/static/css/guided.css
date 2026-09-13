@@ -19,3 +19,5 @@
 .payment-status{font-size:13px;color:#60726b;margin:26px 0 0;text-align:center}
 .result-restart{margin-top:24px}
 @media(max-width:800px){.reference-offers{grid-template-columns:1fr}.reference-offer{border-right:0;border-bottom:1px solid #ddd;padding:12px 20px 10px}.reference-offer ul{margin-bottom:0}.offer-price{margin:0 0 10px;padding-top:6px}.reference-offer:last-child{border:0}.result-page .journey{margin-top:24px}.offer-intro{margin-bottom:28px}}
+.offer-button{text-decoration:none;display:inline-flex;justify-content:center;align-items:center}
+.customer-field{margin:18px 0}.customer-field label{display:block;font-weight:650;margin-bottom:6px}.customer-field input{width:100%;padding:13px 15px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--green)}.customer-form .errorlist{color:#943c25;padding-left:20px}.order-card{margin-bottom:24px}

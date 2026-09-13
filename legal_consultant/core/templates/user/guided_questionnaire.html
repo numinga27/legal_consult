@@ -1,6 +1,6 @@
 {% load static %}<!doctype html>
 <html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{{ questionnaire.name }} — Карманный юрист</title><link rel="stylesheet" href="{% static 'css/guided.css' %}?v=20260913-result"></head>
+<title>{{ questionnaire.name }} — Карманный юрист</title><link rel="stylesheet" href="{% static 'css/guided.css' %}?v=20260913-help"></head>
 <body{% if result %} class="result-page"{% endif %}><a class="skip" href="#main">К содержанию</a>
 <header class="top"><a class="brand" href="{% url 'core:user_select_problem' %}"><span class="brand-icon">§</span> Карманный юрист</a><a href="{% url 'core:user_select_problem' %}#topics">Все темы ↗</a></header>
 <main class="journey" id="main">
@@ -13,8 +13,8 @@
 <div class="reference-offers">{% for offer in offers %}<article class="reference-offer">
 <span class="offer-icon" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">{% if offer.icon == 'consultation' %}<path d="M18 18c-2 3-7 4-10 2l-4 2 1-5C0 9 7 4 13 5c6 0 9 5 7 9"/><path d="M29 21c0-5-4-8-9-8s-8 3-8 7 4 7 8 7h3l5 3-1-5z"/><path d="M8 12h1m4 0h1m4 7h1m4 0h1"/>{% elif offer.icon == 'plan' %}<path d="M12 7h16M12 16h16M12 25h16M4 6l2-1v5M3 15c1-3 5-2 4 0l-4 4h5M3 24c4-3 6 2 2 2 4 0 3 4-2 2"/>{% else %}<path d="M8 3h13l6 6v19H8zM21 3v7h6M4 8v23h18M12 14h11M12 19h11M12 24h8"/>{% endif %}</svg></span>
 <h2>{{ offer.title }}</h2><ul>{% for service in offer.services %}<li>{{ service }}</li>{% endfor %}</ul>
-<p class="offer-price">{% if offer.price %}{{ offer.price }} ₽{% else %}Цена уточняется{% endif %}</p><button type="button" class="offer-button" disabled aria-describedby="payment-status">Получить помощь</button>
-</article>{% endfor %}</div><p class="payment-status" id="payment-status">Оплата пока не подключена. Выбор и покупка пакетов станут доступны после её подключения.</p></section>
+<p class="offer-price">{% if offer.price %}{{ offer.price }} ₽{% else %}Цена уточняется{% endif %}</p>{% if offer.price %}<a class="offer-button" href="{% url 'core:select_help' questionnaire.id forloop.counter0 %}">Получить помощь</a>{% else %}<button type="button" class="offer-button" disabled>Получить помощь</button>{% endif %}
+</article>{% endfor %}</div><p class="payment-status" id="payment-status">Выберите пакет и сохраните заказ. Приём оплаты и выдача материалов пока не подключены.</p><p class="payment-status"><a href="{% url 'core:help_orders' %}">Мои заказы</a></p></section>
 <form method="post" class="result-restart">{% csrf_token %}<input type="hidden" name="revision" value="{{ state.revision }}"><button class="text-button" name="action" value="restart">Пройти опрос заново →</button></form>
 {% else %}
 <section class="panel"><p class="step">Вопрос {{ step }}</p>

@@ -1,5 +1,25 @@
 from django.db import models
 from django.utils import timezone
+import uuid
+
+
+class HelpOrder(models.Model):
+    """Unpaid bundle reservation. A payment provider must be integrated separately."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    owner_id = models.UUIDField(db_index=True)
+    fingerprint = models.CharField(max_length=64, unique=True)
+    questionnaire = models.ForeignKey('Questionnaire', on_delete=models.PROTECT)
+    result_code = models.CharField(max_length=100)
+    bundle_index = models.PositiveSmallIntegerField()
+    summary = models.JSONField(default=dict)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    full_name = models.CharField(max_length=200)
+    email = models.EmailField()
+    phone = models.CharField(max_length=40)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
 
 class LegalDirection(models.Model):
     """
@@ -469,4 +489,4 @@ class UserDocumentData(models.Model):
         verbose_name_plural = 'Данные пользователей'
 
     def __str__(self):
-        return f"Данные пользователя #{self.id}"    
+        return f"Данные пользователя #{self.id}"

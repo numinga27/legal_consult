@@ -1,10 +1,13 @@
 from django.urls import path
 from . import views
-from . import import_views, guided_views
+from . import import_views, guided_views, help_views
 
 app_name = 'core'
 
 urlpatterns = [
+    path('guided/<int:q_id>/help/<int:bundle_index>/', help_views.select_help, name='select_help'),
+    path('help/orders/', help_views.help_orders, name='help_orders'),
+    path('help/orders/<uuid:order_id>/', help_views.help_order, name='help_order'),
     path('admin-import/', import_views.import_questionnaire, name='import_questionnaire'),
     path('guided/<int:q_id>/', guided_views.guided_questionnaire, name='guided_questionnaire'),
     # Админ-панель

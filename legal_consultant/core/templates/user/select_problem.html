@@ -20,7 +20,7 @@
 </svg>
 <header class="site-header"><div class="wrap header-inner">
 <a class="brand" href="{% url 'core:user_select_problem' %}" aria-label="Карманный юрист — главная"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M8 8h16v13l-8 5-8-5V8Z"/><path d="m12 16 3 3 6-7"/></svg></span><span>карманный<span class="brand-second">юрист<span class="brand-dot">.</span></span></span></a>
-<nav class="desktop-nav" aria-label="Основная навигация"><a href="#topics">С чем поможем</a><a href="#how-it-works">Как это работает</a><a href="#help">Что вы получите</a></nav>
+<nav class="desktop-nav" aria-label="Основная навигация"><a href="#topics">С чем поможем</a><a href="#how-it-works">Как это работает</a><a href="#help">Что вы получите</a><a href="{% url 'core:help_orders' %}">Мои заказы</a></nav>
 <a class="button button-small button-outline" href="#topics">Начать бесплатно <svg class="icon" aria-hidden="true"><use href="#icon-arrow"/></svg></a>
 </div></header>
 <main id="main" tabindex="-1">
@@ -78,5 +78,5 @@
 </div></section>
 <section class="closing-section wrap"><div class="closing-inner"><div><p class="eyebrow">ПЕРВЫЙ ШАГ УЖЕ РЯДОМ</p><h2>Не знаете, с чего начать?<br> Начните со своей ситуации.</h2><p>Один простой вопрос за другим. Мы поможем разобраться.</p></div><a class="button button-primary" href="#topics">Выбрать проблему <svg class="icon" aria-hidden="true"><use href="#icon-arrow"/></svg></a></div></section>
 </main>
-<footer class="site-footer wrap"><a class="footer-brand" href="{% url 'core:user_select_problem' %}">карманный юрист<span class="brand-dot">.</span></a><p>Юридические вопросы. Человеческим языком.</p><a href="{% if user.is_staff %}{% url 'core:admin_dashboard' %}{% else %}{% url 'core:admin_login' %}{% endif %}">Для специалистов <span aria-hidden="true">↗</span></a><span class="copyright">© {% now 'Y' %}</span></footer>
+<footer class="site-footer wrap"><a class="footer-brand" href="{% url 'core:user_select_problem' %}">карманный юрист<span class="brand-dot">.</span></a><p>Юридические вопросы. Человеческим языком.</p><a href="{% url 'core:help_orders' %}">Мои заказы</a><a href="{% if user.is_staff %}{% url 'core:admin_dashboard' %}{% else %}{% url 'core:admin_login' %}{% endif %}">Для специалистов <span aria-hidden="true">↗</span></a><span class="copyright">© {% now 'Y' %}</span></footer>
 </body></html>

@@ -275,7 +275,8 @@ class ImportedQuestionnaireTests(TestCase):
             ['Пошаговый план действий', 'Подготовка документов'],
             ['Консультация', 'Пошаговый план действий', 'Подготовка документов'],
         ])
-        self.assertContains(response, 'disabled aria-describedby="payment-status"', count=3)
+        for i in range(3):
+            self.assertContains(response, reverse('core:select_help', args=[self.questionnaire.id, i]))
         self.assertEqual(Payment.objects.count(), 0)
 
     def test_owner_can_set_bundle_prices_for_future_import_and_export_them(self):
