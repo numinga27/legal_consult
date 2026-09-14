@@ -1,6 +1,8 @@
-{% load static %}<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Мои заказы — Карманный юрист</title><link rel="stylesheet" href="{% static 'css/guided.css' %}?v=20260913-help"></head><body>
-<header class="top"><a class="brand" href="/">§ Карманный юрист</a><a href="{% url 'core:help_orders' %}">Мои заказы</a></header>
-<main class="journey"><h1>{% if detail %}Заказ сохранён{% else %}Мои заказы{% endif %}</h1><p>Здесь доступны заказы текущей сессии браузера.</p>
+{% extends "user/site_base.html" %}
+{% block title %}Мои заказы — Карманный юрист{% endblock %}
+{% block content %}
+<h1>{% if detail %}Заказ сохранён{% else %}Мои заказы{% endif %}</h1><p>Здесь доступны заказы текущей сессии браузера.</p>
 {% for order in orders %}<article class="panel order-card"><p class="eyebrow">{{ order.summary.questionnaire }}</p><h2>{{ order.summary.title }}</h2><ul>{% for service in order.summary.services %}<li>{{ service }}</li>{% endfor %}</ul><p class="offer-price">{{ order.amount|floatformat:0 }} ₽</p><p>Заказ {{ order.created_at|date:'d.m.Y H:i' }} · {{ order.email }}</p>
 <p class="notice">Не оплачен. Приём оплаты пока не подключён. Материалы не выданы, письмо не отправлено.</p><button type="button" class="primary" disabled>Оплатить</button><p><a href="{% url 'core:guided_questionnaire' order.questionnaire_id %}">К результату опросника</a></p></article>
-{% empty %}<p>Заказов пока нет. Пройдите опросник и выберите подходящий пакет помощи.</p><a class="primary" href="/#topics">Выбрать тему</a>{% endfor %}</main></body></html>
+{% empty %}<p>Заказов пока нет. Пройдите опросник и выберите подходящий пакет помощи.</p><a class="primary" href="/#topics">Выбрать тему</a>{% endfor %}
+{% endblock %}

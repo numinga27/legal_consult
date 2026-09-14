@@ -22,6 +22,7 @@
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     
     {% block extra_css %}{% endblock %}
+    <link rel="stylesheet" href="{% static 'css/admin-polish.css' %}?v=20260914">
 </head>
 <body>
     <!-- Навигация -->
@@ -109,7 +110,7 @@
     <!-- Подвал -->
     <footer class="bg-light text-center text-muted py-3 mt-5">
         <div class="container">
-            <p class="mb-0">&copy; 2024 Карманный юрист. Все права защищены.</p>
+            <p class="mb-0">&copy; {% now 'Y' %} Карманный юрист. Все права защищены.</p>
         </div>
     </footer>
 

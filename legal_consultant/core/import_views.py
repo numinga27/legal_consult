@@ -8,6 +8,7 @@ from django.views.decorators.http import require_http_methods
 
 from .models import LegalDirection, Questionnaire
 from .paid_help import help_offers
+from .google_docs_import import download_google_doc
 from .questionnaire_import import (FORMAT, MAX_BYTES, ImportProblem, prepare_import,
                                    save_package, validate_package)
 
@@ -46,9 +47,13 @@ def import_questionnaire(request):
                 raise ImportProblem('Этот просмотр устарел: в другой вкладке открыта новая версия. Проверьте текущий опросник перед сохранением.')
             if action == 'analyze':
                 graph, word = request.FILES.get('graph'), request.FILES.get('word')
-                if not graph or not word:
-                    raise ImportProblem('Выберите схему Draw.io и Word с текстами.')
-                package = prepare_import(graph.read(MAX_BYTES + 1), word.read(MAX_BYTES + 1),
+                google_doc = request.POST.get('google_doc', '').strip()
+                if not graph or (not word and not google_doc):
+                    raise ImportProblem('Выберите схему Draw.io и укажите Google Docs или загрузите .docx с текстами.')
+                if word and google_doc:
+                    raise ImportProblem('Выберите один источник текстов: Google Docs или файл .docx.')
+                word_data = word.read(MAX_BYTES + 1) if word else download_google_doc(google_doc)
+                package = prepare_import(graph.read(MAX_BYTES + 1), word_data,
                                          request.POST.get('name', ''))
                 draft_revision = uuid4().hex
             elif action == 'load_json':

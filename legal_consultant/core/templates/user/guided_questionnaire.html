@@ -1,13 +1,13 @@
-{% load static %}<!doctype html>
-<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{{ questionnaire.name }} — Карманный юрист</title><link rel="stylesheet" href="{% static 'css/guided.css' %}?v=20260913-help"></head>
-<body{% if result %} class="result-page"{% endif %}><a class="skip" href="#main">К содержанию</a>
-<header class="top"><a class="brand" href="{% url 'core:user_select_problem' %}"><span class="brand-icon">§</span> Карманный юрист</a><a href="{% url 'core:user_select_problem' %}#topics">Все темы ↗</a></header>
-<main class="journey" id="main">
+{% extends "user/site_base.html" %}
+{% block title %}{{ questionnaire.name }} — Карманный юрист{% endblock %}
+{% block main_class %}{% if result %}journey-result{% endif %}{% endblock %}
+{% block content %}
 <p class="eyebrow">{{ questionnaire.name }}</p>
 {% if not questionnaire.is_active %}<p class="notice">Предпросмотр владельца. Опросник ещё не опубликован.</p>{% endif %}
-<div class="stages" aria-label="Этапы"><span class="{% if not result %}current{% endif %}">01 · Ваша ситуация</span><span class="{% if result %}current{% endif %}">02 · Оценка</span><span>03 · Помощь</span></div>
-{% if result %}
+<div class="stages" aria-label="Этапы"><span class="{% if not result and not unavailable %}current{% endif %}">1. Вопросы</span><span class="{% if result %}current{% endif %}">2. Результат</span><span>3. Помощь</span></div>
+{% if unavailable %}
+<section class="panel"><p class="eyebrow">Материалы готовятся</p><h1>Для этого ответа пока нет готового разбора</h1><p class="muted">Вы можете вернуться к предыдущему вопросу и проверить свой ответ или выбрать другую тему.</p><a class="primary" href="/#topics">Выбрать другую тему →</a></section>
+{% elif result %}
 <section class="reference-result" aria-label="Ваша бесплатная оценка"><h1>Краткий вывод:</h1><div class="result-copy"><p>{{ result.title }}</p>{{ result.short_text|linebreaks }}</div></section>
 <section class="help-section" aria-label="Пакеты платной помощи"><p class="offer-intro">Чтобы получить электронный доступ выберите из списка требуемых услуг:</p>
 <div class="reference-offers">{% for offer in offers %}<article class="reference-offer">
@@ -19,11 +19,12 @@
 {% else %}
 <section class="panel"><p class="step">Вопрос {{ step }}</p>
 <h1>{{ node.text }}</h1>
-<p class="muted">Выберите подходящий ответ. Количество вопросов зависит от вашей ситуации. Оценку получите в конце опроса.</p>
+<p class="muted">Выберите один ответ. В конце опроса вы получите краткую оценку вашей ситуации.</p>
 <form method="post" class="answers">{% csrf_token %}<input type="hidden" name="revision" value="{{ state.revision }}"><input type="hidden" name="action" value="answer">
 {% for answer in node.answers %}<button class="answer" name="answer" value="{{ forloop.counter0 }}"><span>{{ answer.text }}</span><span aria-hidden="true">→</span></button>{% endfor %}</form>
 </section>{% endif %}
 <div class="journey-nav"><form method="post">{% csrf_token %}<input type="hidden" name="revision" value="{{ state.revision }}">{% if can_back %}<button class="text-button" name="action" value="back">← Предыдущий вопрос</button>{% endif %}</form>
 {% if can_back and not result %}<form method="post">{% csrf_token %}<input type="hidden" name="revision" value="{{ state.revision }}"><button class="text-button" name="action" value="restart">Начать заново</button></form>{% endif %}</div>
 <p class="privacy">Без регистрации. Прогресс сохраняется в текущей сессии браузера.</p>
-</main><footer class="footer">Карманный юрист · Шаг за шагом к решению</footer></body></html>
+
+{% endblock %}

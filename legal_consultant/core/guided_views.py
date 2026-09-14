@@ -7,6 +7,7 @@ from django.views.decorators.http import require_http_methods
 from .models import Questionnaire
 from .questionnaire_import import FORMAT
 from .paid_help import help_offers
+from .questionnaire_runtime import runtime_package
 
 
 def imported(questionnaire):
@@ -30,7 +31,8 @@ def reset_completed_on_entry(request, questionnaire):
     if not isinstance(state, dict):
         return
     try:
-        completed = position(questionnaire.workflow, state.get('history', [])).startswith('result:')
+        final = position(runtime_package(questionnaire), state.get('history', []))
+        completed = final.startswith('result:') or final == 'unavailable'
     except (ValueError, KeyError, IndexError, TypeError):
         completed = True
     if completed:
@@ -42,9 +44,9 @@ def reset_completed_on_entry(request, questionnaire):
 @require_http_methods(['GET', 'POST'])
 def guided_questionnaire(request, q_id):
     questionnaire = get_object_or_404(Questionnaire, pk=q_id)
-    if not imported(questionnaire) or (not questionnaire.is_active and not request.user.is_staff):
+    if not questionnaire.is_active and not request.user.is_staff:
         raise Http404
-    package = questionnaire.workflow
+    package = runtime_package(questionnaire)
     state_key = f'guided_questionnaire_{q_id}'
     state = request.session.get(state_key, {'history': [], 'pending': None, 'revision': 0})
     history = state['history']
@@ -88,14 +90,18 @@ def guided_questionnaire(request, q_id):
         return redirect('core:guided_questionnaire', q_id=q_id)
     request.session[state_key] = state
     node, result = None, None
+    unavailable = current == 'unavailable'
     if current.startswith('result:'):
         source = package['conclusions'][current[7:]]
         # Paid text and unassigned Word prices never leave the server in the public result.
         result = {key: source[key] for key in ['title', 'short_text']}
-    else:
+    elif not unavailable:
         node = package['nodes'][current]
+        # Stop a cycle or an empty branch without presenting an invented legal assessment.
+        unavailable = not node['answers'] or any(entry['node'] == current for entry in history)
     return render(request, 'user/guided_questionnaire.html', {
         'questionnaire': questionnaire, 'state': state, 'node': node, 'result': result,
         'step': len(history) + 1, 'can_back': bool(history),
         'offers': help_offers(package) if result else [],
+        'unavailable': unavailable,
     })
