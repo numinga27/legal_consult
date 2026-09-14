@@ -1,0 +1,3 @@
+{% extends "user/site_base.html" %}
+{% block title %}Не удалось открыть страницу — Карманный юрист{% endblock %}
+{% block content %}<section class="panel empty-state"><p class="error-code" aria-hidden="true">400</p><h1>Не удалось обработать запрос</h1><p>Попробуйте открыть нужный раздел с главной страницы и повторить действие.</p><a class="primary" href="{% url 'core:user_select_problem' %}">На главную →</a></section>{% endblock %}

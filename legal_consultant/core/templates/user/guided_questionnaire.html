@@ -4,17 +4,17 @@
 {% block content %}
 <p class="eyebrow">{{ questionnaire.name }}</p>
 {% if not questionnaire.is_active %}<p class="notice">Предпросмотр владельца. Опросник ещё не опубликован.</p>{% endif %}
-<div class="stages" aria-label="Этапы"><span class="{% if not result and not unavailable %}current{% endif %}">1. Вопросы</span><span class="{% if result %}current{% endif %}">2. Результат</span><span>3. Помощь</span></div>
+<div class="stages" aria-label="Этапы"><span class="{% if not result and not unavailable %}current{% endif %}"{% if not result and not unavailable %} aria-current="step"{% endif %}>1. Вопросы</span><span class="{% if result %}current{% endif %}"{% if result %} aria-current="step"{% endif %}>2. Результат</span><span>3. Помощь</span></div>
 {% if unavailable %}
-<section class="panel"><p class="eyebrow">Материалы готовятся</p><h1>Для этого ответа пока нет готового разбора</h1><p class="muted">Вы можете вернуться к предыдущему вопросу и проверить свой ответ или выбрать другую тему.</p><a class="primary" href="/#topics">Выбрать другую тему →</a></section>
+<section class="panel"><p class="eyebrow">Материалы готовятся</p><h1>Для этого ответа пока нет готового разбора</h1><p class="muted">В этой ветке ещё не хватает материалов. Если вы ошиблись при выборе ответа, вернитесь к предыдущему вопросу. Вы также можете выбрать другую тему.</p><a class="primary" href="/#topics">Выбрать другую тему →</a></section>
 {% elif result %}
 <section class="reference-result" aria-label="Ваша бесплатная оценка"><h1>Краткий вывод:</h1><div class="result-copy"><p>{{ result.title }}</p>{{ result.short_text|linebreaks }}</div></section>
-<section class="help-section" aria-label="Пакеты платной помощи"><p class="offer-intro">Чтобы получить электронный доступ выберите из списка требуемых услуг:</p>
+<section class="help-section" aria-label="Пакеты платной помощи"><h2 class="offer-intro">Дополнительная помощь по вашей ситуации</h2><p class="muted">Сравните состав пакетов и выберите подходящий.</p>
 <div class="reference-offers">{% for offer in offers %}<article class="reference-offer">
 <span class="offer-icon" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">{% if offer.icon == 'consultation' %}<path d="M18 18c-2 3-7 4-10 2l-4 2 1-5C0 9 7 4 13 5c6 0 9 5 7 9"/><path d="M29 21c0-5-4-8-9-8s-8 3-8 7 4 7 8 7h3l5 3-1-5z"/><path d="M8 12h1m4 0h1m4 7h1m4 0h1"/>{% elif offer.icon == 'plan' %}<path d="M12 7h16M12 16h16M12 25h16M4 6l2-1v5M3 15c1-3 5-2 4 0l-4 4h5M3 24c4-3 6 2 2 2 4 0 3 4-2 2"/>{% else %}<path d="M8 3h13l6 6v19H8zM21 3v7h6M4 8v23h18M12 14h11M12 19h11M12 24h8"/>{% endif %}</svg></span>
 <h2>{{ offer.title }}</h2><ul>{% for service in offer.services %}<li>{{ service }}</li>{% endfor %}</ul>
 <p class="offer-price">{% if offer.price %}{{ offer.price }} ₽{% else %}Цена уточняется{% endif %}</p>{% if offer.price %}<a class="offer-button" href="{% url 'core:select_help' questionnaire.id forloop.counter0 %}">Получить помощь</a>{% else %}<button type="button" class="offer-button" disabled>Получить помощь</button>{% endif %}
-</article>{% endfor %}</div><p class="payment-status" id="payment-status">Выберите пакет и сохраните заказ. Приём оплаты и выдача материалов пока не подключены.</p><p class="payment-status"><a href="{% url 'core:help_orders' %}">Мои заказы</a></p></section>
+</article>{% endfor %}</div><p class="payment-status" id="payment-status">{% if offers.0.price %}Пакет можно сохранить в заказе без оплаты. Оплата и получение материалов пока недоступны.{% else %}Стоимость помощи по этой теме уточняется. Оформление заказа пока недоступно.{% endif %}</p><p class="payment-status"><a href="{% url 'core:help_orders' %}">Мои заказы</a></p></section>
 <form method="post" class="result-restart">{% csrf_token %}<input type="hidden" name="revision" value="{{ state.revision }}"><button class="text-button" name="action" value="restart">Пройти опрос заново →</button></form>
 {% else %}
 <section class="panel"><p class="step">Вопрос {{ step }}</p>

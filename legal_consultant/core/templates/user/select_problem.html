@@ -5,7 +5,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="Карманный юрист поможет разобраться в юридической проблеме. Ответьте на простые вопросы, получите краткий вывод бесплатно и выберите подробную помощь по вашей ситуации.">
 <meta name="theme-color" content="#f8f7f2"><title>Карманный юрист — разберёмся, что делать дальше</title>
-<link rel="stylesheet" href="{% static 'css/home.css' %}"><script src="{% static 'js/home.js' %}" defer></script>
+<link rel="stylesheet" href="{% static 'css/home.css' %}?v=20260914-public-final"><script src="{% static 'js/home.js' %}?v=20260914-search" defer></script>
 </head>
 <body>
 <a class="skip-link" href="#main">Перейти к содержанию</a>
@@ -19,7 +19,7 @@
 <symbol id="icon-chat" viewBox="0 0 24 24"><path d="M21 4H3v13h4v4l5-4h9V4Z M7 9h10 M7 13h6"/></symbol>
 </svg>
 <header class="site-header"><div class="wrap header-inner">
-<a class="brand" href="{% url 'core:user_select_problem' %}" aria-label="Карманный юрист — главная"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M8 8h16v13l-8 5-8-5V8Z"/><path d="m12 16 3 3 6-7"/></svg></span><span>карманный<span class="brand-second">юрист<span class="brand-dot">.</span></span></span></a>
+{% include "user/brand.html" %}
 <nav class="desktop-nav" aria-label="Основная навигация"><a href="#topics">С чем поможем</a><a href="#how-it-works">Как это работает</a><a href="#help">Что вы получите</a><a href="{% url 'core:help_orders' %}">Мои заказы</a></nav>
 <a class="button button-small button-outline" href="#topics">Начать бесплатно <svg class="icon" aria-hidden="true"><use href="#icon-arrow"/></svg></a>
 </div></header>
@@ -27,9 +27,9 @@
 <section class="hero wrap" aria-labelledby="hero-title">
 <div class="hero-copy"><p class="eyebrow"><span class="status-dot"></span> Юридическая помощь понятным языком</p>
 <h1 id="hero-title">Есть проблема?<br> Разберёмся,<br> <span class="accent-word">что делать.</span></h1>
-<p class="hero-description">Ваш лёгкий помощник в юридических вопросах. Ответьте на несколько простых вопросов — и узнайте, как действовать именно в вашей ситуации.</p>
+<p class="hero-description">Карманный помощник в юридических вопросах. Выберите проблему, ответьте на вопросы и получите краткую оценку своей ситуации бесплатно.</p>
 <a class="button button-primary" href="#topics">Разобраться в своей ситуации <svg class="icon" aria-hidden="true"><use href="#icon-arrow"/></svg></a>
-<p class="hero-note"><svg class="icon" aria-hidden="true"><use href="#icon-check"/></svg> Без регистрации <span>·</span> Краткий вывод бесплатно</p></div>
+<p class="hero-note"><span class="hero-note-item"><svg class="icon" aria-hidden="true"><use href="#icon-check"/></svg> Без регистрации</span><span class="hero-note-item">Краткий вывод бесплатно</span></p></div>
 <div class="journey-illustration" role="img" aria-label="Пример пути: ваша проблема, простые вопросы, понятный следующий шаг">
 <div class="illustration-caption"><span class="tiny-cross">+</span> Сложную ситуацию — по простым шагам</div><div class="journey-orbit" aria-hidden="true"></div>
 <div class="floating-label"><span class="status-dot"></span> Вы не один на один с проблемой</div>
@@ -43,7 +43,7 @@
 <div class="benefit-strip wrap" aria-label="Преимущества"><p><span>01</span> Простые вопросы вместо юридических терминов</p><p><span>02</span> Рекомендации с учётом ваших ответов</p><p><span>03</span> Вы сами выбираете дополнительную помощь</p></div>
 <section class="topics-section section-space wrap" id="topics" tabindex="-1" aria-labelledby="topics-title">
 <div class="section-heading"><div><p class="eyebrow">НАЧНЁМ С ВАШЕЙ СИТУАЦИИ</p><h2 id="topics-title">Что вас беспокоит?</h2></div><p>Выберите тему, а затем подходящую проблему.<br> Дальше мы подскажем, куда двигаться.</p></div>
-<form class="topic-search" role="search" id="topic-search" hidden><svg class="icon" aria-hidden="true"><use href="#icon-search"/></svg><label class="sr-only" for="searchProblem">Найти тему или проблему</label><input id="searchProblem" type="search" placeholder="Например, судебный приказ, работа или автомобиль" autocomplete="off" aria-controls="topics-grid"><button type="submit" class="search-submit">Найти <svg class="icon" aria-hidden="true"><use href="#icon-arrow"/></svg></button></form>
+<form class="topic-search" role="search" id="topic-search" hidden><svg class="icon" aria-hidden="true"><use href="#icon-search"/></svg><label class="sr-only" for="searchProblem">Найти тему или проблему</label><input id="searchProblem" type="search" placeholder="Например, долг или алименты" autocomplete="off" aria-controls="topics-grid"><button type="submit" class="search-submit">Найти <svg class="icon" aria-hidden="true"><use href="#icon-arrow"/></svg></button></form>
 <noscript><p class="topics-footnote">Выберите подходящий опрос в списке ниже.</p></noscript>
 <p id="search-status" class="search-status" role="status" aria-live="polite"></p>
 <div class="topics-grid" id="topics-grid">
@@ -59,22 +59,23 @@
 <p class="topics-footnote">Не знаете юридическое название? Ищите по тому, что произошло: покупка, долг, семья, работа.</p>
 </section>
 <section class="how-section" id="how-it-works" aria-labelledby="how-title"><div class="wrap section-space">
-<div class="section-heading"><div><p class="eyebrow">ВСЁ ПРОЩЕ, ЧЕМ КАЖЕТСЯ</p><h2 id="how-title">От вопроса — к понятному плану</h2></div><a class="text-link" href="#topics">Давайте начнём <svg class="icon" aria-hidden="true"><use href="#icon-arrow"/></svg></a></div>
-<ol class="steps"><li><span class="step-number">1</span><h3>Расскажите, что случилось</h3><p>Выберите проблему и отвечайте на простые вопросы. Следующий шаг зависит от вашего ответа.</p></li><li><span class="step-number">2</span><h3>Узнайте свои возможности</h3><p>Получите краткий вывод и оценку ситуации: что в вашу пользу, что может помешать и какие есть перспективы.</p><span class="free-label">Бесплатно</span></li><li><span class="step-number">3</span><h3>Выберите помощь, если нужна</h3><p>После опроса можно отдельно оплатить подробную консультацию, план действий или образцы документов.</p></li></ol>
+<div class="section-heading"><div><p class="eyebrow">ВСЁ ПРОЩЕ, ЧЕМ КАЖЕТСЯ</p><h2 id="how-title">Три шага, чтобы разобраться</h2></div><a class="text-link" href="#topics">Давайте начнём <svg class="icon" aria-hidden="true"><use href="#icon-arrow"/></svg></a></div>
+<ol class="steps"><li><span class="step-number">1</span><h3>Расскажите, что случилось</h3><p>Выберите проблему и отвечайте на простые вопросы. Следующий шаг зависит от вашего ответа.</p></li><li><span class="step-number">2</span><h3>Узнайте свои возможности</h3><p>Прочитайте краткий вывод по вашим ответам. Оценка появится в конце выбранного пути, когда вы ответите на все его вопросы.</p><span class="free-label">Бесплатно</span></li><li><span class="step-number">3</span><h3>Выберите помощь, если нужна</h3><p>На странице результата сравните три варианта дополнительной помощи. Состав и стоимость указаны в карточках пакетов.</p></li></ol>
 </div></section>
 <section class="help-section section-space wrap" id="help" aria-labelledby="help-title">
-<div class="section-heading"><div><p class="eyebrow">ПОДДЕРЖКА ДЛЯ СЛЕДУЮЩЕГО ШАГА</p><h2 id="help-title">Понять ситуацию.<br> И перейти к действиям.</h2></div><p>Краткий вывод — бесплатно.<br> Если нужна подробная помощь, выбирайте<br> один вариант, несколько или всё вместе.</p></div>
+<div class="section-heading"><div><p class="eyebrow">ПОДДЕРЖКА ДЛЯ СЛЕДУЮЩЕГО ШАГА</p><h2 id="help-title">Понять ситуацию.<br> И перейти к действиям.</h2></div><p>Краткий вывод — бесплатно.<br> Если нужна подробная помощь, выбирайте<br> подходящий пакет.</p></div>
 <div class="help-grid">
 <article class="help-card"><svg class="icon help-icon" aria-hidden="true"><use href="#icon-chat"/></svg><span class="help-tag">Разобраться в деталях</span><h3>Письменная <br> консультация</h3><p>Подробные пояснения с учётом ваших ответов. Чтобы понимать свои права и возможные варианты действий.</p><a href="#topics" class="text-link">Начать с опроса <svg class="icon" aria-hidden="true"><use href="#icon-arrow"/></svg></a></article>
 <article class="help-card"><svg class="icon help-icon" aria-hidden="true"><use href="#icon-plan"/></svg><span class="help-tag">Действовать по порядку</span><h3>Пошаговый <br> план действий</h3><p>Что делать сначала и что потом: куда обратиться, что подготовить и на какие обстоятельства обратить внимание.</p><a href="#topics" class="text-link">Начать с опроса <svg class="icon" aria-hidden="true"><use href="#icon-arrow"/></svg></a></article>
 <article class="help-card"><svg class="icon help-icon" aria-hidden="true"><use href="#icon-document"/></svg><span class="help-tag">Подготовить нужное</span><h3>Образцы <br> документов</h3><p>Документы для вашей ситуации с полями для самостоятельного заполнения. Не придётся начинать с чистого листа.</p><a href="#topics" class="text-link">Начать с опроса <svg class="icon" aria-hidden="true"><use href="#icon-arrow"/></svg></a></article>
-</div><p class="purchase-note">Состав и стоимость дополнительных материалов вы увидите после опроса, до оплаты.</p>
+</div><p class="purchase-note">Сейчас доступны опросы и краткие выводы. Заказ пакета можно сохранить, если для него указана цена. Оплата и получение платных материалов пока недоступны.</p>
 </section>
 <section class="faq-section wrap" aria-labelledby="faq-title"><div><p class="eyebrow">ОСТАЛИСЬ ВОПРОСЫ?</p><h2 id="faq-title">Давайте поясним</h2></div><div class="faq-list">
-<details><summary>Нужно ли платить, чтобы начать?<span aria-hidden="true">+</span></summary><p>Нет. Выбор темы, прохождение опроса и краткий вывод бесплатны. Подробную консультацию, план действий и образцы документов можно выбрать и оплатить после получения результата.</p></details>
+<details><summary>Нужно ли платить, чтобы начать?<span aria-hidden="true">+</span></summary><p>Нет. Выбор темы, прохождение опроса и краткий вывод бесплатны. Дополнительная помощь предлагается отдельно на странице результата. Сейчас приём оплаты ещё недоступен.</p></details>
 <details><summary>Нужно ли разбираться в законах?<span aria-hidden="true">+</span></summary><p>Нет. Опрос построен вокруг событий вашей жизни. Просто выбирайте ответы, которые описывают вашу ситуацию.</p></details>
-<details><summary>Что я получу после опроса?<span aria-hidden="true">+</span></summary><p>Краткую оценку вашей ситуации с положительными и отрицательными факторами. Если потребуется больше подробностей, на странице результата можно выбрать дополнительные материалы.</p></details>
-<details><summary>Можно ли выбрать только документы?<span aria-hidden="true">+</span></summary><p>Да, образцы документов — отдельный вариант помощи. Вы выбираете нужные материалы на странице результата. В образцах останется заполнить поля с вашими данными.</p></details>
+<details><summary>Что я получу после опроса?<span aria-hidden="true">+</span></summary><p>Краткий вывод по вашим ответам и оценку перспектив, если она указана в материалах опроса. Результат появляется после последнего вопроса вашей ветки.</p></details>
+<details><summary>Чем отличаются варианты помощи?<span aria-hidden="true">+</span></summary><p>Есть три пакета: консультация с планом действий, план с подготовкой документов и полный комплект из трёх услуг. Выберите подходящий состав на странице результата.</p></details>
+<details><summary>Можно ли вернуться и изменить ответ?<span aria-hidden="true">+</span></summary><p>Да. Нажмите «Предыдущий вопрос» или начните опрос заново. Незавершённое прохождение сохраняется в текущем браузере, пока доступна его сессия.</p></details>
 </div></section>
 <section class="closing-section wrap"><div class="closing-inner"><div><p class="eyebrow">ПЕРВЫЙ ШАГ УЖЕ РЯДОМ</p><h2>Не знаете, с чего начать?<br> Начните со своей ситуации.</h2><p>Один простой вопрос за другим. Мы поможем разобраться.</p></div><a class="button button-primary" href="#topics">Выбрать проблему <svg class="icon" aria-hidden="true"><use href="#icon-arrow"/></svg></a></div></section>
 </main>

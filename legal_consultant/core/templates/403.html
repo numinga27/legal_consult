@@ -1,0 +1,3 @@
+{% extends "user/site_base.html" %}
+{% block title %}Страница недоступна — Карманный юрист{% endblock %}
+{% block content %}<section class="panel empty-state"><p class="error-code" aria-hidden="true">403</p><h1>Не удалось открыть страницу</h1><p>Доступ к этой странице ограничен или форма устарела. Вернитесь на главную и откройте нужный раздел заново.</p><a class="primary" href="{% url 'core:user_select_problem' %}">На главную →</a></section>{% endblock %}
