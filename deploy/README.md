@@ -49,3 +49,24 @@ Dependencies use the existing server virtualenv and are not silently upgraded.
 If a new feature needs another dependency, install and verify it explicitly.
 Release/backup cleanup is also an explicit maintenance operation. HTTPS is not
 configured by these scripts; the existing HTTP address remains in use.
+
+## Verified rollout — 2026-09-15
+
+The initial rollout of `b0cb774` passed all 37 core tests on the server,
+verified the SQLite backup, applied migrations and returned the matching
+release from the public health endpoint. Nginx now serves the collected CSS
+successfully. The timer is enabled and its scheduled service runs exit cleanly.
+
+Public entry points:
+
+- Site: http://51.250.99.226/
+- Imported court-order questionnaire: http://51.250.99.226/questionnaire/17/
+- Owner import (staff login required): http://51.250.99.226/admin-import/
+- Deployment readback: http://51.250.99.226/healthz/
+
+Production questionnaire IDs differ from the local RAM preview: court order
+is **17** on this server; existing questionnaire **10** is child support.
+The seven existing questionnaires and existing users/payments were preserved.
+Installing changes to the deployment scripts or systemd units themselves
+requires updating their installed copies; normal application commits are
+picked up automatically from `main`.
