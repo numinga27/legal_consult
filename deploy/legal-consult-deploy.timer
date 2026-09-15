@@ -1,0 +1,11 @@
+[Unit]
+Description=Check legal_consult main for a new release
+
+[Timer]
+OnBootSec=2min
+OnUnitInactiveSec=2min
+AccuracySec=10s
+Unit=legal-consult-deploy.service
+
+[Install]
+WantedBy=timers.target
