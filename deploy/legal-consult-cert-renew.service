@@ -1,0 +1,7 @@
+[Unit]
+Description=Renew legal consult HTTPS certificate
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/legal-consult-certbot/bin/certbot renew --quiet --deploy-hook "/usr/sbin/nginx -t && /bin/systemctl reload nginx"

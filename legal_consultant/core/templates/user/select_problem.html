@@ -21,7 +21,7 @@
 <header class="site-header"><div class="wrap header-inner">
 {% include "user/brand.html" %}
 <nav class="desktop-nav" aria-label="Основная навигация"><a href="#topics">С чем поможем</a><a href="#how-it-works">Как это работает</a><a href="#help">Что вы получите</a><a href="{% url 'core:help_orders' %}">Мои заказы</a></nav>
-<a class="button button-small button-outline" href="#topics">Начать бесплатно <svg class="icon" aria-hidden="true"><use href="#icon-arrow"/></svg></a>
+<a class="button button-small button-outline" href="{% if user.is_authenticated %}{% url 'core:help_orders' %}{% else %}{% url 'core:account_login' %}{% endif %}">{% if user.is_authenticated %}Мой кабинет{% else %}Войти{% endif %} <svg class="icon" aria-hidden="true"><use href="#icon-arrow"/></svg></a>
 </div></header>
 <main id="main" tabindex="-1">
 <section class="hero wrap" aria-labelledby="hero-title">

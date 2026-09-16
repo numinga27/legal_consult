@@ -1,11 +1,15 @@
 from django.urls import path
 from . import views
-from . import import_views, guided_views, help_views, owner_views
+from . import import_views, guided_views, help_views, owner_views, account_views
 from .health import health
 
 app_name = 'core'
 
 urlpatterns = [
+    path('account/login/', account_views.account_auth, name='account_login'),
+    path('account/register/', account_views.account_auth, {'mode': 'register'}, name='account_register'),
+    path('account/logout/', account_views.account_logout, name='account_logout'),
+    path('account/results/<uuid:consultation_id>/', help_views.consultation_detail, name='consultation_detail'),
     path('healthz/', health, name='health'),
     path('guided/<int:q_id>/help/<int:bundle_index>/', help_views.select_help, name='select_help'),
     path('help/orders/', help_views.help_orders, name='help_orders'),

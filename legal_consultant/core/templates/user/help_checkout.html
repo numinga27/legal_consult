@@ -6,6 +6,6 @@
 <section class="panel"><p class="muted">{{ questionnaire.name }}</p><h1>{{ offer.title }}</h1><div class="package-summary"><ul>{% for service in offer.services %}<li>{{ service }}</li>{% endfor %}</ul><p class="offer-price"><span class="price-caption">Стоимость пакета</span>{{ offer.price }} ₽</p></div>
 <h2>Контактные данные</h2><p class="muted">Они будут сохранены вместе с выбранным пакетом.</p><form method="post" class="customer-form">{% csrf_token %}<input type="hidden" name="revision" value="{{ revision }}"><input type="hidden" name="selection" value="{{ selection }}">
 {% for field in form %}<div class="customer-field{% if field.errors %} field-invalid{% endif %}">{{ field.label_tag }}{{ field }}{{ field.errors }}</div>{% endfor %}
-<p class="notice">Сейчас можно сохранить заказ без оплаты. Приём оплаты и получение материалов пока недоступны.</p><button class="primary" type="submit">Сохранить заказ</button><p class="form-note">Заказ появится в разделе «Мои заказы» в этом браузере.</p></form></section>
+<p class="notice">Сейчас можно сохранить заказ без оплаты. Приём оплаты и получение материалов пока недоступны.</p><button class="primary" type="submit">Сохранить заказ</button><p class="form-note">{% if user.is_authenticated %}Заказ сохранится в вашем аккаунте в разделе «Мои заказы».{% else %}После сохранения заказа можно зарегистрироваться и перенести его в личный кабинет.{% endif %}</p></form></section>
 
 {% endblock %}

@@ -1,12 +1,47 @@
 from django.db import models
+from django.conf import settings
 from django.utils import timezone
 import uuid
+
+
+class CustomerAccount(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='customer_account')
+    email = models.EmailField(unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class AccountAttempt(models.Model):
+    key = models.CharField(max_length=64, primary_key=True)
+    started_at = models.DateTimeField(default=timezone.now)
+    count = models.PositiveIntegerField(default=0)
+
+
+class Consultation(models.Model):
+    """Immutable result and answer snapshot; guest access uses an unguessable session owner."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name='consultations')
+    owner_id = models.UUIDField(db_index=True)
+    questionnaire = models.ForeignKey('Questionnaire', null=True, on_delete=models.SET_NULL)
+    fingerprint = models.CharField(max_length=64, unique=True)
+    title = models.CharField(max_length=200)
+    answers = models.JSONField(default=list)
+    result_code = models.CharField(max_length=100)
+    result_title = models.TextField()
+    short_text = models.TextField()
+    private_text = models.TextField(blank=True)
+    completed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-completed_at']
 
 
 class HelpOrder(models.Model):
     """Unpaid bundle reservation. A payment provider must be integrated separately."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     owner_id = models.UUIDField(db_index=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name='help_orders')
+    consultation = models.ForeignKey(Consultation, null=True, blank=True, on_delete=models.SET_NULL, related_name='orders')
+    private_text = models.TextField(blank=True)
     fingerprint = models.CharField(max_length=64, unique=True)
     questionnaire = models.ForeignKey('Questionnaire', on_delete=models.PROTECT)
     result_code = models.CharField(max_length=100)
@@ -20,6 +55,22 @@ class HelpOrder(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+
+
+class OrderPayment(models.Model):
+    """Only trusted server-side payment integration may create confirmation records."""
+    order = models.OneToOneField(HelpOrder, on_delete=models.PROTECT, related_name='payment_confirmation')
+    provider = models.CharField(max_length=80)
+    transaction_id = models.CharField(max_length=200, unique=True)
+    status = models.CharField(max_length=12, choices=[('paid', 'Оплачен'), ('refunded', 'Возврат')])
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    currency = models.CharField(max_length=3, default='RUB')
+    verified_at = models.DateTimeField()
+
+    @property
+    def grants_access(self):
+        return (self.status == 'paid' and self.amount == self.order.amount and self.currency == 'RUB'
+                and bool(self.provider and self.transaction_id and self.verified_at))
 
 class LegalDirection(models.Model):
     """

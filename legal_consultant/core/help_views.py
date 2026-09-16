@@ -2,17 +2,18 @@
 import hashlib
 import json
 import re
-from uuid import uuid4
 
 from django import forms
+from django.core.paginator import Paginator
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_http_methods
 
 from .guided_views import imported, position
-from .models import HelpOrder, Questionnaire
+from .models import HelpOrder, Questionnaire, Consultation
 from .paid_help import help_offers
+from .account_history import capture_result, session_owner, owned_records, order_access
 
 
 class CustomerForm(forms.Form):
@@ -45,19 +46,22 @@ def select_help(request, q_id, bundle_index):
         raise Http404
     offer = offers[bundle_index]
     source = questionnaire.workflow['conclusions'][current[7:]]
-    owner_id = request.session.get('help_owner_id')
-    if not owner_id:
-        owner_id = request.session['help_owner_id'] = str(uuid4())
+    owner_id = session_owner(request)
+    consultation = capture_result(request, questionnaire, questionnaire.workflow, state, current)
     # Bind the form to the current path and published package, not posted price/result IDs.
-    context = [owner_id, q_id, questionnaire.workflow, state.get('history', []), bundle_index]
+    context = [owner_id, q_id, questionnaire.workflow, state.get('history', []), state.get('attempt_id'), bundle_index]
     fingerprint = hashlib.sha256(json.dumps(context, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
-    form = CustomerForm(request.POST if request.method == 'POST' else None)
+    form = CustomerForm(request.POST if request.method == 'POST' else None,
+                        initial={'email': request.user.email} if request.user.is_authenticated else None)
     if request.method == 'POST':
         if request.POST.get('revision') != str(state.get('revision', 0)) or request.POST.get('selection') != fingerprint:
             return redirect('core:guided_questionnaire', q_id=q_id)
         if form.is_valid():
             order, _ = HelpOrder.objects.get_or_create(fingerprint=fingerprint, defaults={
                 'owner_id': owner_id, 'questionnaire': questionnaire,
+                'user': request.user if request.user.is_authenticated else None,
+                'consultation': consultation,
+                'private_text': source.get('full_text', '') if bundle_index in (0, 2) else '',
                 'result_code': current[7:], 'bundle_index': bundle_index,
                 'summary': {'questionnaire': questionnaire.name, 'result': source['title'],
                             'title': offer['title'], 'services': list(offer['services'])},
@@ -73,16 +77,35 @@ def select_help(request, q_id, bundle_index):
 @never_cache
 @require_http_methods(['GET'])
 def help_order(request, order_id):
-    owner_id = request.session.get('help_owner_id')
-    if not owner_id:
-        raise Http404
-    order = get_object_or_404(HelpOrder, pk=order_id, owner_id=owner_id)
-    return render(request, 'user/help_orders.html', {'orders': [order], 'detail': True})
+    order = get_object_or_404(owned_records(HelpOrder, request).select_related('payment_confirmation', 'consultation'), pk=order_id)
+    order.access = order_access(order)
+    return render(request, 'user/order_detail.html', {'order': order})
 
 
 @never_cache
 @require_http_methods(['GET'])
 def help_orders(request):
-    owner_id = request.session.get('help_owner_id')
-    orders = HelpOrder.objects.filter(owner_id=owner_id)[:50] if owner_id else []
-    return render(request, 'user/help_orders.html', {'orders': orders})
+    if not request.user.is_authenticated:
+        return render(request, 'user/help_orders.html', {'guest': True})
+    orders = owned_records(HelpOrder, request).select_related('payment_confirmation', 'consultation')
+    consultations = owned_records(Consultation, request)
+    tab = 'orders' if request.GET.get('tab') == 'orders' else 'results'
+    page = Paginator(orders if tab == 'orders' else consultations, 10).get_page(request.GET.get('page'))
+    if tab == 'orders':
+        for order in page:
+            order.access = order_access(order)
+    return render(request, 'user/help_orders.html', {
+        'page': page, 'tab': tab, 'results_count': consultations.count(), 'orders_count': orders.count(),
+    })
+
+
+@never_cache
+@require_http_methods(['GET'])
+def consultation_detail(request, consultation_id):
+    if not request.user.is_authenticated:
+        return redirect('core:account_login')
+    consultation = get_object_or_404(owned_records(Consultation, request), pk=consultation_id)
+    orders = list(owned_records(HelpOrder, request).filter(consultation=consultation).select_related('payment_confirmation'))
+    for order in orders:
+        order.access = order_access(order)
+    return render(request, 'user/consultation_detail.html', {'consultation': consultation, 'orders': orders})

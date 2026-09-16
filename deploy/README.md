@@ -47,8 +47,39 @@ once; deployment never re-seeds or overwrites owner-managed questionnaires.
 
 Dependencies use the existing server virtualenv and are not silently upgraded.
 If a new feature needs another dependency, install and verify it explicitly.
-Release/backup cleanup is also an explicit maintenance operation. HTTPS is not
-configured by these scripts; the existing HTTP address remains in use.
+Release/backup cleanup is also an explicit maintenance operation. HTTPS is
+configured separately on this server, as documented below.
+
+## HTTPS and customer accounts — 2026-09-16
+
+Public address: https://51.250.99.226/ (HTTP redirects with 308).
+The owner explicitly approved Let's Encrypt terms and certificate issuance.
+Certbot 5.8.0 is installed in `/opt/legal-consult-certbot`, independently of
+the application virtualenv. The `legal-consult-ip` IP certificate uses the
+short-lived profile. Its first expiry is 2026-09-23; renewal is essential.
+
+Nginx uses `/etc/letsencrypt/live/legal-consult-ip/fullchain.pem` and
+`privkey.pem`; keep the private key on the server, outside Git. HTTP ACME
+requests under `/.well-known/acme-challenge/` are served from
+`/var/www/legal-consult-acme`. Other HTTP paths redirect to HTTPS. The TLS
+proxy overwrites `X-Forwarded-Proto`; Gunicorn remains on loopback only.
+Private runtime configuration sets `DJANGO_HTTPS=1` and includes the HTTPS
+origin in `DJANGO_CSRF_ORIGINS`. This enables Secure session/CSRF cookies.
+Public registration fails closed without HTTPS and Secure session cookies.
+
+`legal-consult-cert-renew.timer` checks twice daily, with up to 30 minutes
+randomization and persistent catch-up. A successful renewal validates and
+reloads Nginx. Installed units are mirrored here; normal Git deployment does
+not install systemd/Nginx changes automatically. The existing Nginx backup
+is private at `~numinga/.local/share/legal-consult-deploy/before-https-nginx.conf`.
+
+```sh
+sudo systemctl status legal-consult-cert-renew.timer
+sudo /opt/legal-consult-certbot/bin/certbot renew --dry-run --cert-name legal-consult-ip
+```
+
+Initial issuance, trusted HTTPS connection, and simulated renewal were
+verified. See `CUSTOMER_ACCOUNTS.md` for account ownership and payment gates.
 
 ## Verified rollout — 2026-09-15
 

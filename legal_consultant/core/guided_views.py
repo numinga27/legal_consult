@@ -8,6 +8,7 @@ from .models import Questionnaire
 from .questionnaire_import import FORMAT
 from .paid_help import help_offers
 from .questionnaire_runtime import runtime_package
+from .account_history import capture_result
 
 
 def imported(questionnaire):
@@ -89,12 +90,13 @@ def guided_questionnaire(request, q_id):
         request.session[state_key] = state
         return redirect('core:guided_questionnaire', q_id=q_id)
     request.session[state_key] = state
-    node, result = None, None
+    node, result, consultation = None, None, None
     unavailable = current == 'unavailable'
     if current.startswith('result:'):
         source = package['conclusions'][current[7:]]
         # Paid text and unassigned Word prices never leave the server in the public result.
         result = {key: source[key] for key in ['title', 'short_text']}
+        consultation = capture_result(request, questionnaire, package, state, current)
     elif not unavailable:
         node = package['nodes'][current]
         # Stop a cycle or an empty branch without presenting an invented legal assessment.
@@ -104,4 +106,5 @@ def guided_questionnaire(request, q_id):
         'step': len(history) + 1, 'can_back': bool(history),
         'offers': help_offers(package) if result else [],
         'unavailable': unavailable,
+        'consultation': consultation,
     })
