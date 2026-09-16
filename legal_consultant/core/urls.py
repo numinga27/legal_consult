@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from . import import_views, guided_views, help_views
+from . import import_views, guided_views, help_views, owner_views
 from .health import health
 
 app_name = 'core'
@@ -11,10 +11,11 @@ urlpatterns = [
     path('help/orders/', help_views.help_orders, name='help_orders'),
     path('help/orders/<uuid:order_id>/', help_views.help_order, name='help_order'),
     path('admin-import/', import_views.import_questionnaire, name='import_questionnaire'),
+    path('admin-import/guide/', owner_views.import_guide, name='import_guide'),
     path('guided/<int:q_id>/', guided_views.guided_questionnaire, name='guided_questionnaire'),
     # Админ-панель
     path('admin-login/', views.admin_login, name='admin_login'),
-    path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard'),
+    path('admin-dashboard/', owner_views.owner_dashboard, name='admin_dashboard'),
     path('admin-logout/', views.admin_logout, name='admin_logout'),
     path('api/sync-workflow/', views.api_sync_workflow, name='api_sync_workflow'),
     path('api/load-workflow/<int:q_id>/', views.api_load_workflow, name='api_load_workflow'),

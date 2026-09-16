@@ -22,15 +22,13 @@
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     
     {% block extra_css %}{% endblock %}
-    <link rel="stylesheet" href="{% static 'css/admin-polish.css' %}?v=20260914">
-</head>
+    <link rel="stylesheet" href="{% static 'css/admin-polish.css' %}?v=20260916">
+<link rel="stylesheet" href="{% static 'css/design-system.css' %}?v=20260916"></head>
 <body>
     <!-- Навигация -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
-            <a class="navbar-brand" href="{% url 'core:user_select_problem' %}">
-                <i class="fas fa-gavel"></i> Карманный юрист
-            </a>
+            {% include "user/brand.html" %}
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -55,7 +53,7 @@
                                         </a>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" href="{% url 'core:admin_add_questionnaire' %}">
+                                        <a class="dropdown-item" href="{% url 'core:import_questionnaire' %}">
                                             <i class="fas fa-plus-circle"></i> Создать опросник
                                         </a>
                                     </li>

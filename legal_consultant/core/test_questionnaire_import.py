@@ -315,6 +315,10 @@ class ImportedQuestionnaireTests(TestCase):
         self.client.force_login(user)
         self.assertEqual(self.client.get(reverse('core:api_load_workflow', args=[self.questionnaire.id])).status_code, 403)
         for name in ['api_save_workflow', 'api_sync_workflow']:
+            self.assertEqual(self.client.post(reverse('core:' + name), json.dumps({'questionnaire_id': self.questionnaire.id, 'workflow': {'nodes': []}}), content_type='application/json').status_code, 403)
+        user.is_staff = True
+        user.save()
+        for name in ['api_save_workflow', 'api_sync_workflow']:
             self.assertEqual(self.client.post(reverse('core:' + name), json.dumps({'questionnaire_id': self.questionnaire.id, 'workflow': {'nodes': []}}), content_type='application/json').status_code, 409)
         self.questionnaire.refresh_from_db()
         self.assertEqual(self.questionnaire.workflow['format'], FORMAT)

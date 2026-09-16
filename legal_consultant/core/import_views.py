@@ -2,9 +2,10 @@ import json
 from uuid import uuid4
 from functools import wraps
 
-from django.http import HttpResponse, HttpResponseForbidden
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods
+from django.views.decorators.cache import never_cache
 
 from .models import LegalDirection, Questionnaire
 from .paid_help import help_offers
@@ -19,12 +20,13 @@ def staff_only(view):
         if not request.user.is_authenticated:
             return redirect('core:admin_login')
         if not request.user.is_staff:
-            return HttpResponseForbidden('Доступ только владельцу и администраторам.')
+            return render(request, '403.html', status=403)
         return view(request, *args, **kwargs)
     return wrapped
 
 
 @staff_only
+@never_cache
 @require_http_methods(['GET', 'POST'])
 def import_questionnaire(request):
     package = request.session.get('questionnaire_import_draft')
@@ -43,6 +45,10 @@ def import_questionnaire(request):
     if request.method == 'POST':
         action = request.POST.get('action')
         try:
+            if action == 'clear':
+                for key in ('questionnaire_import_draft', 'questionnaire_import_revision', 'questionnaire_import_direction'):
+                    request.session.pop(key, None)
+                return redirect('core:import_questionnaire')
             if action in {'review', 'save', 'download'} and request.POST.get('draft_revision') != draft_revision:
                 raise ImportProblem('Этот просмотр устарел: в другой вкладке открыта новая версия. Проверьте текущий опросник перед сохранением.')
             if action == 'analyze':
@@ -77,7 +83,8 @@ def import_questionnaire(request):
                     node['text'] = request.POST.get(f'q{i}', node['text']).strip()
                     for j, answer in enumerate(node['answers']):
                         answer['target'] = request.POST.get(f't{i}_{j}', answer['target'])
-                        answer['intermediate_text'] = request.POST.get(f'h{i}_{j}', answer['intermediate_text'])
+                        answer['intermediate_text'] = request.POST.get(f'h{i}_{j}', answer.get('intermediate_text', ''))
+                        answer['text'] = request.POST.get(f'a{i}_{j}', answer['text']).strip()
                 for i, result in enumerate(package['conclusions'].values()):
                     for field in ['title', 'short_text', 'full_text']:
                         result[field] = request.POST.get(f'c{i}_{field}', result[field])

@@ -18,6 +18,7 @@ from .models import (
 from .pdf_generator import generate_document_for_user
 from .ai_integration import get_ai_consultant
 from .guided_views import imported, reset_completed_on_entry
+from .import_views import staff_only
 from django.urls import reverse
 
 
@@ -51,7 +52,7 @@ def admin_login(request):
     return render(request, 'admin/login.html')
 
 
-@login_required
+@staff_only
 def admin_dashboard(request):
     """Главная панель администратора"""
     if not request.user.is_staff:
@@ -75,14 +76,14 @@ def admin_dashboard(request):
     return render(request, 'admin/dashboard.html', context)
 
 
-@login_required
+@staff_only
 def admin_logout(request):
     """Выход из админ-панели"""
     logout(request)
     return redirect('core:admin_login')
 
 
-@login_required
+@staff_only
 def admin_add_questionnaire(request):
     """Создание нового опросника"""
     if request.method == 'POST':
@@ -104,7 +105,7 @@ def admin_add_questionnaire(request):
     return render(request, 'admin/add_questionnaire.html', {'directions': directions})
 
 
-@login_required
+@staff_only
 def admin_questionnaire(request, q_id):
     """Редактирование опросника"""
     questionnaire = get_object_or_404(Questionnaire, id=q_id)
@@ -199,7 +200,7 @@ def admin_questionnaire(request, q_id):
     return render(request, 'admin/questionnaire_edit.html', context)
 
 
-@login_required
+@staff_only
 def admin_delete_question(request, q_id):
     """Удаление вопроса"""
     question = get_object_or_404(Question, id=q_id)
@@ -211,7 +212,7 @@ def admin_delete_question(request, q_id):
     return redirect('core:admin_questionnaire', q_id=questionnaire_id)
 
 
-@login_required
+@staff_only
 def admin_delete_answer(request, a_id):
     """Удаление ответа"""
     answer = get_object_or_404(Answer, id=a_id)
@@ -223,7 +224,7 @@ def admin_delete_answer(request, a_id):
     return redirect('core:admin_questionnaire', q_id=questionnaire_id)
 
 
-@login_required
+@staff_only
 def admin_generate_with_ai(request):
     """Генерация опросника с помощью AI"""
     if request.method == 'POST':
@@ -307,7 +308,7 @@ def admin_generate_with_ai(request):
     return render(request, 'admin/generate_ai.html', {'directions': directions})
 
 
-@login_required
+@staff_only
 def admin_test_rules(request):
     """Страница тестирования правил AI"""
     if not request.user.is_staff:
@@ -523,7 +524,7 @@ def api_test_rules(request):
         logger.error(f"API test rules error: {e}")
         return JsonResponse({'error': str(e)}, status=500)
 
-@login_required
+@staff_only
 def api_save_workflow(request):
     """API для сохранения визуального алгоритма с синхронизацией с БД"""
     if request.method != 'POST':
@@ -681,7 +682,7 @@ def api_save_workflow(request):
         logger.error(f"Save workflow error: {e}")
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
-@login_required
+@staff_only
 def visual_editor(request, q_id):
     """Визуальный редактор алгоритмов"""
     questionnaire = get_object_or_404(Questionnaire, id=q_id)
@@ -691,7 +692,7 @@ def visual_editor(request, q_id):
         'questionnaire': questionnaire
     })
 
-@login_required
+@staff_only
 def api_load_workflow(request, q_id):
     """API для загрузки сохраненного алгоритма"""
     try:
@@ -710,7 +711,7 @@ def api_load_workflow(request, q_id):
             'error': str(e)
         }, status=500)
 
-@login_required
+@staff_only
 def api_sync_workflow(request):
     """API для синхронизации визуального редактора с БД"""
     if request.method != 'POST':
