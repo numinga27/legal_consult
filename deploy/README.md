@@ -112,3 +112,8 @@ entry point working while accepting ACME challenges for `k-urist.ru` and
 `www.k-urist.ru`. Install the domain certificate only after both A records
 resolve to `51.250.99.226`, then add the domain TLS virtual host and verify it
 before treating `https://www.k-urist.ru/` as canonical.
+
+The staged acceptance plan uses `test.k-urist.ru` on `51.250.99.226` while the
+existing public site remains on Beget. After acceptance, deploy the verified
+release to the client's production IP, archive the old site, and only then
+switch the root and `www` A records.
