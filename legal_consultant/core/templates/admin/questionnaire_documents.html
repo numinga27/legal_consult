@@ -1,0 +1,23 @@
+{% extends 'admin/owner_base.html' %}
+{% block title %}Документы — Панель владельца{% endblock %}
+{% block content %}
+<a class="back-link" href="{% url 'core:admin_dashboard' %}">← Все опросники</a>
+<p class="eyebrow">{{ questionnaire.name }}</p>
+<h1>Документы для выдачи</h1>
+<p class="page-intro">Для каждого документа загрузите оба файла: редактируемый DOCX и готовый PDF. Пользователь получит обе версии после подтверждённой оплаты услуги «Документы».</p>
+{% for message in messages %}<p class="success" role="status">{{ message }}</p>{% endfor %}
+<section class="panel">
+  <h2>{% if document %}Изменить комплект{% else %}Добавить комплект DOCX + PDF{% endif %}</h2>
+  {% if form.errors %}<div class="errors" role="alert">{{ form.errors }}</div>{% endif %}
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {% if document %}<input type="hidden" name="document_id" value="{{ document.id }}">{% endif %}
+    {{ form.as_p }}
+    <div class="actions"><button class="primary" type="submit">Сохранить комплект</button>{% if document %}<a class="secondary" href="{% url 'core:questionnaire_documents' questionnaire.id %}">Отмена</a>{% endif %}</div>
+  </form>
+</section>
+<section class="panel">
+  <h2>Загруженные комплекты</h2>
+  <ul class="import-list">{% for item in documents %}<li><strong>{{ item.title }}</strong> · Вывод {{ item.conclusion.order }}: {{ item.conclusion.title }} · {% if item.is_active %}выдаётся пользователю{% else %}отключён{% endif %} · <a href="?edit={{ item.id }}">Изменить</a></li>{% empty %}<li>Документы ещё не загружены.</li>{% endfor %}</ul>
+</section>
+{% endblock %}

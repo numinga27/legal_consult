@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 from .models import (
     LegalDirection, Questionnaire, Question, Answer, 
-    Conclusion, AnswerConclusion, UserSession, Payment,
+    Conclusion, ConclusionDocument, AnswerConclusion, UserSession, Payment,
     DocumentTemplate, GeneratedDocument, AIRules  # AIRules должен быть здесь один раз
 )
 
@@ -69,17 +69,32 @@ class AnswerAdmin(admin.ModelAdmin):
     next_question_preview.short_description = 'Следующий вопрос'
 
 
+class ConclusionDocumentInline(admin.StackedInline):
+    model = ConclusionDocument
+    extra = 0
+    fields = ['title', 'docx_file', 'pdf_file', 'is_active']
+
+
 @admin.register(Conclusion)
 class ConclusionAdmin(admin.ModelAdmin):
     list_display = ['order', 'title', 'questionnaire', 'price', 'success_rate', 'created_at']
     list_filter = ['questionnaire', 'created_at']
     search_fields = ['title', 'short_text', 'full_text']
     readonly_fields = ['created_at']
+    inlines = [ConclusionDocumentInline]
     fieldsets = (
-        # ... существующие поля ...
+        ('Результат', {
+            'fields': ('questionnaire', 'order', 'title', 'short_text', 'full_text')
+        }),
+        ('Настройки', {
+            'fields': ('is_paid', 'price', 'success_rate', 'pros', 'cons', 'documents')
+        }),
         ('Сбор данных пользователя', {
             'fields': ('user_data_fields',),
             'description': 'Укажите поля, которые пользователь должен заполнить. Формат JSON: [{"name": "full_name", "label": "ФИО", "type": "text", "required": true}]'
+        }),
+        ('Статистика', {
+            'fields': ('views_count', 'purchases_count', 'created_at')
         }),
     )
     
@@ -88,6 +103,15 @@ class ConclusionAdmin(admin.ModelAdmin):
             return format_html('<a href="{}" target="_blank">Скачать</a>', obj.documents.url)
         return "Нет документа"
     document_link.short_description = 'Документ'
+
+
+@admin.register(ConclusionDocument)
+class ConclusionDocumentAdmin(admin.ModelAdmin):
+    list_display = ['title', 'conclusion', 'is_active', 'updated_at']
+    list_filter = ['is_active', 'conclusion__questionnaire']
+    search_fields = ['title', 'conclusion__title', 'conclusion__questionnaire__name']
+    raw_id_fields = ['conclusion']
+    readonly_fields = ['created_at', 'updated_at']
 
 
 @admin.register(AnswerConclusion)

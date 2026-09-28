@@ -5,13 +5,13 @@ import re
 
 from django import forms
 from django.core.paginator import Paginator
-from django.http import Http404
+from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_http_methods
 
 from .guided_views import imported, position
-from .models import HelpOrder, Questionnaire, Consultation
+from .models import ConclusionDocument, HelpOrder, Questionnaire, Consultation
 from .paid_help import help_offers
 from .account_history import capture_result, session_owner, owned_records, order_access
 
@@ -49,7 +49,8 @@ def select_help(request, q_id, bundle_index):
     owner_id = session_owner(request)
     consultation = capture_result(request, questionnaire, questionnaire.workflow, state, current)
     # Bind the form to the current path and published package, not posted price/result IDs.
-    context = [owner_id, q_id, questionnaire.workflow, state.get('history', []), state.get('attempt_id'), bundle_index]
+    context = [owner_id, q_id, questionnaire.workflow, state.get('history', []), state.get('attempt_id'),
+               bundle_index, offer['code'], offer['title']]
     fingerprint = hashlib.sha256(json.dumps(context, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
     form = CustomerForm(request.POST if request.method == 'POST' else None,
                         initial={'email': request.user.email} if request.user.is_authenticated else None)
@@ -61,10 +62,11 @@ def select_help(request, q_id, bundle_index):
                 'owner_id': owner_id, 'questionnaire': questionnaire,
                 'user': request.user if request.user.is_authenticated else None,
                 'consultation': consultation,
-                'private_text': source.get('full_text', '') if bundle_index in (0, 2) else '',
+                'private_text': source.get('full_text', '') if offer['code'] == 'consultation' else '',
                 'result_code': current[7:], 'bundle_index': bundle_index,
                 'summary': {'questionnaire': questionnaire.name, 'result': source['title'],
-                            'title': offer['title'], 'services': list(offer['services'])},
+                            'title': offer['title'], 'services': list(offer['services']),
+                            'service_code': offer['code']},
                 'amount': offer['price'], **form.cleaned_data,
             })
             return redirect('core:help_order', order_id=order.id)
@@ -79,7 +81,51 @@ def select_help(request, q_id, bundle_index):
 def help_order(request, order_id):
     order = get_object_or_404(owned_records(HelpOrder, request).select_related('payment_confirmation', 'consultation'), pk=order_id)
     order.access = order_access(order)
-    return render(request, 'user/order_detail.html', {'order': order})
+    documents = []
+    if order.access == 'paid' and request.user.is_authenticated and _is_documents_order(order):
+        conclusion = _order_conclusion(order)
+        if conclusion:
+            documents = conclusion.download_documents.filter(is_active=True)
+    return render(request, 'user/order_detail.html', {'order': order, 'documents': documents})
+
+
+def _is_documents_order(order):
+    return order.summary.get('service_code') == 'documents' or (
+        'service_code' not in order.summary and order.bundle_index == 2
+    )
+
+
+def _order_conclusion(order):
+    result_codes = list(order.questionnaire.workflow.get('conclusions', {}))
+    try:
+        result_order = result_codes.index(order.result_code) + 1
+    except ValueError:
+        return None
+    return order.questionnaire.conclusions.filter(order=result_order).first()
+
+
+@never_cache
+@require_http_methods(['GET'])
+def download_order_document(request, order_id, document_id, file_kind):
+    if not request.user.is_authenticated:
+        return redirect('core:account_login')
+    order = get_object_or_404(
+        owned_records(HelpOrder, request).select_related('payment_confirmation', 'questionnaire'),
+        pk=order_id,
+    )
+    conclusion = _order_conclusion(order)
+    if order_access(order) != 'paid' or not _is_documents_order(order) or not conclusion:
+        raise Http404
+    document = get_object_or_404(
+        ConclusionDocument,
+        pk=document_id,
+        conclusion=conclusion,
+        is_active=True,
+    )
+    field = document.docx_file if file_kind == 'docx' else document.pdf_file if file_kind == 'pdf' else None
+    if not field:
+        raise Http404
+    return FileResponse(field.open('rb'), as_attachment=True, filename=field.name.rsplit('/', 1)[-1])
 
 
 @never_cache

@@ -4,3 +4,6 @@ __pycache__/
 instance/
 .DS_Store
 uploads/
+legal_consultant/media/
+legal_consultant/protected_media/
+legal_consultant/test_media/

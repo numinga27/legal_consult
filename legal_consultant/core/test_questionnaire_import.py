@@ -263,17 +263,17 @@ class ImportedQuestionnaireTests(TestCase):
         self.assertNotContains(response, 'Объяснение да.')
         self.assertContains(response, 'Цена уточняется', count=3)
 
-    def test_reference_result_has_exact_bundles_without_creating_a_payment(self):
+    def test_reference_result_has_exact_services_without_creating_a_payment(self):
         self.client.get(self.url)
         response = self.post_action('answer', answer=1)
         self.assertContains(response, 'Судебный приказ можно отменить с вероятностью 100%!')
         self.assertContains(response, 'Причина: срок в 10 дней на обжалование приказа не пропущен.')
-        for text in ['Правовая оценка ситуации', 'Документальное сопровождение', 'Максимальная помощь', '298 ₽', '498 ₽', '697 ₽']:
+        for text in ['Письменная консультация', 'Пошаговый план действий', 'Документы', '298 ₽', '498 ₽', '697 ₽']:
             self.assertContains(response, text, count=1)
         self.assertEqual([list(offer['services']) for offer in response.context['offers']], [
-            ['Консультация', 'Пошаговый план действий'],
-            ['Пошаговый план действий', 'Подготовка документов'],
-            ['Консультация', 'Пошаговый план действий', 'Подготовка документов'],
+            ['Письменная консультация'],
+            ['Пошаговый план действий'],
+            ['Документы'],
         ])
         for i in range(3):
             self.assertContains(response, reverse('core:select_help', args=[self.questionnaire.id, i]))

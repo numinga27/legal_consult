@@ -1,7 +1,10 @@
 from django.db import models
 from django.conf import settings
+from django.core.validators import FileExtensionValidator
 from django.utils import timezone
 import uuid
+
+from .storage import protected_document_storage
 
 
 class CustomerAccount(models.Model):
@@ -225,6 +228,40 @@ class Conclusion(models.Model):
 
     def __str__(self):
         return f"Вывод #{self.order}: {self.title}"
+
+
+class ConclusionDocument(models.Model):
+    """A DOCX/PDF pair delivered for the documents service after verified payment."""
+    conclusion = models.ForeignKey(
+        Conclusion,
+        on_delete=models.CASCADE,
+        verbose_name='Вывод',
+        related_name='download_documents',
+    )
+    title = models.CharField('Название документа', max_length=200)
+    docx_file = models.FileField(
+        'Файл DOCX',
+        upload_to='protected/documents/docx/%Y/%m/%d/',
+        storage=protected_document_storage,
+        validators=[FileExtensionValidator(['docx'])],
+    )
+    pdf_file = models.FileField(
+        'Файл PDF',
+        upload_to='protected/documents/pdf/%Y/%m/%d/',
+        storage=protected_document_storage,
+        validators=[FileExtensionValidator(['pdf'])],
+    )
+    is_active = models.BooleanField('Выдавать пользователю', default=True)
+    created_at = models.DateTimeField('Дата добавления', auto_now_add=True)
+    updated_at = models.DateTimeField('Дата изменения', auto_now=True)
+
+    class Meta:
+        verbose_name = 'Комплект DOCX + PDF'
+        verbose_name_plural = 'Комплекты DOCX + PDF'
+        ordering = ['conclusion__order', 'title']
+
+    def __str__(self):
+        return self.title
 
 class AnswerConclusion(models.Model):
     """

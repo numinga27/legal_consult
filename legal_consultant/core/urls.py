@@ -1,4 +1,5 @@
 from django.urls import path
+from django.views.generic import TemplateView
 from . import views
 from . import import_views, guided_views, help_views, owner_views, account_views
 from .health import health
@@ -14,8 +15,11 @@ urlpatterns = [
     path('guided/<int:q_id>/help/<int:bundle_index>/', help_views.select_help, name='select_help'),
     path('help/orders/', help_views.help_orders, name='help_orders'),
     path('help/orders/<uuid:order_id>/', help_views.help_order, name='help_order'),
+    path('help/orders/<uuid:order_id>/documents/<int:document_id>/<str:file_kind>/', help_views.download_order_document, name='download_order_document'),
+    path('requisites/', TemplateView.as_view(template_name='user/requisites.html'), name='requisites'),
     path('admin-import/', import_views.import_questionnaire, name='import_questionnaire'),
     path('admin-import/guide/', owner_views.import_guide, name='import_guide'),
+    path('admin-questionnaires/<int:q_id>/documents/', owner_views.questionnaire_documents, name='questionnaire_documents'),
     path('guided/<int:q_id>/', guided_views.guided_questionnaire, name='guided_questionnaire'),
     # Админ-панель
     path('admin-login/', views.admin_login, name='admin_login'),

@@ -1,7 +1,14 @@
+import shutil
+from decimal import Decimal
+from pathlib import Path
+
+from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, Client
 from django.urls import reverse
+from django.utils import timezone
 
-from .models import HelpOrder, LegalDirection, Payment
+from .models import ConclusionDocument, HelpOrder, LegalDirection, OrderPayment, Payment
 from .questionnaire_import import save_package
 from .test_questionnaire_import import example
 
@@ -75,3 +82,80 @@ class HelpOrdersTests(TestCase):
         self.questionnaire.save()
         order.refresh_from_db()
         self.assertEqual(str(order.amount), '400.00')
+
+    def test_paid_documents_service_delivers_both_files_only_to_owner(self):
+        media_root = Path(__file__).resolve().parent.parent / 'test_media'
+        media_root.mkdir(exist_ok=True)
+        self.addCleanup(shutil.rmtree, media_root, ignore_errors=True)
+        media_settings = self.settings(PROTECTED_MEDIA_ROOT=media_root)
+        media_settings.enable()
+        self.addCleanup(media_settings.disable)
+        user = get_user_model().objects.create_user('document-owner', password='test-only-password')
+        self.client.force_login(user)
+        self.complete()
+        selection = reverse('core:select_help', args=[self.questionnaire.id, 2])
+        response = self.client.get(selection)
+        self.client.post(selection, self.fields(response))
+        order = HelpOrder.objects.get(bundle_index=2)
+        document = ConclusionDocument.objects.create(
+            conclusion=self.questionnaire.conclusions.get(order=1),
+            title='Возражение на судебный приказ',
+            docx_file=SimpleUploadedFile('objection.docx', b'DOCX-CONTENT'),
+            pdf_file=SimpleUploadedFile('objection.pdf', b'PDF-CONTENT'),
+        )
+        OrderPayment.objects.create(
+            order=order,
+            provider='test-provider',
+            transaction_id='document-transaction',
+            status='paid',
+            amount=Decimal('697'),
+            verified_at=timezone.now(),
+        )
+        detail = self.client.get(reverse('core:help_order', args=[order.pk]))
+        self.assertContains(detail, 'Возражение на судебный приказ')
+        for kind, content in [('docx', b'DOCX-CONTENT'), ('pdf', b'PDF-CONTENT')]:
+            url = reverse('core:download_order_document', args=[order.pk, document.pk, kind])
+            response = self.client.get(url)
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(b''.join(response.streaming_content), content)
+            outsider = Client()
+            outsider.force_login(get_user_model().objects.create_user(f'outsider-{kind}'))
+            self.assertEqual(outsider.get(url).status_code, 404)
+
+    def test_owner_can_add_and_edit_required_docx_pdf_pair(self):
+        media_root = Path(__file__).resolve().parent.parent / 'test_media'
+        media_root.mkdir(exist_ok=True)
+        self.addCleanup(shutil.rmtree, media_root, ignore_errors=True)
+        media_settings = self.settings(PROTECTED_MEDIA_ROOT=media_root)
+        media_settings.enable()
+        self.addCleanup(media_settings.disable)
+        self.client.force_login(get_user_model().objects.create_user('document-editor', is_staff=True))
+        conclusion = self.questionnaire.conclusions.get(order=1)
+        url = reverse('core:questionnaire_documents', args=[self.questionnaire.pk])
+        response = self.client.post(url, {
+            'conclusion': conclusion.pk,
+            'title': 'Неполный комплект',
+            'docx_file': SimpleUploadedFile('only.docx', b'DOCX'),
+            'is_active': 'on',
+        })
+        self.assertContains(response, 'Обязательное поле')
+        self.assertEqual(ConclusionDocument.objects.count(), 0)
+        response = self.client.post(url, {
+            'conclusion': conclusion.pk,
+            'title': 'Возражение',
+            'docx_file': SimpleUploadedFile('objection.docx', b'DOCX'),
+            'pdf_file': SimpleUploadedFile('objection.pdf', b'PDF'),
+            'is_active': 'on',
+        })
+        self.assertRedirects(response, url)
+        document = ConclusionDocument.objects.get()
+        response = self.client.post(url, {
+            'document_id': document.pk,
+            'conclusion': conclusion.pk,
+            'title': 'Возражение — новая версия',
+            'is_active': 'on',
+        })
+        self.assertRedirects(response, url)
+        document.refresh_from_db()
+        self.assertEqual(document.title, 'Возражение — новая версия')
+        self.assertTrue(document.docx_file and document.pdf_file)

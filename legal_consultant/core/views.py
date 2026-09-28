@@ -355,7 +355,7 @@ def user_payment(request, conclusion_id):
     """Retired demo checkout must never record fictitious payments."""
     conclusion = get_object_or_404(Conclusion, id=conclusion_id)
     if request.method == 'POST':
-        return JsonResponse({'error': 'Оплата пока не подключена. Выберите пакет на странице результата.'}, status=409)
+        return JsonResponse({'error': 'Оплата пока не подключена. Выберите услугу на странице результата.'}, status=409)
     return redirect('core:guided_questionnaire', q_id=conclusion.questionnaire_id)
 
 

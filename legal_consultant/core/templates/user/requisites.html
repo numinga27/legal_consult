@@ -1,0 +1,13 @@
+{% extends "user/site_base.html" %}
+{% block title %}Реквизиты — Карманный юрист{% endblock %}
+{% block content %}
+<a class="back-link" href="{% url 'core:user_select_problem' %}">← На главную</a>
+<p class="eyebrow">Реквизиты</p>
+<section class="panel">
+  <h1>ООО «ЦИФРОВАЯ ЮРИДИЧЕСКАЯ ЛАБОРАТОРИЯ»</h1>
+  <dl class="order-meta">
+    <div><dt>ИНН</dt><dd>9728134285</dd></div>
+    <div><dt>ОГРН</dt><dd>1247700404137</dd></div>
+  </dl>
+</section>
+{% endblock %}

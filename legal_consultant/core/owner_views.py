@@ -1,4 +1,5 @@
 """Owner catalogue and publication; source content is never regenerated here."""
+from django import forms
 from django.contrib import messages
 from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
@@ -6,7 +7,7 @@ from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_http_methods
 
 from .import_views import staff_only
-from .models import Questionnaire
+from .models import ConclusionDocument, Questionnaire
 from .questionnaire_import import FORMAT, validate_package
 
 
@@ -37,6 +38,7 @@ def owner_dashboard(request):
         item.is_imported = item.workflow.get('format') == FORMAT
         item.question_count = len(item.workflow['nodes']) if item.is_imported else item.questions.count()
         item.result_count = len(item.workflow['conclusions']) if item.is_imported else item.conclusions.count()
+        item.document_count = ConclusionDocument.objects.filter(conclusion__questionnaire=item).count()
     return render(request, 'admin/dashboard.html', {
         'questionnaires': items, 'total': len(items),
         'published': sum(item.is_active for item in items),
@@ -48,3 +50,51 @@ def owner_dashboard(request):
 @never_cache
 def import_guide(request):
     return render(request, 'admin/import_guide.html')
+
+
+class ConclusionDocumentForm(forms.ModelForm):
+    class Meta:
+        model = ConclusionDocument
+        fields = ['conclusion', 'title', 'docx_file', 'pdf_file', 'is_active']
+        widgets = {
+            'docx_file': forms.FileInput(attrs={'accept': '.docx'}),
+            'pdf_file': forms.FileInput(attrs={'accept': '.pdf'}),
+        }
+
+    def __init__(self, *args, questionnaire, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['conclusion'].queryset = questionnaire.conclusions.order_by('order')
+
+
+@staff_only
+@never_cache
+@require_http_methods(['GET', 'POST'])
+def questionnaire_documents(request, q_id):
+    questionnaire = get_object_or_404(Questionnaire, pk=q_id)
+    document = None
+    document_id = request.POST.get('document_id') if request.method == 'POST' else request.GET.get('edit')
+    if document_id:
+        document = get_object_or_404(
+            ConclusionDocument,
+            pk=document_id,
+            conclusion__questionnaire=questionnaire,
+        )
+    form = ConclusionDocumentForm(
+        request.POST or None,
+        request.FILES or None,
+        instance=document,
+        questionnaire=questionnaire,
+    )
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        messages.success(request, 'Комплект DOCX + PDF сохранён.')
+        return redirect('core:questionnaire_documents', q_id=questionnaire.pk)
+    documents = ConclusionDocument.objects.filter(
+        conclusion__questionnaire=questionnaire,
+    ).select_related('conclusion')
+    return render(request, 'admin/questionnaire_documents.html', {
+        'questionnaire': questionnaire,
+        'documents': documents,
+        'document': document,
+        'form': form,
+    })
