@@ -20,18 +20,6 @@ server {
     location / { return 308 https://www.k-urist.ru$request_uri; }
 }
 
-# Temporary acceptance address. The existing www site stays on Beget until the
-# verified release is moved to the client's production IP.
-server {
-    listen 80;
-    server_name test.k-urist.ru;
-    location ^~ /.well-known/acme-challenge/ {
-        root /var/www/legal-consult-acme;
-        default_type text/plain;
-    }
-    location / { return 308 https://test.k-urist.ru$request_uri; }
-}
-
 server {
     listen 443 ssl;
     server_name 51.250.99.226;
