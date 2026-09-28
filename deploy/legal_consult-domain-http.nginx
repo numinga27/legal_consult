@@ -1,0 +1,39 @@
+server {
+    listen 80;
+    server_name 51.250.99.226;
+    location ^~ /.well-known/acme-challenge/ {
+        root /var/www/legal-consult-acme;
+        default_type text/plain;
+    }
+    location / { return 308 https://51.250.99.226$request_uri; }
+}
+
+# This block is installed before DNS cutover. It serves the ACME challenge and
+# sends both domain spellings to the canonical www address.
+server {
+    listen 80;
+    server_name k-urist.ru www.k-urist.ru;
+    location ^~ /.well-known/acme-challenge/ {
+        root /var/www/legal-consult-acme;
+        default_type text/plain;
+    }
+    location / { return 308 https://www.k-urist.ru$request_uri; }
+}
+
+server {
+    listen 443 ssl;
+    server_name 51.250.99.226;
+    ssl_certificate /etc/letsencrypt/live/legal-consult-ip/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/legal-consult-ip/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    client_max_body_size 12m;
+    location /static/ { alias /var/www/legal-consult/current/; }
+    location /media/ { alias /home/numinga/legal_consult/legal_consultant/media/; }
+    location / {
+        proxy_pass http://127.0.0.1:8001;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}

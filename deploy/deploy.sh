@@ -51,6 +51,8 @@ cd "$release/legal_consultant"
 "$python" manage.py check
 "$python" manage.py makemigrations --check --dry-run
 "$python" manage.py test core --noinput --verbosity 1
+mkdir -p "$DJANGO_MEDIA_ROOT" "$DJANGO_PROTECTED_MEDIA_ROOT"
+chmod 700 "$DJANGO_PROTECTED_MEDIA_ROOT"
 "$python" - "$state/backups/$sha.sqlite3" <<'PY'
 import os,sqlite3,sys
 from pathlib import Path

@@ -19,6 +19,8 @@ Paths verified on the existing server:
 - Original checkout and Python environment: `/home/numinga/legal_consult`.
 - Live database: `/home/numinga/legal_consult/legal_consultant/db.sqlite3`.
 - Existing uploads remain at the original `legal_consultant/media` path.
+- Paid DOCX/PDF files remain in the private `legal_consultant/protected_media`
+  path and are served only through the authenticated Django download view.
 - Releases, lock, status and private backups:
   `/home/numinga/.local/share/legal-consult-deploy`.
 - Private runtime configuration: `/home/numinga/.config/legal-consult/app.env`.
@@ -101,3 +103,12 @@ The seven existing questionnaires and existing users/payments were preserved.
 Installing changes to the deployment scripts or systemd units themselves
 requires updating their installed copies; normal application commits are
 picked up automatically from `main`.
+
+## Domain cutover preparation — 2026-09-28
+
+The pre-cutover Nginx configuration is mirrored in
+`deploy/legal-consult-domain-http.nginx`. It keeps the IP certificate and IP
+entry point working while accepting ACME challenges for `k-urist.ru` and
+`www.k-urist.ru`. Install the domain certificate only after both A records
+resolve to `51.250.99.226`, then add the domain TLS virtual host and verify it
+before treating `https://www.k-urist.ru/` as canonical.
