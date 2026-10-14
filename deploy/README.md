@@ -1,4 +1,63 @@
-# Production: 51.250.99.226
+# Current recovery host: 176.53.224.200 (2026-10-14)
+
+The owner reported the old server lost and authorized restoration on the new
+host. SSH uses `root@176.53.224.200` and the existing deployment key; the app
+runs as `numinga`, not root. The historical notes below describe the lost host.
+
+Current verified entry point: **https://176.53.224.200/**. IP HTTPS is trusted;
+certificate renewal uses `legal-consult-cert-renew.timer`. Domain DNS still
+points to the old IP as of the recovery check. The customer controls Beget DNS.
+Change both A records (`k-urist.ru`, `www.k-urist.ru`) to `176.53.224.200`, then
+run `sudo bash deploy/activate-recovery-domain.sh` on this server. That script
+checks DNS first, issues the domain certificate, validates/reloads Nginx, and
+checks HTTPS. Do not report domain cutover complete before an external readback.
+
+## Recovered data and remaining gaps
+
+- The source is the local SQLite catalogue dated 2026-09-10, not the latest
+  production DB. `create-catalog-seed.py` made a fresh file with only the legal
+  catalogue and five embedded HTML templates. All authentication, payment,
+  session, generated-document and other tables were verified empty before
+  transfer. The full historical database was not transferred.
+- Six historical questionnaires were recovered. The saved, reviewed
+  `core/import_examples/court_order.json` was imported as questionnaire **10**:
+  24 contextual nodes, 48 transitions, 18 conclusions. Its graph validates.
+- Total: **7 questionnaires**, of which 5 active. The seed experiments
+  `Тестовый опросник` (6) and `kfjdesc (AI)` (5) remain as inactive drafts.
+- Historical questionnaires 7 (alimony), 8 (privatization), and 9 (goods return)
+  contain an unavailable answer target at questions 17, 19, and 21 respectively.
+  Existing safe handling remains; missing legal text was not invented.
+- No uploaded DOCX/PDF pairs were found or restored. The five embedded HTML
+  templates are not uploaded paid DOCX/PDF materials.
+- Old production users/orders and post-snapshot edits were not recovered.
+  Payment provider/webhook integration was already absent from the saved app;
+  it is not represented as working. Yandex AI credentials are unset.
+
+## Recovery operations
+
+`bootstrap-recovery.sh` is a one-time script for an empty host. It refuses to
+overwrite an existing runtime. Do not rerun it on a working installation.
+Its seed must be produced by `create-catalog-seed.py`; it rechecks that all
+non-catalogue tables are empty. Prerequisites and required files are in its
+header. Dependencies are pinned in `requirements-recovery.txt` (52 tests PASS).
+
+The private runtime directory remains `/home/numinga/.config/legal-consult`.
+It is the designated secret store, mode 700; `app.env` and `recovery-admin.txt`
+are mode 600. The new staff login is `recovery-owner`; its password is generated
+on the server and stored only in `recovery-admin.txt`. Never print it in logs,
+commit it, or include it in recovery reports. Owner access was tested through
+the HTTPS login form, including CSRF, then logged out.
+
+`verify-recovery.py` checks public HTTPS, static assets, staff login/import pages,
+and catalogue completeness without logging credentials. Run with production
+settings through `manage.py shell`. Paths are pinned to this recovery host.
+
+Verified server backups are in
+`/home/numinga/.local/share/legal-consult-deploy/backups` (private): the sanitized
+seed and the migrated recovery DB. These are on-server copies, not offsite
+backups. The original local DB remains unchanged.
+
+## Historical deployment architecture (old host 51.250.99.226)
 
 The server checks public `numinga27/legal_consult:main` every two minutes with
 `legal-consult-deploy.timer`. No GitHub secret or inbound webhook is required.
