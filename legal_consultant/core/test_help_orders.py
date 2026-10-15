@@ -35,6 +35,23 @@ class HelpOrdersTests(TestCase):
         self.questionnaire.save()
         self.assertEqual(self.client.get(self.selection).status_code, 404)
 
+    def test_plan_is_separate_immutable_paid_material(self):
+        self.client.force_login(get_user_model().objects.create_user('plan-reader'))
+        self.questionnaire.workflow['conclusions']['1']['plan_text'] = 'Утверждённый отдельный план действий.'
+        self.questionnaire.save()
+        self.complete()
+        url = reverse('core:select_help', args=[self.questionnaire.pk, 1])
+        self.client.post(url, self.fields(self.client.get(url)))
+        order = HelpOrder.objects.get(bundle_index=1)
+        detail = reverse('core:help_order', args=[order.pk])
+        self.assertEqual(order.private_text, 'Утверждённый отдельный план действий.')
+        self.assertNotContains(self.client.get(detail), order.private_text)
+        self.questionnaire.workflow['conclusions']['1']['plan_text'] = 'Новая редакция'
+        self.questionnaire.save()
+        OrderPayment.objects.create(order=order, provider='test-provider', transaction_id='plan-test', status='paid', amount=order.amount, verified_at=timezone.now())
+        self.assertContains(self.client.get(detail), order.private_text)
+        self.assertNotContains(self.client.get(detail), 'Новая редакция')
+
     def test_all_bundles_create_private_unpaid_orders_at_server_prices(self):
         self.complete()
         for index, price in enumerate(['298', '498', '697']):
@@ -121,6 +138,8 @@ class HelpOrdersTests(TestCase):
             outsider = Client()
             outsider.force_login(get_user_model().objects.create_user(f'outsider-{kind}'))
             self.assertEqual(outsider.get(url).status_code, 404)
+            getattr(document, kind + '_file').delete(save=False)
+            self.assertEqual(self.client.get(url).status_code, 404)
 
     def test_owner_can_add_and_edit_required_docx_pdf_pair(self):
         media_root = Path(__file__).resolve().parent.parent / 'test_media'

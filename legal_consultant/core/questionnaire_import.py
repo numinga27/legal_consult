@@ -244,6 +244,8 @@ def validate_package(package):
         if not isinstance(result, dict) or any(not isinstance(result.get(field), str)
                                                for field in ['title', 'short_text', 'full_text']):
             errors.append(f'Вывод {key}: неверный формат текстов.')
+        elif not isinstance(result.get('plan_text', ''), str):
+            errors.append(f'Вывод {key}: неверный формат пошагового плана.')
         elif not result['title'].strip() or not result['short_text'].strip() or len(result['title']) > 200:
             errors.append(f'Вывод {key}: нужен заголовок до 200 символов и бесплатный текст.')
     if errors:
@@ -273,6 +275,8 @@ def validate_package(package):
 
 @transaction.atomic
 def save_package(package, direction, *, activate=False):
+    if activate and not direction.is_active:
+        raise ImportProblem('Нельзя публиковать опросник в отключённом разделе. Сохраните черновик.')
     errors = validate_package(package)
     if errors:
         raise ImportProblem('\n'.join(errors))

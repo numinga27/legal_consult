@@ -129,3 +129,15 @@ class CustomerAccountTests(TestCase):
         user = get_user_model().objects.create_user('old-owner', email='staff@example.com', password=self.password, is_staff=True)
         self.assertRedirects(self.client.post(self.login, {'email': 'STAFF@example.com', 'password': self.password}, secure=True), reverse('core:help_orders'))
         self.assertEqual(int(self.client.session['_auth_user_id']), user.pk)
+
+    def test_email_and_login_survive_questionnaire_restart_and_service_selection(self):
+        self.signup()
+        self.complete()
+        response = self.client.get(reverse('core:user_questionnaire', args=[self.q.pk]), secure=True, follow=True)
+        self.assertContains(response, 'owner@example.com')
+        self.assertTrue(response.context['user'].is_authenticated)
+        self.complete()
+        for index in range(3):
+            response = self.client.get(reverse('core:select_help', args=[self.q.pk, index]), secure=True)
+            self.assertContains(response, 'owner@example.com')
+            self.assertTrue(response.context['user'].is_authenticated)

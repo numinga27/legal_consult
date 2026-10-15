@@ -215,8 +215,7 @@
                             </div>
                         </div>
                         <div class="mt-2">
-                            <label>Документ</label>
-                            <input type="file" name="documents" class="form-control">
+                            <p>После сохранения вывода <a href="{% url 'core:questionnaire_documents' questionnaire.id %}">прикрепите комплект DOCX + PDF</a>.</p>
                         </div>
                         <div class="mt-2">
                             <button type="submit" name="action" value="add_conclusion" class="btn btn-success">

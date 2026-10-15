@@ -86,8 +86,8 @@ def import_questionnaire(request):
                         answer['intermediate_text'] = request.POST.get(f'h{i}_{j}', answer.get('intermediate_text', ''))
                         answer['text'] = request.POST.get(f'a{i}_{j}', answer['text']).strip()
                 for i, result in enumerate(package['conclusions'].values()):
-                    for field in ['title', 'short_text', 'full_text']:
-                        result[field] = request.POST.get(f'c{i}_{field}', result[field])
+                    for field in ['title', 'short_text', 'full_text', 'plan_text']:
+                        result[field] = request.POST.get(f'c{i}_{field}', result.get(field, ''))
                 errors = validate_package(package)
                 draft_revision = uuid4().hex
                 if action == 'save' and not errors:

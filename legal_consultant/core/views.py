@@ -5,8 +5,9 @@ from django.http import JsonResponse, FileResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.contrib import messages
+from django import forms
 from django.utils import timezone
-from django.db.models import Exists, OuterRef, Prefetch
+from django.db.models import Exists, OuterRef, Prefetch, Max
 import json
 import logging
 from datetime import datetime
@@ -120,8 +121,11 @@ def admin_questionnaire(request, q_id):
         action = request.POST.get('action')
 
         if action == 'add_question':
-            text = request.POST.get('question_text')
-            order = questions.count() + 1
+            text = request.POST.get('question_text', '').strip()
+            if not text:
+                messages.error(request, 'Введите текст вопроса.')
+                return redirect('core:admin_questionnaire', q_id=questionnaire.id)
+            order = (questions.aggregate(last=Max('order'))['last'] or 0) + 1
             question = Question.objects.create(
                 questionnaire=questionnaire,
                 text=text,
@@ -133,9 +137,12 @@ def admin_questionnaire(request, q_id):
         elif action == 'add_answer':
             question_id = request.POST.get('question_id')
             text = request.POST.get('answer_text')
-            intermediate_text = request.POST.get('intermediate_text')
+            intermediate_text = request.POST.get('intermediate_text', '')
             next_question_id = request.POST.get('next_question') or None
             is_final = request.POST.get('is_final') == 'on'
+            if not text or not text.strip() or len(text) > 200 or (is_final and next_question_id):
+                messages.error(request, 'Введите ответ до 200 символов и выберите только один следующий шаг.')
+                return redirect('core:admin_questionnaire', q_id=questionnaire.id)
 
             question = get_object_or_404(Question, id=question_id, questionnaire=questionnaire)
             if next_question_id:
@@ -152,14 +159,21 @@ def admin_questionnaire(request, q_id):
             return redirect('core:admin_questionnaire', q_id=questionnaire.id)
 
         elif action == 'add_conclusion':
-            order = conclusions.count() + 1
+            order = (conclusions.aggregate(last=Max('order'))['last'] or 0) + 1
             title = request.POST.get('title')
             short_text = request.POST.get('short_text')
             full_text = request.POST.get('full_text')
             pros = request.POST.get('pros', '')
             cons = request.POST.get('cons', '')
-            success_rate = int(request.POST.get('success_rate', 50))
-            price = request.POST.get('price', 0)
+            try:
+                title = forms.CharField(max_length=200).clean(title)
+                short_text = forms.CharField().clean(short_text)
+                full_text = forms.CharField().clean(full_text)
+                success_rate = forms.IntegerField(min_value=0, max_value=100).clean(request.POST.get('success_rate', 50))
+                price = forms.DecimalField(max_digits=10, decimal_places=2, min_value=0).clean(request.POST.get('price', 0))
+            except forms.ValidationError:
+                messages.error(request, 'Заполните заголовок и тексты вывода. Цена должна быть неотрицательной, вероятность — от 0 до 100%.')
+                return redirect('core:admin_questionnaire', q_id=questionnaire.id)
 
             conclusion = Conclusion.objects.create(
                 questionnaire=questionnaire,
@@ -172,10 +186,6 @@ def admin_questionnaire(request, q_id):
                 success_rate=success_rate,
                 price=price
             )
-
-            if request.FILES.get('documents'):
-                conclusion.documents = request.FILES['documents']
-                conclusion.save()
 
             messages.success(request, 'Вывод добавлен!')
             return redirect('core:admin_questionnaire', q_id=questionnaire.id)
@@ -234,86 +244,8 @@ def admin_delete_answer(request, a_id):
 
 @staff_only
 def admin_generate_with_ai(request):
-    """Генерация опросника с помощью AI"""
-    if request.method == 'POST':
-        topic = request.POST.get('topic')
-        category = request.POST.get('category')
-        direction_id = request.POST.get('direction_id')
-        instructions = request.POST.get('instructions', '')
-
-        try:
-            ai = get_ai_consultant('mock')
-
-            questionnaire_data = ai.generate_questionnaire(topic, category, instructions)
-
-            if not questionnaire_data.get('questions'):
-                messages.error(request, 'Не удалось сгенерировать вопросы. Попробуйте другую тему.')
-                return redirect('core:admin_dashboard')
-
-            direction = get_object_or_404(LegalDirection, id=direction_id)
-
-            questionnaire = Questionnaire.objects.create(
-                direction=direction,
-                name=f"{topic} (AI)",
-                description=f"Сгенерировано AI по теме: {topic}\nКатегория: {category}",
-                is_active=True
-            )
-
-            question_map = {}
-            for q_data in questionnaire_data.get('questions', []):
-                question = Question.objects.create(
-                    questionnaire=questionnaire,
-                    text=q_data['text'],
-                    help_text=q_data.get('help_text', ''),
-                    order=q_data.get('id', Question.objects.filter(questionnaire=questionnaire).count() + 1)
-                )
-                question_map[q_data['id']] = question
-
-                for a_data in q_data.get('answers', []):
-                    Answer.objects.create(
-                        question=question,
-                        text=a_data['text'],
-                        intermediate_text=a_data.get('intermediate', ''),
-                        is_final=a_data.get('is_final', False)
-                    )
-
-            for q_data in questionnaire_data.get('questions', []):
-                question = question_map.get(q_data['id'])
-                if not question:
-                    continue
-                for a_data in q_data.get('answers', []):
-                    if a_data.get('next_question'):
-                        try:
-                            answer = Answer.objects.get(question=question, text=a_data['text'])
-                            next_q = question_map.get(a_data['next_question'])
-                            if next_q:
-                                answer.next_question = next_q
-                                answer.save()
-                        except Answer.DoesNotExist:
-                            pass
-
-            for c_data in questionnaire_data.get('conclusions', []):
-                Conclusion.objects.create(
-                    questionnaire=questionnaire,
-                    title=c_data['title'],
-                    short_text=c_data['short'],
-                    full_text=c_data['full'],
-                    pros='\n'.join(c_data.get('pros', [])),
-                    cons='\n'.join(c_data.get('cons', [])),
-                    success_rate=c_data.get('success_rate', 50),
-                    price=c_data.get('price', 0)
-                )
-
-            messages.success(request, f'✅ Опросник "{topic}" успешно создан с помощью AI!')
-            return redirect('core:admin_questionnaire', q_id=questionnaire.id)
-
-        except Exception as e:
-            logger.error(f"AI generation error: {e}")
-            messages.error(request, f'❌ Ошибка при генерации: {str(e)}')
-            return redirect('core:admin_dashboard')
-
-    directions = LegalDirection.objects.filter(is_active=True)
-    return render(request, 'admin/generate_ai.html', {'directions': directions})
+    messages.error(request, 'Генерация ИИ не подключена. Загрузите готовую схему и тексты или создайте опросник вручную.')
+    return redirect('core:import_questionnaire')
 
 
 @staff_only
@@ -399,6 +331,7 @@ def api_get_next_question(request):
     return JsonResponse({'error': 'Этот интерфейс обновлён. Откройте опросник заново из каталога.'}, status=409)
 
 
+@staff_only
 def api_questionnaire_data(request, q_id):
     """API для получения данных опросника"""
     try:
@@ -485,213 +418,36 @@ def api_generate_document(request):
     return JsonResponse({'error': 'Этот интерфейс обновлён. Откройте опросник заново из каталога.'}, status=409)
 
 
+@staff_only
+@require_POST
 def api_test_rules(request):
-    """API для тестирования правил AI"""
-    if request.method != 'POST':
-        return JsonResponse({'error': 'Метод не поддерживается'}, status=405)
+    return JsonResponse({'error': 'ИИ не подключён. Демонстрационные ответы не используются для юридических опросников.'}, status=409)
 
-    try:
-        data = json.loads(request.body)
-        rule_id = data.get('rule_id')
-        topic = data.get('topic', '')
-        instructions = data.get('instructions', '')
-
-        if not rule_id:
-            return JsonResponse({'error': 'ID правила не указан'}, status=400)
-
-        rule = get_object_or_404(AIRules, id=rule_id)
-
-        ai = get_ai_consultant('mock')
-
-        context = {
-            'topic': topic,
-            'category': rule.rule_type,
-            'instructions': instructions
-        }
-
-        prompt = rule.get_prompt(context)
-
-        if rule.rule_type == 'questionnaire':
-            result = ai.generate_questionnaire(topic, rule.rule_type, instructions)
-        elif rule.rule_type == 'consultation':
-            result = ai.generate_intermediate_consultation(topic, instructions, '')
-        elif rule.rule_type == 'document':
-            result = ai.generate_document('claim', {'full_name': topic}, instructions)
-        else:
-            result = {'message': 'Тест выполнен', 'prompt': prompt}
-
-        return JsonResponse({
-            'success': True,
-            'rule': {
-                'id': rule.id,
-                'name': rule.name,
-                'type': rule.get_rule_type_display()
-            },
-            'prompt': prompt,
-            'result': result
-        })
-
-    except Exception as e:
-        logger.error(f"API test rules error: {e}")
-        return JsonResponse({'error': str(e)}, status=500)
 
 @staff_only
+@require_POST
 def api_save_workflow(request):
-    """API для сохранения визуального алгоритма с синхронизацией с БД"""
-    if request.method != 'POST':
-        return JsonResponse({'error': 'Method not allowed'}, status=405)
+    return save_visual_request(request)
 
+
+def save_visual_request(request):
+    from .legacy_workflow import save_visual_draft
+    from .questionnaire_import import ImportProblem
     try:
         data = json.loads(request.body)
-        questionnaire_id = data.get('questionnaire_id')
-        workflow = data.get('workflow', {})
+        if not isinstance(data, dict) or not str(data.get('questionnaire_id', '')).isdecimal():
+            return JsonResponse({'success': False, 'error': 'Выберите опросник.'}, status=400)
+    except (ValueError, UnicodeDecodeError):
+        return JsonResponse({'success': False, 'error': 'Некорректные данные схемы.'}, status=400)
+    questionnaire = get_object_or_404(Questionnaire, pk=data['questionnaire_id'])
+    if imported(questionnaire):
+        return imported_legacy_error()
+    try:
+        save_visual_draft(questionnaire.pk, data.get('workflow'))
+    except ImportProblem as error:
+        return JsonResponse({'success': False, 'error': str(error)}, status=400)
+    return JsonResponse({'success': True, 'message': 'Схема проверена и сохранена.'})
 
-        questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
-        if imported(questionnaire):
-            return imported_legacy_error()
-
-        # Сохраняем workflow в JSON поле
-        questionnaire.workflow = workflow
-        questionnaire.save()
-
-        # ============================================================
-        # СИНХРОНИЗАЦИЯ: создаем/обновляем вопросы, ответы, выводы
-        # ============================================================
-
-        # 1. Удаляем старые данные (опционально - можно только обновлять)
-        # Но лучше обновлять, чтобы не потерять связи с оплатами и сессиями
-        # Поэтому будем только добавлять новые и обновлять существующие
-
-        # Получаем существующие вопросы
-        existing_questions = {q.order: q for q in Question.objects.filter(questionnaire=questionnaire)}
-        existing_conclusions = {c.order: c for c in Conclusion.objects.filter(questionnaire=questionnaire)}
-
-        # Счетчики для новых ID
-        question_order = 1
-        conclusion_order = 1
-
-        # Словарь для связи node_id -> question_id
-        node_to_question = {}
-        node_to_conclusion = {}
-
-        # Проходим по узлам
-        for node in workflow.get('nodes', []):
-            node_type = node.get('type')
-            node_id = node.get('id')
-
-            if node_type == 'question':
-                # Создаем или обновляем вопрос
-                question, created = Question.objects.get_or_create(
-                    questionnaire=questionnaire,
-                    order=question_order,
-                    defaults={
-                        'text': node.get('title', 'Вопрос без названия'),
-                        'help_text': node.get('text', '')
-                    }
-                )
-                if not created:
-                    question.text = node.get('title', 'Вопрос без названия')
-                    question.help_text = node.get('text', '')
-                    question.save()
-
-                node_to_question[node_id] = question
-                question_order += 1
-
-            elif node_type == 'answer':
-                # Ответы будут создаваться позже, при обработке связей
-                pass
-
-            elif node_type == 'conclusion':
-                # Создаем или обновляем вывод
-                conclusion, created = Conclusion.objects.get_or_create(
-                    questionnaire=questionnaire,
-                    order=conclusion_order,
-                    defaults={
-                        'title': node.get('title', 'Вывод без названия'),
-                        'short_text': node.get('text', '')[:200],
-                        'full_text': node.get('text', ''),
-                        'price': node.get('price', 0),
-                        'success_rate': node.get('success_rate', 50)
-                    }
-                )
-                if not created:
-                    conclusion.title = node.get('title', 'Вывод без названия')
-                    conclusion.short_text = node.get('text', '')[:200]
-                    conclusion.full_text = node.get('text', '')
-                    conclusion.price = node.get('price', 0)
-                    conclusion.success_rate = node.get('success_rate', 50)
-                    conclusion.save()
-
-                node_to_conclusion[node_id] = conclusion
-                conclusion_order += 1
-
-        # 2. Обрабатываем связи (connections)
-        # Сначала создаем все ответы для вопросов
-        answer_map = {}
-
-        for conn in workflow.get('connections', []):
-            source_id = conn.get('source')
-            target_id = conn.get('target')
-
-            source_node = next((n for n in workflow['nodes'] if n['id'] == source_id), None)
-            target_node = next((n for n in workflow['nodes'] if n['id'] == target_id), None)
-
-            if not source_node or not target_node:
-                continue
-
-            # Если источник - вопрос, а цель - ответ
-            if source_node['type'] == 'question' and target_node['type'] == 'answer':
-                question = node_to_question.get(source_id)
-                if question:
-                    # Создаем ответ
-                    answer_text = target_node.get('title', 'Вариант ответа')
-                    intermediate = target_node.get('text', '')
-
-                    answer, created = Answer.objects.get_or_create(
-                        question=question,
-                        text=answer_text,
-                        defaults={
-                            'intermediate_text': intermediate,
-                            'is_final': False,
-                            'order': question.answers.count() + 1
-                        }
-                    )
-                    if not created:
-                        answer.intermediate_text = intermediate
-                        answer.save()
-
-                    answer_map[target_id] = answer
-
-            # Если источник - ответ, а цель - вывод
-            elif source_node['type'] == 'answer' and target_node['type'] == 'conclusion':
-                answer = answer_map.get(source_id)
-                conclusion = node_to_conclusion.get(target_id)
-
-                if answer and conclusion:
-                    # Связываем ответ с выводом
-                    AnswerConclusion.objects.update_or_create(
-                        answer=answer,
-                        defaults={'conclusion': conclusion}
-                    )
-                    # Помечаем ответ как финальный
-                    answer.is_final = True
-                    answer.save()
-
-            # Если источник - ответ, а цель - вопрос (переход к следующему вопросу)
-            elif source_node['type'] == 'answer' and target_node['type'] == 'question':
-                answer = answer_map.get(source_id)
-                next_question = node_to_question.get(target_id)
-
-                if answer and next_question:
-                    answer.next_question = next_question
-                    answer.is_final = False
-                    answer.save()
-
-        return JsonResponse({'success': True, 'message': 'Алгоритм сохранен и синхронизирован с БД'})
-
-    except Exception as e:
-        logger.error(f"Save workflow error: {e}")
-        return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 @staff_only
 def visual_editor(request, q_id):
@@ -723,132 +479,6 @@ def api_load_workflow(request, q_id):
         }, status=500)
 
 @staff_only
+@require_POST
 def api_sync_workflow(request):
-    """API для синхронизации визуального редактора с БД"""
-    if request.method != 'POST':
-        return JsonResponse({'error': 'Method not allowed'}, status=405)
-
-    try:
-        data = json.loads(request.body)
-        questionnaire_id = data.get('questionnaire_id')
-        workflow = data.get('workflow', {})
-
-        logger.info(f"Sync workflow for questionnaire {questionnaire_id}")
-        logger.info(f"Nodes: {len(workflow.get('nodes', []))}")
-        logger.info(f"Connections: {len(workflow.get('connections', []))}")
-
-        questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
-        if imported(questionnaire):
-            return imported_legacy_error()
-
-        # Проверяем, есть ли данные
-        if not workflow.get('nodes'):
-            return JsonResponse({
-                'success': False,
-                'error': 'Нет узлов для синхронизации. Сначала создайте блоки.'
-            }, status=400)
-
-        # Очищаем старые данные
-        Question.objects.filter(questionnaire=questionnaire).delete()
-        Answer.objects.filter(question__questionnaire=questionnaire).delete()
-        Conclusion.objects.filter(questionnaire=questionnaire).delete()
-        AnswerConclusion.objects.filter(conclusion__questionnaire=questionnaire).delete()
-
-        # Создаем заново из workflow
-        node_to_question = {}
-        node_to_conclusion = {}
-        answer_map = {}
-
-        question_order = 1
-        conclusion_order = 1
-
-        # Проходим по узлам
-        for node in workflow.get('nodes', []):
-            node_type = node.get('type')
-            node_id = node.get('id')
-
-            if node_type == 'question':
-                question = Question.objects.create(
-                    questionnaire=questionnaire,
-                    order=question_order,
-                    text=node.get('title', 'Вопрос без названия'),
-                    help_text=node.get('text', '')
-                )
-                node_to_question[node_id] = question
-                question_order += 1
-                logger.info(f"Created question: {question.text}")
-
-            elif node_type == 'conclusion':
-                conclusion = Conclusion.objects.create(
-                    questionnaire=questionnaire,
-                    order=conclusion_order,
-                    title=node.get('title', 'Вывод без названия'),
-                    short_text=node.get('text', '')[:200] if node.get('text') else '',
-                    full_text=node.get('text', ''),
-                    price=node.get('price', 0),
-                    success_rate=node.get('success_rate', 50)
-                )
-                node_to_conclusion[node_id] = conclusion
-                conclusion_order += 1
-                logger.info(f"Created conclusion: {conclusion.title}")
-
-        # Обрабатываем связи
-        for conn in workflow.get('connections', []):
-            source_id = conn.get('source')
-            target_id = conn.get('target')
-
-            source_node = next((n for n in workflow['nodes'] if n['id'] == source_id), None)
-            target_node = next((n for n in workflow['nodes'] if n['id'] == target_id), None)
-
-            if not source_node or not target_node:
-                logger.warning(f"Node not found: {source_id} -> {target_id}")
-                continue
-
-            logger.info(f"Processing connection: {source_node['type']} -> {target_node['type']}")
-
-            # Если источник - вопрос, а цель - ответ
-            if source_node['type'] == 'question' and target_node['type'] == 'answer':
-                question = node_to_question.get(source_id)
-                if question:
-                    answer = Answer.objects.create(
-                        question=question,
-                        text=target_node.get('title', 'Вариант ответа'),
-                        intermediate_text=target_node.get('text', ''),
-                        is_final=False,
-                        order=question.answers.count() + 1
-                    )
-                    answer_map[target_id] = answer
-                    logger.info(f"Created answer: {answer.text}")
-
-            # Если источник - ответ, а цель - вывод
-            elif source_node['type'] == 'answer' and target_node['type'] == 'conclusion':
-                answer = answer_map.get(source_id)
-                conclusion = node_to_conclusion.get(target_id)
-                if answer and conclusion:
-                    AnswerConclusion.objects.create(answer=answer, conclusion=conclusion)
-                    answer.is_final = True
-                    answer.save()
-                    logger.info(f"Linked answer {answer.text} -> conclusion {conclusion.title}")
-
-            # Если источник - ответ, а цель - вопрос (переход к следующему вопросу)
-            elif source_node['type'] == 'answer' and target_node['type'] == 'question':
-                answer = answer_map.get(source_id)
-                next_question = node_to_question.get(target_id)
-                if answer and next_question:
-                    answer.next_question = next_question
-                    answer.is_final = False
-                    answer.save()
-                    logger.info(f"Linked answer {answer.text} -> next question {next_question.text}")
-
-        # Сохраняем workflow в JSON поле
-        questionnaire.workflow = workflow
-        questionnaire.save()
-
-        return JsonResponse({
-            'success': True,
-            'message': f'Синхронизировано: {len(workflow.get("nodes", []))} узлов, {len(workflow.get("connections", []))} связей'
-        })
-
-    except Exception as e:
-        logger.error(f"Sync workflow error: {e}")
-        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+    return save_visual_request(request)

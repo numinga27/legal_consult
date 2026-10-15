@@ -19,18 +19,20 @@ from .questionnaire_import import FORMAT, validate_package
 from .questionnaire_runtime import runtime_package
 
 
+def content_errors(item):
+    try:
+        package = runtime_package(item)
+        return validate_package({**package, 'format': FORMAT, 'name': item.name})
+    except (ValueError, TypeError, KeyError):
+        return ['Не удалось прочитать схему. Проверьте вопросы и переходы.']
+
+
 def publication_errors(item):
     if item.is_archived:
         return ['Сначала верните опросник из архива.']
     if not item.direction.is_active:
         return ['Раздел сайта отключён.']
-    if item.workflow.get('format') == FORMAT:
-        return validate_package(item.workflow)
-    package = runtime_package(item)
-    if not package['nodes'] or not package['conclusions']:
-        return ['Добавьте вопросы, ответы и выводы.']
-    # Reuse graph validation for legacy routes, including cycles and unreachable results.
-    return validate_package({**package, 'format': FORMAT, 'name': item.name})
+    return content_errors(item)
 
 
 class QuestionnaireForm(forms.ModelForm):
@@ -83,6 +85,10 @@ def questionnaire_content_edit(request, q_id, kind, object_id):
     form = form_type(request.POST if request.method == 'POST' else None, instance=obj)
     if kind == 'answer':
         form.fields['next_question'].queryset = item.questions.all()
+        form.fields['intermediate_text'].required = False
+    elif kind == 'conclusion':
+        form.fields['price'] = forms.DecimalField(label='Цена', max_digits=10, decimal_places=2, min_value=0)
+        form.fields['success_rate'] = forms.IntegerField(label='Вероятность успеха', min_value=0, max_value=100)
     if request.method == 'POST' and form.is_valid():
         if kind == 'answer' and form.cleaned_data.get('next_question') and form.cleaned_data.get('is_final'):
             form.add_error('next_question', 'Выберите либо следующий вопрос, либо финальный ответ.')
@@ -181,6 +187,7 @@ def owner_dashboard(request):
             item.question_count = len(item.workflow.get('nodes', {}))
             item.result_count = len(item.workflow.get('conclusions', {}))
         item.completion_rate = round(item.finishes * 100 / item.starts) if item.starts else 0
+        item.validation_errors = content_errors(item)
     params = request.GET.copy()
     params.pop('page', None)
     return render(request, 'admin/dashboard.html', {

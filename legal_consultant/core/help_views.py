@@ -62,7 +62,7 @@ def select_help(request, q_id, bundle_index):
                 'owner_id': owner_id, 'questionnaire': questionnaire,
                 'user': request.user if request.user.is_authenticated else None,
                 'consultation': consultation,
-                'private_text': source.get('full_text', '') if offer['code'] == 'consultation' else '',
+                'private_text': source.get('full_text', '') if offer['code'] == 'consultation' else source.get('plan_text', '') if offer['code'] == 'plan' else '',
                 'result_code': current[7:], 'bundle_index': bundle_index,
                 'summary': {'questionnaire': questionnaire.name, 'result': source['title'],
                             'title': offer['title'], 'services': list(offer['services']),
@@ -125,7 +125,11 @@ def download_order_document(request, order_id, document_id, file_kind):
     field = document.docx_file if file_kind == 'docx' else document.pdf_file if file_kind == 'pdf' else None
     if not field:
         raise Http404
-    return FileResponse(field.open('rb'), as_attachment=True, filename=field.name.rsplit('/', 1)[-1])
+    try:
+        opened = field.open('rb')
+    except FileNotFoundError:
+        raise Http404('Файл временно недоступен. Обратитесь к администратору.')
+    return FileResponse(opened, as_attachment=True, filename=field.name.rsplit('/', 1)[-1])
 
 
 @never_cache
