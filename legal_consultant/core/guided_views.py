@@ -4,7 +4,9 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_http_methods
 
-from .models import Questionnaire
+from uuid import uuid4
+from django.utils import timezone
+from .models import Questionnaire, QuestionnaireRun
 from .questionnaire_import import FORMAT
 from .paid_help import help_offers
 from .questionnaire_runtime import runtime_package
@@ -45,7 +47,7 @@ def reset_completed_on_entry(request, questionnaire):
 @require_http_methods(['GET', 'POST'])
 def guided_questionnaire(request, q_id):
     questionnaire = get_object_or_404(Questionnaire, pk=q_id)
-    if not questionnaire.is_active and not request.user.is_staff:
+    if not request.user.is_staff and (not questionnaire.is_active or questionnaire.is_archived or not questionnaire.direction.is_active):
         raise Http404
     package = runtime_package(questionnaire)
     state_key = f'guided_questionnaire_{q_id}'
@@ -89,6 +91,12 @@ def guided_questionnaire(request, q_id):
         state['revision'] += 1
         request.session[state_key] = state
         return redirect('core:guided_questionnaire', q_id=q_id)
+    if not request.user.is_staff:
+        if not state.get('run_id'):
+            state['run_id'] = str(uuid4())
+        QuestionnaireRun.objects.get_or_create(pk=state['run_id'], questionnaire=questionnaire)
+        if current.startswith('result:'):
+            QuestionnaireRun.objects.filter(pk=state['run_id'], questionnaire=questionnaire, completed_at__isnull=True).update(completed_at=timezone.now())
     request.session[state_key] = state
     node, result, consultation = None, None, None
     unavailable = current == 'unavailable'

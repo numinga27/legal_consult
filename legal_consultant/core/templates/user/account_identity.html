@@ -1,0 +1,1 @@
+{% if user.is_authenticated %}<a class="signed-account" href="{% url 'core:help_orders' %}"><span>Вы вошли как</span><strong>{{ user.email|default:user.username }}</strong></a>{% endif %}

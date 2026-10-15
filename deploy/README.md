@@ -19,6 +19,26 @@ reload is asynchronous. The installed domain configuration is
 
 ## Recovered data and remaining gaps
 
+## Owner catalogue update (2026-10-15)
+
+The owner dashboard now uses server-side search, section/type/status filters,
+and ten questionnaires per page. Every row offers metadata editing, preview,
+documents, publication/hiding, archiving/restoration, and confirmed deletion.
+New manual questionnaires start as private drafts. Imported content retains
+its established new-version workflow; metadata edits keep the same record.
+Manual questions, answers, and results have scoped editing forms.
+
+Archive hides the questionnaire from the default owner list and public routes;
+restoration returns a draft. Deletion requires the exact title and is blocked
+when orders or legacy payment records reference the questionnaire.
+Migration 0014 adds the archive flag and anonymous attempt records. Statistics
+show starts, completions, completion ratio, and saved order count. Reloads and
+staff previews do not create additional attempts; an explicit restart does.
+Historical starts/completions are not inferred. Account email (login fallback)
+is visible in the shared header and home page.
+
+## Recovery data limitations
+
 - The source is the local SQLite catalogue dated 2026-09-10, not the latest
   production DB. `create-catalog-seed.py` made a fresh file with only the legal
   catalogue and five embedded HTML templates. All authentication, payment,

@@ -280,7 +280,7 @@ def save_package(package, direction, *, activate=False):
     digest = hashlib.sha256(json.dumps(package, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
     for existing in Questionnaire.objects.filter(direction=direction):
         if existing.workflow.get('import_digest') == digest:
-            if activate and not existing.is_active:
+            if activate and not existing.is_active and not existing.is_archived and direction.is_active:
                 existing.is_active = True
                 existing.save(update_fields=['is_active'])
             return existing, False

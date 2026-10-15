@@ -108,6 +108,7 @@ class Questionnaire(models.Model):
     description = models.TextField('Описание', blank=True)
     is_active = models.BooleanField('Активен', default=True)
     workflow = models.JSONField('Визуальный алгоритм', default=dict, blank=True)
+    is_archived = models.BooleanField('В архиве', default=False)
     created_at = models.DateTimeField('Дата создания', auto_now_add=True)
     updated_at = models.DateTimeField('Дата обновления', auto_now=True)
     views_count = models.PositiveIntegerField('Просмотров', default=0)  # Добавить
@@ -119,6 +120,14 @@ class Questionnaire(models.Model):
 
     def __str__(self):
         return f"{self.direction.name} - {self.name}"
+
+class QuestionnaireRun(models.Model):
+    """One visitor attempt; no personal data and no staff previews."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    questionnaire = models.ForeignKey(Questionnaire, on_delete=models.CASCADE, related_name='runs')
+    started_at = models.DateTimeField(auto_now_add=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+
 
 class Question(models.Model):
     """

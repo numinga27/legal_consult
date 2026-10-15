@@ -32,7 +32,7 @@ class CustomerForm(forms.Form):
 @require_http_methods(['GET', 'POST'])
 def select_help(request, q_id, bundle_index):
     questionnaire = get_object_or_404(Questionnaire, pk=q_id)
-    if not imported(questionnaire) or (not questionnaire.is_active and not request.user.is_staff):
+    if not imported(questionnaire) or (not request.user.is_staff and (not questionnaire.is_active or questionnaire.is_archived or not questionnaire.direction.is_active)):
         raise Http404
     state = request.session.get(f'guided_questionnaire_{q_id}', {})
     try:

@@ -22,8 +22,8 @@
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     
     {% block extra_css %}{% endblock %}
-    <link rel="stylesheet" href="{% static 'css/admin-polish.css' %}?v=20260916">
-<link rel="stylesheet" href="{% static 'css/design-system.css' %}?v=20260916"></head>
+    <link rel="stylesheet" href="{% static 'css/admin-polish.css' %}?v=20261015-catalogue">
+<link rel="stylesheet" href="{% static 'css/design-system.css' %}?v=20261015-catalogue"></head>
 <body>
     <!-- Навигация -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
@@ -43,7 +43,7 @@
                     {% if user.is_authenticated %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-user-circle"></i> {{ user.username }}
+                                <i class="fas fa-user-circle"></i> {{ user.email|default:user.username }}
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
                                 {% if user.is_staff %}

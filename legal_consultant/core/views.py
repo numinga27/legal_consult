@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, FileResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.utils import timezone
 from django.db.models import Exists, OuterRef, Prefetch
@@ -136,7 +137,9 @@ def admin_questionnaire(request, q_id):
             next_question_id = request.POST.get('next_question') or None
             is_final = request.POST.get('is_final') == 'on'
 
-            question = get_object_or_404(Question, id=question_id)
+            question = get_object_or_404(Question, id=question_id, questionnaire=questionnaire)
+            if next_question_id:
+                get_object_or_404(Question, id=next_question_id, questionnaire=questionnaire)
             answer = Answer.objects.create(
                 question=question,
                 text=text,
@@ -181,8 +184,11 @@ def admin_questionnaire(request, q_id):
             answer_id = request.POST.get('answer_id')
             conclusion_id = request.POST.get('conclusion_id')
 
-            answer = get_object_or_404(Answer, id=answer_id)
-            conclusion = get_object_or_404(Conclusion, id=conclusion_id)
+            answer = get_object_or_404(Answer, id=answer_id, question__questionnaire=questionnaire)
+            conclusion = get_object_or_404(Conclusion, id=conclusion_id, questionnaire=questionnaire)
+            answer.next_question = None
+            answer.is_final = True
+            answer.save(update_fields=['next_question', 'is_final'])
 
             AnswerConclusion.objects.update_or_create(
                 answer=answer,
@@ -201,6 +207,7 @@ def admin_questionnaire(request, q_id):
 
 
 @staff_only
+@require_POST
 def admin_delete_question(request, q_id):
     """Удаление вопроса"""
     question = get_object_or_404(Question, id=q_id)
@@ -213,6 +220,7 @@ def admin_delete_question(request, q_id):
 
 
 @staff_only
+@require_POST
 def admin_delete_answer(request, a_id):
     """Удаление ответа"""
     answer = get_object_or_404(Answer, id=a_id)
@@ -323,7 +331,7 @@ def admin_test_rules(request):
 def user_select_problem(request):
     """Показываем темы без создания тестовых данных при посещении страницы."""
     questionnaires = Questionnaire.objects.filter(
-        is_active=True, questions__isnull=False, conclusions__isnull=False,
+        is_active=True, is_archived=False, questions__isnull=False, conclusions__isnull=False,
     ).distinct()
     directions = (
         LegalDirection.objects.filter(is_active=True)
@@ -340,7 +348,10 @@ def user_select_problem(request):
 
 def user_questionnaire(request, q_id):
     """All catalogues use the same server-owned, reload-safe questionnaire UI."""
-    questionnaire = get_object_or_404(Questionnaire, id=q_id, is_active=True)
+    questionnaire = get_object_or_404(Questionnaire, id=q_id)
+    if not request.user.is_staff and (not questionnaire.is_active or questionnaire.is_archived or not questionnaire.direction.is_active):
+        from django.http import Http404
+        raise Http404
     reset_completed_on_entry(request, questionnaire)
     return redirect('core:guided_questionnaire', q_id=q_id)
 

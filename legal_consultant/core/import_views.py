@@ -119,5 +119,5 @@ def import_questionnaire(request):
         'offers': help_offers(package) if package else [],
         'draft_revision': draft_revision, 'selected_direction': selected_direction,
         'directions': LegalDirection.objects.all(),
-        'imports': [q for q in Questionnaire.objects.all() if q.workflow.get('format') == FORMAT],
+        'imports': [],  # The paginated owner catalogue is the single saved-questionnaire list.
     })

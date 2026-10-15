@@ -7,3 +7,6 @@ html{-webkit-text-size-adjust:100%;font-size:16px}body{font-family:var(--font-ui
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 
 .brand{display:flex;align-items:center;gap:10px;color:var(--green);text-decoration:none}.brand-mark{display:grid;place-items:center;border-radius:12px;background:var(--green);color:var(--paper);flex-shrink:0}.brand-mark svg{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linejoin:round;stroke-linecap:round}
+
+.signed-account{display:flex;flex-direction:column;gap:2px;text-decoration:none;color:var(--green);min-width:0;max-width:260px;font-size:13px;line-height:1.4}.signed-account span{color:var(--muted);font-size:11px}.signed-account strong{font-weight:600;overflow-wrap:anywhere}.top,.header-inner{flex-wrap:wrap}.signed-account{margin-left:auto}
+@media(max-width:720px){.signed-account{max-width:100%;flex-basis:100%;margin-left:0;padding-top:8px;border-top:1px solid var(--line)}}

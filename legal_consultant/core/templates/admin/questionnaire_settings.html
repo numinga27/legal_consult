@@ -1,0 +1,11 @@
+{% extends 'admin/owner_base.html' %}
+{% block title %}{% if creating %}Создать опросник{% else %}Редактировать опросник{% endif %} — Карманный юрист{% endblock %}
+{% block content %}
+<a class="back-link" href="{% url 'core:admin_dashboard' %}">← Все опросники</a><h1>{% if creating %}Создать опросник{% else %}{{ item.name }}{% endif %}</h1>
+{% for message in messages %}<p class="notice" role="status">{{ message }}</p>{% endfor %}
+{% if creating %}<p class="page-intro">Укажите название и раздел. Опросник сохранится как черновик — затем добавьте вопросы, ответы и выводы.</p><p>Есть готовая схема и тексты? <a href="{% url 'core:import_questionnaire' %}">Загрузить из документов</a></p>{% endif %}
+<section class="panel"><h2>Название и раздел</h2><form method="post">{% csrf_token %}{{ form.as_p }}<button class="primary">{% if creating %}Создать черновик{% else %}Сохранить изменения{% endif %}</button></form></section>
+{% if not creating %}<section class="panel"><h2>Содержание опросника</h2><p>Тип: {% if is_imported %}из документов{% else %}создан вручную{% endif %}. {% if item.is_archived %}Опросник находится в архиве.{% elif item.is_active %}Доступен посетителям.{% else %}Черновик, виден только администратору.{% endif %}</p>
+{% if is_imported %}<p class="muted">Вопросы, ответы, выводы и цены редактируются в новой версии. После проверки опубликуйте её, а прежнюю версию переместите в архив.</p>{% endif %}
+<div class="actions"><a class="primary" href="{% url 'core:admin_questionnaire' item.id %}">{% if is_imported %}Редактировать новую версию{% else %}Вопросы, ответы и выводы{% endif %}</a><a class="secondary" href="{% url 'core:questionnaire_documents' item.id %}">Документы DOCX + PDF</a><a class="secondary" href="{% url 'core:user_questionnaire' item.id %}">Просмотреть опросник</a></div></section>{% endif %}
+{% endblock %}

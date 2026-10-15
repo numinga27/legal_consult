@@ -49,6 +49,7 @@
                                     {% for answer in question.answers.all %}
                                     <li class="small">
                                         {{ answer.text }}
+                                        <a href="{% url 'core:questionnaire_content_edit' questionnaire.id 'answer' answer.id %}">Изменить ответ</a>
                                         {% if answer.is_final %} 
                                         <span class="badge bg-success">→ Вывод</span>
                                         {% elif answer.next_question %}
@@ -56,21 +57,18 @@
                                         {% else %}
                                         <span class="badge bg-secondary">Нет связи</span>
                                         {% endif %}
-                                        <a href="{% url 'core:admin_delete_answer' answer.id %}" 
-                                           class="text-danger ms-2" 
-                                           onclick="return confirm('Удалить ответ?')">
+                                        <form method="post" action="{% url 'core:admin_delete_answer' answer.id %}" class="d-inline" onsubmit="return confirm('Удалить ответ?')">{% csrf_token %}<button class="btn btn-link text-danger" type="submit">
                                             <span aria-hidden="true">×</span><span class="visually-hidden">Удалить ответ</span>
-                                        </a>
+                                        </button></form>
                                     </li>
                                     {% endfor %}
                                 </ul>
                             </div>
                             <div>
-                                <a href="{% url 'core:admin_delete_question' question.id %}" 
-                                   class="btn btn-sm btn-danger"
-                                   onclick="return confirm('Удалить вопрос?')">
+                                <a class="btn btn-sm btn-secondary" href="{% url 'core:questionnaire_content_edit' questionnaire.id 'question' question.id %}">Изменить вопрос</a>
+                                <form method="post" action="{% url 'core:admin_delete_question' question.id %}" class="d-inline" onsubmit="return confirm('Удалить вопрос?')">{% csrf_token %}<button class="btn btn-sm btn-danger" type="submit">
                                     <span aria-hidden="true">×</span><span class="visually-hidden">Удалить вопрос</span>
-                                </a>
+                                </button></form>
                             </div>
                         </div>
                     </div>
@@ -163,6 +161,7 @@
                         <div class="d-flex justify-content-between">
                             <div>
                                 <strong>Вывод #{{ conclusion.order }}: {{ conclusion.title }}</strong>
+                                <a href="{% url 'core:questionnaire_content_edit' questionnaire.id 'conclusion' conclusion.id %}">Изменить вывод</a>
                                 <div class="text-muted small">
                                     Цена: {{ conclusion.price }} ₽ | Успех: {{ conclusion.success_rate }}%
                                 </div>

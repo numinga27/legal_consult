@@ -1,0 +1,2 @@
+{% extends 'admin/owner_base.html' %}{% block title %}{{ title }} — Карманный юрист{% endblock %}
+{% block content %}<a class="back-link" href="{% url 'core:admin_questionnaire' item.id %}">← {{ item.name }}</a><h1>{{ title }}</h1><section class="panel"><form method="post">{% csrf_token %}{{ form.as_p }}<div class="actions"><button class="primary">Сохранить изменения</button><a class="secondary" href="{% url 'core:admin_questionnaire' item.id %}">Отмена</a></div></form></section>{% endblock %}
