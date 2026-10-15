@@ -1,16 +1,21 @@
-# Current recovery host: 176.53.224.200 (2026-10-14)
+# Current recovery host: 176.53.224.200 (2026-10-15)
 
 The owner reported the old server lost and authorized restoration on the new
 host. SSH uses `root@176.53.224.200` and the existing deployment key; the app
 runs as `numinga`, not root. The historical notes below describe the lost host.
 
-Current verified entry point: **https://176.53.224.200/**. IP HTTPS is trusted;
-certificate renewal uses `legal-consult-cert-renew.timer`. Domain DNS still
-points to the old IP as of the recovery check. The customer controls Beget DNS.
-Change both A records (`k-urist.ru`, `www.k-urist.ru`) to `176.53.224.200`, then
-run `sudo bash deploy/activate-recovery-domain.sh` on this server. That script
-checks DNS first, issues the domain certificate, validates/reloads Nginx, and
-checks HTTPS. Do not report domain cutover complete before an external readback.
+Current verified entry point: **https://www.k-urist.ru/**. Both domain A records
+point to `176.53.224.200`; HTTP and the bare HTTPS domain redirect to this URL.
+The trusted domain certificate covers both names and expires 2027-01-13.
+External HTTPS pages, static assets, questionnaire 10, and real staff login with
+CSRF and logout were verified on 2026-10-15. Certificate renewal dry-run passed;
+`legal-consult-cert-renew.timer` renews certificates and reloads Nginx.
+The trusted **https://176.53.224.200/** entry point also remains available.
+
+`activate-recovery-domain.sh` checks DNS, issues/reuses the domain certificate,
+validates/reloads Nginx, and checks HTTPS with bounded retries because worker
+reload is asynchronous. The installed domain configuration is
+`/etc/nginx/conf.d/legal-consult-domain-https.conf`. No DNS change is pending.
 
 ## Recovered data and remaining gaps
 

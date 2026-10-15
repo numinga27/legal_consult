@@ -50,7 +50,8 @@ NGINX
 chmod 644 "$target"
 nginx -t
 systemctl reload nginx
-curl -fsS --resolve www.k-urist.ru:443:127.0.0.1 https://www.k-urist.ru/healthz/
-curl -fsSI --resolve k-urist.ru:443:127.0.0.1 https://k-urist.ru/ | grep -Fi 'Location: https://www.k-urist.ru/'
+# Reload signals nginx asynchronously; allow workers to load the new certificate.
+curl -fsS --retry 5 --retry-all-errors --retry-delay 1 --max-time 10 --resolve www.k-urist.ru:443:127.0.0.1 https://www.k-urist.ru/healthz/
+curl -fsSI --retry 5 --retry-all-errors --retry-delay 1 --max-time 10 --resolve k-urist.ru:443:127.0.0.1 https://k-urist.ru/ | grep -Fi 'Location: https://www.k-urist.ru/'
 trap - ERR
 echo 'DOMAIN HTTPS VERIFIED'
