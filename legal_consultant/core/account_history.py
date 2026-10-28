@@ -20,17 +20,19 @@ def capture_result(request, questionnaire, package, state, current):
         state['attempt_id'] = uuid4().hex
         request.session[f'guided_questionnaire_{questionnaire.id}'] = state
     source = package['conclusions'][current[7:]]
+    from .consultation_text import consultation_text
+    private_text = consultation_text(package, state.get('history', []), current)
     answers = []
     for entry in state.get('history', []):
         node = package['nodes'][entry['node']]
         answers.append({'question': node['text'], 'answer': node['answers'][entry['answer']]['text']})
-    fingerprint = hashlib.sha256(json.dumps([owner, questionnaire.id, state['attempt_id'], answers, source],
+    fingerprint = hashlib.sha256(json.dumps([owner, questionnaire.id, state['attempt_id'], answers, source, private_text],
                                            ensure_ascii=False, sort_keys=True).encode()).hexdigest()
     item, _ = Consultation.objects.get_or_create(fingerprint=fingerprint, defaults={
         'owner_id': owner, 'user': request.user if request.user.is_authenticated else None,
         'questionnaire': questionnaire, 'title': questionnaire.name, 'answers': answers,
         'result_code': current[7:], 'result_title': source['title'], 'short_text': source['short_text'],
-        'private_text': source.get('full_text', ''),
+        'private_text': private_text,
     })
     if request.user.is_authenticated and item.user_id is None:
         Consultation.objects.filter(pk=item.pk, user__isnull=True, owner_id=owner).update(user=request.user)
@@ -76,4 +78,6 @@ def order_access(order):
         return 'pending'
     if confirmation.status == 'refunded':
         return 'refunded'
+    if confirmation.status == 'held':
+        return 'held'
     return 'paid' if confirmation.grants_access else 'pending'

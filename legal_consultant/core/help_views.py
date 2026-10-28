@@ -62,7 +62,7 @@ def select_help(request, q_id, bundle_index):
                 'owner_id': owner_id, 'questionnaire': questionnaire,
                 'user': request.user if request.user.is_authenticated else None,
                 'consultation': consultation,
-                'private_text': source.get('full_text', '') if offer['code'] == 'consultation' else source.get('plan_text', '') if offer['code'] == 'plan' else '',
+                'private_text': consultation.private_text if offer['code'] == 'consultation' else source.get('plan_text', '') if offer['code'] == 'plan' else '',
                 'result_code': current[7:], 'bundle_index': bundle_index,
                 'summary': {'questionnaire': questionnaire.name, 'result': source['title'],
                             'title': offer['title'], 'services': list(offer['services']),
@@ -86,7 +86,11 @@ def help_order(request, order_id):
         conclusion = _order_conclusion(order)
         if conclusion:
             documents = conclusion.download_documents.filter(is_active=True)
-    return render(request, 'user/order_detail.html', {'order': order, 'documents': documents})
+    from .payment_views import materials_ready
+    from .platega import enabled
+    return render(request, 'user/order_detail.html', {'order': order, 'documents': documents,
+        'payment_enabled': enabled(), 'materials_ready': materials_ready(order),
+        'payment_started': order.platega_attempts.exists()})
 
 
 def _is_documents_order(order):

@@ -10,6 +10,7 @@ from django.views.decorators.cache import never_cache
 from .models import LegalDirection, Questionnaire
 from .paid_help import help_offers
 from .google_docs_import import download_google_doc
+from .route_review import route_review
 from .questionnaire_import import (FORMAT, MAX_BYTES, ImportProblem, prepare_import,
                                    save_package, validate_package)
 
@@ -120,4 +121,5 @@ def import_questionnaire(request):
         'draft_revision': draft_revision, 'selected_direction': selected_direction,
         'directions': LegalDirection.objects.all(),
         'imports': [],  # The paginated owner catalogue is the single saved-questionnaire list.
+        'route_review': route_review(package) if package and not errors else None,
     })

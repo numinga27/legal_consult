@@ -3,10 +3,14 @@ from django.views.generic import TemplateView
 from . import views
 from . import import_views, guided_views, help_views, owner_views, account_views
 from .health import health
+from . import payment_views
 
 app_name = 'core'
 
 urlpatterns = [
+    path('payments/platega/callback/', payment_views.platega_callback, name='platega_callback'),
+    path('help/orders/<uuid:order_id>/pay/', payment_views.pay_order, name='pay_order'),
+    path('help/orders/<uuid:order_id>/check-payment/', payment_views.check_payment, name='check_payment'),
     path('account/login/', account_views.account_auth, name='account_login'),
     path('account/register/', account_views.account_auth, {'mode': 'register'}, name='account_register'),
     path('account/logout/', account_views.account_logout, name='account_logout'),

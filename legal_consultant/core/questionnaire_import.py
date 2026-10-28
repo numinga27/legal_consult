@@ -17,7 +17,7 @@ from .models import Questionnaire, Question, Answer, Conclusion, AnswerConclusio
 FORMAT = 'questionnaire-import-v1'
 MAX_BYTES = 5 * 1024 * 1024
 Q_RE = re.compile(r'^В\s*(\d+(?:\.\d+)*)\s*(?::\s*|\s+|$)', re.I)
-C_RE = re.compile(r'^Вывод\s+(\d+(?:\.\d+)*)\s*:\s*(.*)', re.I)
+C_RE = re.compile(r'^Вывод\s+(\d+(?:\.\d+)*)(?:\s*:\s*|\s+|$)(.*)', re.I | re.S)
 
 
 class ImportProblem(ValueError):
@@ -91,6 +91,10 @@ def read_word(data):
     ns = {'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'}
     paragraphs = [''.join(t.text or '' for t in p.findall('.//w:t', ns)).strip()
                   for p in root.findall('.//w:p', ns)]
+    from .word_tables import read_labelled_tables
+    structured = read_labelled_tables(root, ns)
+    if structured is not None:
+        return *structured, paragraphs
     questions, conclusions = {}, {}
     section, answer = None, None
     for line in paragraphs:
@@ -147,6 +151,9 @@ def prepare_import(graph_bytes, word_bytes, name):
                'conclusions': conclusions, 'notes': notes,
                'sources': {'graph_sha256': hashlib.sha256(graph_bytes).hexdigest(),
                            'word_sha256': hashlib.sha256(word_bytes).hexdigest()}}
+    if any(q.get('consultation_from_answers') for q in texts.values()):
+        package['consultation_mode'] = 'answers'
+        notes.append('Бесплатный результат и план взяты из отдельных столбцов Word. Консультация собирается из третьего столбца вопросов по выбранным ответам.')
     for key, cell in question_cells.items():
         code = Q_RE.match(plain(cell.get('value', '')))[1]
         if code not in texts:
@@ -174,6 +181,27 @@ def prepare_import(graph_bytes, word_bytes, name):
             elif color and color[1].upper() in {'#FF0000', '#FF3333'}:
                 label = 'Нет'
         target = destinations.get(cell.get('target'), '')
+        if not target and not cell.get('target'):
+            # Only an endpoint lying on/in exactly one block in the same coordinate
+            # space is safe. Never guess by nearest node, colour or legal wording.
+            point = cell.find("mxGeometry/mxPoint[@as='targetPoint']")
+            candidates = []
+            if point is not None:
+                try:
+                    x, y = float(point.get('x')), float(point.get('y'))
+                    for dest_id in destinations:
+                        dest = vertices[dest_id]
+                        geom = dest.find('mxGeometry')
+                        if dest.get('parent') != cell.get('parent') or geom is None or geom.get('relative') == '1':
+                            continue
+                        dx, dy, width, height = [float(geom.get(a, 0)) for a in ('x', 'y', 'width', 'height')]
+                        if width > 0 and height > 0 and dx <= x <= dx + width and dy <= y <= dy + height:
+                            candidates.append(dest_id)
+                except (ValueError, TypeError):
+                    candidates = []
+            if len(candidates) == 1:
+                target = destinations[candidates[0]]
+                notes.append(f'В{node["code"]}, {label}: конец стрелки {cell.get("id")} однозначно попадает в блок {candidates[0]}; переход восстановлен по геометрии.')
         if not target:
             notes.append(f'В{node["code"]}, {label or "ответ без подписи"}: стрелка {cell.get("id")} не привязана. Выберите переход.')
         matched = [a for a in node['answers'] if a['text'].casefold() == label.casefold()]
@@ -201,6 +229,8 @@ def validate_package(package):
     errors = []
     if not isinstance(package, dict) or package.get('format') != FORMAT:
         return ['Неподдерживаемый формат импорта.']
+    if package.get('consultation_mode', 'result') not in ('result', 'answers'):
+        errors.append('Неизвестный способ сборки консультации.')
     prices = package.get('offer_prices', ['', '', ''])
     if (not isinstance(prices, list) or len(prices) != 3 or
             any(not isinstance(price, str) or (price != '' and not re.fullmatch(r'[1-9][0-9]{0,6}', price)) for price in prices)):

@@ -65,7 +65,7 @@ class OrderPayment(models.Model):
     order = models.OneToOneField(HelpOrder, on_delete=models.PROTECT, related_name='payment_confirmation')
     provider = models.CharField(max_length=80)
     transaction_id = models.CharField(max_length=200, unique=True)
-    status = models.CharField(max_length=12, choices=[('paid', 'Оплачен'), ('refunded', 'Возврат')])
+    status = models.CharField(max_length=12, choices=[('paid', 'Оплачен'), ('refunded', 'Возврат'), ('held', 'Проверка платежа')])
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     currency = models.CharField(max_length=3, default='RUB')
     verified_at = models.DateTimeField()
@@ -74,6 +74,21 @@ class OrderPayment(models.Model):
     def grants_access(self):
         return (self.status == 'paid' and self.amount == self.order.amount and self.currency == 'RUB'
                 and bool(self.provider and self.transaction_id and self.verified_at))
+
+class PlategaAttempt(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    order = models.ForeignKey(HelpOrder, on_delete=models.PROTECT, related_name='platega_attempts')
+    transaction_id = models.UUIDField(null=True, blank=True, unique=True)
+    checkout_url = models.URLField(max_length=1000, blank=True)
+    status = models.CharField(max_length=30, default='CREATING')
+    active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    checked_at = models.DateTimeField(null=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=['order'], condition=models.Q(active=True),
+                                               name='one_active_platega_attempt')]
+
 
 class LegalDirection(models.Model):
     """

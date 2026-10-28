@@ -1,0 +1,10 @@
+{% for message in messages %}<p class="notice" role="status">{{ message }}</p>{% endfor %}
+{% if order.access == 'held' %}<p class="notice">Платёж на проверке. Доступ временно приостановлен. Свяжитесь с нами по контактам внизу страницы.</p>
+{% elif order.access == 'pending' %}
+  {% if payment_enabled %}
+    {% if not user.is_authenticated %}<p>Войдите или зарегистрируйтесь, чтобы оплатить заказ и получить материалы в личном кабинете.</p><a class="primary" href="{% url 'core:account_login' %}">Войти</a>
+    {% elif materials_ready %}<form method="post" action="{% url 'core:pay_order' order.id %}">{% csrf_token %}<button class="primary" type="submit">Оплатить {{ order.amount|floatformat:0 }} ₽</button></form><p class="muted">Вы перейдёте на защищённую страницу Platega и выберете способ оплаты.</p>
+    {% else %}<p class="notice">Материалы услуги ещё готовятся. Оплата пока недоступна.</p>{% endif %}
+  {% else %}<p class="notice">Приём оплаты пока недоступен. Заказ сохранён без списания денег.</p>{% endif %}
+{% endif %}
+{% if payment_started and user.is_authenticated %}<form method="post" action="{% url 'core:check_payment' order.id %}">{% csrf_token %}<button class="secondary" type="submit">Проверить оплату</button></form>{% endif %}
