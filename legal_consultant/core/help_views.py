@@ -13,6 +13,7 @@ from django.views.decorators.http import require_http_methods
 from .guided_views import imported, position
 from .models import ConclusionDocument, HelpOrder, Questionnaire, Consultation
 from .paid_help import help_offers
+from .platega import enabled
 from .account_history import capture_result, session_owner, owned_records, order_access
 
 
@@ -73,6 +74,7 @@ def select_help(request, q_id, bundle_index):
     return render(request, 'user/help_checkout.html', {
         'questionnaire': questionnaire, 'offer': offer, 'form': form,
         'revision': state.get('revision', 0), 'selection': fingerprint,
+        'payment_enabled': enabled(),
     })
 
 
@@ -87,7 +89,6 @@ def help_order(request, order_id):
         if conclusion:
             documents = conclusion.download_documents.filter(is_active=True)
     from .payment_views import materials_ready
-    from .platega import enabled
     return render(request, 'user/order_detail.html', {'order': order, 'documents': documents,
         'payment_enabled': enabled(), 'materials_ready': materials_ready(order),
         'payment_started': order.platega_attempts.exists()})

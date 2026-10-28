@@ -9,6 +9,7 @@ from django.utils import timezone
 from .models import Questionnaire, QuestionnaireRun
 from .questionnaire_import import FORMAT
 from .paid_help import help_offers
+from .platega import enabled
 from .questionnaire_runtime import runtime_package
 from .account_history import capture_result
 
@@ -115,4 +116,5 @@ def guided_questionnaire(request, q_id):
         'offers': help_offers(package) if result else [],
         'unavailable': unavailable,
         'consultation': consultation,
+        'payment_enabled': enabled(),
     })
