@@ -9,7 +9,7 @@ from .test_import_columns import package
 from . import platega
 
 
-@override_settings(PLATEGA_ENABLED='1', PLATEGA_MERCHANT_ID='test-merchant', PLATEGA_SECRET='test-secret')
+@override_settings(PAYMENT_PROVIDER='platega', PLATEGA_ENABLED='1', PLATEGA_MERCHANT_ID='test-merchant', PLATEGA_SECRET='test-secret')
 class PlategaTests(TestCase):
     def setUp(self):
         self.user = get_user_model().objects.create_user('payer')

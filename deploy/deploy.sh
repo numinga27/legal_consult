@@ -50,7 +50,10 @@ export DJANGO_STATIC_ROOT=/var/www/legal-consult/releases/$sha
 cd "$release/legal_consultant"
 "$python" manage.py check
 "$python" manage.py makemigrations --check --dry-run
-"$python" manage.py test core --noinput --verbosity 1
+# Production credentials must not participate in fixture-based payment tests.
+env -u PLATEGA_MERCHANT_ID -u PLATEGA_SECRET -u YOOKASSA_SHOP_ID -u YOOKASSA_SECRET_KEY \
+    PAYMENT_PROVIDER=platega PLATEGA_ENABLED=0 YOOKASSA_ENABLED=0 \
+    "$python" manage.py test core --noinput --verbosity 1
 mkdir -p "$DJANGO_MEDIA_ROOT" "$DJANGO_PROTECTED_MEDIA_ROOT"
 chmod 700 "$DJANGO_PROTECTED_MEDIA_ROOT"
 "$python" - "$state/backups/$sha.sqlite3" <<'PY'
