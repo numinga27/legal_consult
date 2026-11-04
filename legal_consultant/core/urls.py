@@ -8,6 +8,7 @@ from . import payment_views
 app_name = 'core'
 
 urlpatterns = [
+    path('payments/yookassa/callback/', payment_views.yookassa_callback, name='yookassa_callback'),
     path('payments/platega/callback/', payment_views.platega_callback, name='platega_callback'),
     path('help/orders/<uuid:order_id>/pay/', payment_views.pay_order, name='pay_order'),
     path('help/orders/<uuid:order_id>/check-payment/', payment_views.check_payment, name='check_payment'),

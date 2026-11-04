@@ -11,8 +11,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 from .account_history import owned_records
-from .models import HelpOrder, PlategaAttempt
-from . import platega
+from .models import HelpOrder, PlategaAttempt, YooKassaAttempt
+from . import platega, payments, yookassa
 
 
 def materials_ready(order):
@@ -37,7 +37,7 @@ def pay_order(request, order_id):
     try:
         if not materials_ready(order):
             raise platega.PaymentError('Материалы услуги ещё не готовы. Оплата недоступна.')
-        return redirect(platega.create_checkout(order))
+        return redirect(payments.provider().create_checkout(order))
     except platega.PaymentError as exc:
         messages.error(request, str(exc))
         return redirect('core:help_order', order_id=order.pk)
@@ -49,10 +49,8 @@ def check_payment(request, order_id):
     if not request.user.is_authenticated:
         return redirect('core:account_login')
     order = get_object_or_404(owned_records(HelpOrder, request), pk=order_id)
-    attempt = order.platega_attempts.exclude(transaction_id=None).order_by('-created_at').first()
     try:
-        if attempt:
-            platega.refresh(attempt)
+        if payments.check(order):
             messages.info(request, 'Статус платежа проверен.')
         else:
             messages.info(request, 'Платёж пока не создан или ожидает проверки поддержки.')
@@ -84,6 +82,32 @@ def platega_callback(request):
         return HttpResponseBadRequest()
     try:
         platega.refresh(attempt)  # Authoritative API lookup, never trust browser return/status.
+    except platega.PaymentError:
+        return HttpResponse(status=503)
+    return HttpResponse(status=200)
+
+
+@csrf_exempt
+@require_POST
+def yookassa_callback(request):
+    if not yookassa.configured():
+        return HttpResponse(status=503)
+    if len(request.body) > 16000:
+        return HttpResponseBadRequest()
+    try:
+        data = json.loads(request.body)
+        event = data['event']
+        obj = data['object']
+        payment_id = UUID(str(obj['payment_id'] if event == 'refund.succeeded' else obj['id']))
+        if event not in ('payment.succeeded', 'payment.canceled', 'payment.waiting_for_capture', 'refund.succeeded'):
+            return HttpResponse(status=200)
+    except (ValueError, KeyError, TypeError, AttributeError):
+        return HttpResponseBadRequest()
+    attempt = YooKassaAttempt.objects.select_related('order').filter(payment_id=payment_id).first()
+    if not attempt:
+        return HttpResponse(status=409)
+    try:
+        yookassa.refresh(attempt)  # Callback status alone never grants access.
     except platega.PaymentError:
         return HttpResponse(status=503)
     return HttpResponse(status=200)

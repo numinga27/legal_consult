@@ -11,7 +11,7 @@ from django.conf import settings
 from django.db import IntegrityError, transaction
 from django.utils import timezone
 
-from .models import HelpOrder, OrderPayment, PlategaAttempt
+from .models import HelpOrder, OrderPayment, PlategaAttempt, YooKassaAttempt
 
 
 class PaymentError(ValueError):
@@ -74,6 +74,8 @@ def create_checkout(order):
         HelpOrder.objects.select_for_update().get(pk=order.pk)
         if OrderPayment.objects.filter(order=order).exists():
             raise PaymentError('По заказу уже есть подтверждённый платёж. Проверьте его статус.')
+        if YooKassaAttempt.objects.filter(order=order, active=True).exists():
+            raise PaymentError('По заказу уже создан платёж через ЮKassa. Проверьте его статус.')
         attempt, created = PlategaAttempt.objects.get_or_create(order=order, active=True)
     if not created:
         if attempt.transaction_id:

@@ -275,7 +275,7 @@ def user_select_problem(request):
             'questionnaires', queryset=questionnaires, to_attr='available_questionnaires'
         ))
     )
-    from .platega import enabled
+    from .payments import enabled
     return render(request, 'user/select_problem.html', {'directions': directions, 'payment_enabled': enabled()})
 
 

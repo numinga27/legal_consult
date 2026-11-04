@@ -9,7 +9,7 @@ from django.utils import timezone
 from .models import Questionnaire, QuestionnaireRun
 from .questionnaire_import import FORMAT
 from .paid_help import help_offers
-from .platega import enabled
+from .payments import enabled
 from .questionnaire_runtime import runtime_package
 from .account_history import capture_result
 

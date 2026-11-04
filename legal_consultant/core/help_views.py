@@ -13,7 +13,7 @@ from django.views.decorators.http import require_http_methods
 from .guided_views import imported, position
 from .models import ConclusionDocument, HelpOrder, Questionnaire, Consultation
 from .paid_help import help_offers
-from .platega import enabled
+from .payments import enabled, started, refresh_on_return
 from .account_history import capture_result, session_owner, owned_records, order_access
 
 
@@ -82,6 +82,9 @@ def select_help(request, q_id, bundle_index):
 @require_http_methods(['GET'])
 def help_order(request, order_id):
     order = get_object_or_404(owned_records(HelpOrder, request).select_related('payment_confirmation', 'consultation'), pk=order_id)
+    if request.user.is_authenticated:
+        refresh_on_return(order)
+        order.refresh_from_db()
     order.access = order_access(order)
     documents = []
     if order.access == 'paid' and request.user.is_authenticated and _is_documents_order(order):
@@ -91,7 +94,7 @@ def help_order(request, order_id):
     from .payment_views import materials_ready
     return render(request, 'user/order_detail.html', {'order': order, 'documents': documents,
         'payment_enabled': enabled(), 'materials_ready': materials_ready(order),
-        'payment_started': order.platega_attempts.exists()})
+        'payment_started': started(order)})
 
 
 def _is_documents_order(order):

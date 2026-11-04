@@ -90,6 +90,22 @@ class PlategaAttempt(models.Model):
                                                name='one_active_platega_attempt')]
 
 
+class YooKassaAttempt(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    order = models.ForeignKey(HelpOrder, on_delete=models.PROTECT, related_name='yookassa_attempts')
+    payment_id = models.UUIDField(null=True, blank=True, unique=True)
+    checkout_url = models.URLField(max_length=1000, blank=True)
+    request_payload = models.JSONField(default=dict)
+    status = models.CharField(max_length=30, default='creating')
+    active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    checked_at = models.DateTimeField(null=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=['order'], condition=models.Q(active=True),
+                                               name='one_active_yookassa_attempt')]
+
+
 class LegalDirection(models.Model):
     """
     Юридическое направление (например: "Семейное право", "Трудовое право" и т.д.)
