@@ -72,7 +72,7 @@ def payload(order, attempt_id):
                 raise ValueError
         except (ValueError, TypeError):
             raise PaymentError('Для оплаты необходимо настроить данные чека.') from None
-        data['receipt'] = {'customer': {'email': order.email}, 'items': [{
+        data['receipt'] = {'internet': True, 'customer': {'email': order.email}, 'items': [{
             'description': order.summary.get('title', 'Юридическая услуга')[:128], 'quantity': '1.00',
             'amount': data['amount'], 'vat_code': vat, 'payment_subject': 'service', 'payment_mode': 'full_payment'}]}
         tax_system = str(config('YOOKASSA_TAX_SYSTEM_CODE'))

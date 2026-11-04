@@ -12,7 +12,7 @@ from . import yookassa, platega
 
 
 @override_settings(PAYMENT_PROVIDER='yookassa', YOOKASSA_ENABLED='1', YOOKASSA_SHOP_ID='123',
-                   YOOKASSA_SECRET_KEY='fixture-secret', YOOKASSA_TEST='0', YOOKASSA_RECEIPTS_EXTERNAL='1')
+                   YOOKASSA_SECRET_KEY='fixture-secret', YOOKASSA_TEST='0', YOOKASSA_RECEIPTS='0', YOOKASSA_RECEIPTS_EXTERNAL='1')
 class YooKassaTests(TestCase):
     def setUp(self):
         self.user = get_user_model().objects.create_user('payer')
@@ -136,6 +136,7 @@ class YooKassaTests(TestCase):
             with override_settings(YOOKASSA_RECEIPTS='1',YOOKASSA_VAT_CODE='1'):
                 data=yookassa.payload(self.order,uuid.uuid4())
                 self.assertEqual(data['receipt']['customer']['email'],'test@example.com')
+                self.assertIs(data['receipt']['internet'], True)
                 self.assertEqual(data['receipt']['items'][0]['vat_code'],1)
                 with override_settings(YOOKASSA_TAX_SYSTEM_CODE='2'):
                     self.assertEqual(yookassa.payload(self.order,uuid.uuid4())['receipt']['tax_system_code'],2)
