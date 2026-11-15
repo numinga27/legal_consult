@@ -15,6 +15,4 @@ def consultation_text(package, history, current):
         text = answer.get('intermediate_text', '').strip()
         if text and text not in ('-', '—', '–'):
             parts.append(f'{node["text"]}\nОтвет: {answer["text"]}\n\n{text}')
-    if result.get('full_text', '').strip():
-        parts.append(result['full_text'])
     return '\n\n'.join(parts)

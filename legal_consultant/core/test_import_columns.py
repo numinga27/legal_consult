@@ -48,6 +48,21 @@ def package():
 
 
 class ColumnImportTests(SimpleTestCase):
+    def test_answer_consultation_excludes_result_even_when_populated(self):
+        p = package()
+        p['conclusions']['3']['full_text'] = 'UNRELATED RESULT TEXT'
+        first = consultation_text(p, [{'node': 'q1', 'answer': 0}, {'node': 'q2', 'answer': 1}], 'result:3')
+        second = consultation_text(p, [{'node': 'q1', 'answer': 1}, {'node': 'q2', 'answer': 1}], 'result:3')
+        self.assertNotIn('UNRELATED RESULT TEXT', first)
+        self.assertNotIn('UNRELATED RESULT TEXT', second)
+        self.assertIn('ONLY YES 1', first)
+        self.assertNotIn('ONLY NO 1', first)
+        self.assertIn('ONLY NO 1', second)
+        self.assertNotIn('ONLY YES 1', second)
+        self.assertLess(first.index('ONLY YES 1'), first.index('ONLY NO 2'))
+        p.pop('consultation_mode')
+        self.assertEqual(consultation_text(p, [{'node': 'q1', 'answer': 0}, {'node': 'q2', 'answer': 1}], 'result:3'), 'UNRELATED RESULT TEXT')
+
     def test_columns_multiline_title_and_no_colon_terminal(self):
         p = package()
         self.assertEqual(validate_package(p), [])
@@ -107,3 +122,6 @@ class ColumnOrderTests(TestCase):
         self.client.force_login(get_user_model().objects.create_user('owner', is_staff=True))
         review = self.client.get(reverse('core:import_questionnaire') + f'?q={q.pk}')
         self.assertContains(review, 'Проверка маршрутов: 4')
+        self.assertNotContains(review, 'name="c0_full_text"')
+        self.assertContains(review, 'name="h0_0"')
+        self.assertContains(review, 'name="c0_plan_text"')
