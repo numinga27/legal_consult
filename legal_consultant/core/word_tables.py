@@ -20,6 +20,8 @@ def read_labelled_tables(root, ns):
         free = [i for i, h in enumerate(headers) if h.startswith(('бесплатный результат', 'бесплатная часть'))]
         plan = [i for i, h in enumerate(headers) if h.startswith('пошаговый план')]
         title = [i for i, h in enumerate(headers) if h == 'заголовок']
+        if (free or plan) and not (free and plan and title):
+            raise ImportProblem('В таблице результатов нужны отдельные столбцы: Заголовок, Бесплатный результат, Пошаговый план действий.')
         if free and plan and title:
             if any(len(x) != 1 for x in (free, plan, title)):
                 raise ImportProblem('Повторные заголовки столбцов результатов Word.')

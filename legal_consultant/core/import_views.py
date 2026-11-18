@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.cache import never_cache
 
-from .models import LegalDirection, Questionnaire
+from .models import LegalDirection, Questionnaire, QuestionnaireSource
 from .paid_help import help_offers
 from .google_docs_import import download_google_doc
 from .route_review import route_review
@@ -33,10 +33,13 @@ def import_questionnaire(request):
     package = request.session.get('questionnaire_import_draft')
     draft_revision = request.session.get('questionnaire_import_revision', '')
     selected_direction = request.session.get('questionnaire_import_direction', '')
+    source_ids = request.session.get('questionnaire_import_sources', [])
     errors, saved = [], None
     if request.method == 'GET' and request.GET.get('q'):
         item = get_object_or_404(Questionnaire, pk=request.GET['q'])
         if item.workflow.get('format') == FORMAT:
+            source_ids = list(item.source_files.values_list('id', flat=True))
+            request.session['questionnaire_import_sources'] = source_ids
             package = {key: value for key, value in item.workflow.items() if key != 'import_digest'}
             request.session['questionnaire_import_draft'] = package
             draft_revision = uuid4().hex
@@ -47,7 +50,7 @@ def import_questionnaire(request):
         action = request.POST.get('action')
         try:
             if action == 'clear':
-                for key in ('questionnaire_import_draft', 'questionnaire_import_revision', 'questionnaire_import_direction'):
+                for key in ('questionnaire_import_draft', 'questionnaire_import_revision', 'questionnaire_import_direction', 'questionnaire_import_sources'):
                     request.session.pop(key, None)
                 return redirect('core:import_questionnaire')
             if action in {'review', 'save', 'download'} and request.POST.get('draft_revision') != draft_revision:
@@ -60,18 +63,42 @@ def import_questionnaire(request):
                 if word and google_doc:
                     raise ImportProblem('Выберите один источник текстов: Google Docs или файл .docx.')
                 word_data = word.read(MAX_BYTES + 1) if word else download_google_doc(google_doc)
-                package = prepare_import(graph.read(MAX_BYTES + 1), word_data,
-                                         request.POST.get('name', ''))
+                graph_data = graph.read(MAX_BYTES + 1)
+                package = prepare_import(graph_data, word_data, request.POST.get('name', ''))
+                scenarios = request.FILES.get('scenarios')
+                scenario_data = scenarios.read(MAX_BYTES + 1) if scenarios else None
+                if scenario_data is not None:
+                    from .scenario_import import read_scenarios
+                    package['scenario_checks'] = read_scenarios(scenario_data)
+                from django.core.files.base import ContentFile
+                uploads = [('graph', graph.name, graph_data), ('word', word.name if word else 'google-document.docx', word_data)]
+                if scenarios:
+                    uploads.append(('scenarios', scenarios.name, scenario_data))
+                source_ids = []
+                for kind, name, data in uploads:
+                    if len(data) > MAX_BYTES:
+                        raise ImportProblem('Файл больше 5 МБ.')
+                    item = QuestionnaireSource(uploaded_by=request.user, name=name.replace('\\\\', '/').split('/')[-1][:255], kind=kind)
+                    from pathlib import Path
+                    item.file.save(uuid4().hex + Path(name).suffix.lower(), ContentFile(data), save=True)
+                    source_ids.append(item.pk)
+                request.session['questionnaire_import_sources'] = source_ids
                 draft_revision = uuid4().hex
             elif action == 'load_json':
                 uploaded = request.FILES.get('package')
                 if not uploaded or uploaded.size > MAX_BYTES:
                     raise ImportProblem('Выберите JSON-пакет не больше 5 МБ.')
-                package = json.loads(uploaded.read())
+                package_data = uploaded.read()
+                package = json.loads(package_data)
                 errors = validate_package(package)
                 if errors:
                     package = None
                     raise ImportProblem('\n'.join(errors))
+                from django.core.files.base import ContentFile
+                item = QuestionnaireSource(uploaded_by=request.user, name=uploaded.name[:255], kind='package')
+                item.file.save(uuid4().hex + '.json', ContentFile(package_data), save=True)
+                source_ids = [item.pk]
+                request.session['questionnaire_import_sources'] = source_ids
                 draft_revision = uuid4().hex
             elif action in {'review', 'save', 'download'} and package:
                 selected_direction = request.POST.get('direction', selected_direction)
@@ -98,6 +125,7 @@ def import_questionnaire(request):
                         raise ImportProblem('Выберите раздел сайта для опросника.')
                     direction = get_object_or_404(LegalDirection, pk=selected_direction)
                     saved, created = save_package(package, direction, activate=request.POST.get('activate') == 'yes')
+                    saved.source_files.add(*QuestionnaireSource.objects.filter(pk__in=source_ids))
                 if action == 'download' and not errors:
                     response = HttpResponse(json.dumps(package, ensure_ascii=False, indent=2), content_type='application/json')
                     response['Content-Disposition'] = 'attachment; filename="questionnaire.json"'
@@ -116,6 +144,7 @@ def import_questionnaire(request):
     if package:
         errors = errors or validate_package(package)
     return render(request, 'admin/questionnaire_import.html', {
+        'sources': QuestionnaireSource.objects.filter(pk__in=source_ids),
         'package': package, 'errors': errors, 'saved': saved,
         'offers': help_offers(package) if package else [],
         'draft_revision': draft_revision, 'selected_direction': selected_direction,
@@ -123,3 +152,16 @@ def import_questionnaire(request):
         'imports': [],  # The paginated owner catalogue is the single saved-questionnaire list.
         'route_review': route_review(package) if package and not errors else None,
     })
+
+@staff_only
+@never_cache
+@require_http_methods(['GET'])
+def download_source(request, source_id):
+    from django.http import FileResponse, Http404
+    source = get_object_or_404(QuestionnaireSource, pk=source_id)
+    try:
+        response = FileResponse(source.file.open('rb'), as_attachment=True, filename=source.name, content_type='application/octet-stream')
+    except FileNotFoundError:
+        raise Http404
+    response['X-Content-Type-Options'] = 'nosniff'
+    return response

@@ -8,6 +8,12 @@ from . import payment_views
 app_name = 'core'
 
 urlpatterns = [
+    path('test/<int:q_id>/', guided_views.questionnaire_landing, name='questionnaire_landing'),
+    path('admin-import/sources/<int:source_id>/', import_views.download_source, name='download_source'),
+
+    path('guided/<int:q_id>/help/', help_views.select_help, name='select_services'),
+    path('help/orders/<uuid:order_id>/pdf/', help_views.download_order_pdf, name='download_order_pdf'),
+
     path('payments/yookassa/callback/', payment_views.yookassa_callback, name='yookassa_callback'),
     path('payments/platega/callback/', payment_views.platega_callback, name='platega_callback'),
     path('help/orders/<uuid:order_id>/pay/', payment_views.pay_order, name='pay_order'),

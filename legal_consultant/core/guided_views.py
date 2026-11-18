@@ -110,11 +110,25 @@ def guided_questionnaire(request, q_id):
         node = package['nodes'][current]
         # Stop a cycle or an empty branch without presenting an invented legal assessment.
         unavailable = not node['answers'] or any(entry['node'] == current for entry in history)
+    paid_orders = []
+    if consultation and request.user.is_authenticated:
+        from .account_history import order_access
+        paid_orders = [o for o in consultation.orders.filter(user=request.user).select_related('payment_confirmation')
+                       if o.private_text.strip() and order_access(o) == 'paid']
     return render(request, 'user/guided_questionnaire.html', {
         'questionnaire': questionnaire, 'state': state, 'node': node, 'result': result,
         'step': len(history) + 1, 'can_back': bool(history),
         'offers': help_offers(package) if result else [],
         'unavailable': unavailable,
-        'consultation': consultation,
+        'consultation': consultation, 'paid_orders': paid_orders,
         'payment_enabled': enabled(),
     })
+
+
+@never_cache
+@require_http_methods(['GET'])
+def questionnaire_landing(request, q_id):
+    q = get_object_or_404(Questionnaire, pk=q_id)
+    if not request.user.is_staff and (not q.is_active or q.is_archived or not q.direction.is_active):
+        raise Http404
+    return render(request, 'user/questionnaire_landing.html', {'questionnaire': q})

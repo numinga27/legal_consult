@@ -1,0 +1,7 @@
+{% extends "user/site_base.html" %}
+{% block title %}{{ questionnaire.name }} — Карманный юрист{% endblock %}
+{% block content %}<section class="panel"><p class="eyebrow">{{ questionnaire.direction.name }}</p><h1>{{ questionnaire.name }}</h1>
+{% if questionnaire.description %}<div class="prose">{{ questionnaire.description|linebreaks }}</div>{% endif %}
+<p>Ответьте на вопросы и получите бесплатный вывод по вашей ситуации. Проходить опрос можно без регистрации.</p>
+<a class="primary" href="{% url 'core:guided_questionnaire' questionnaire.id %}">Перейти к опросу</a>
+<p class="muted">После прохождения можно сохранить результат в личном кабинете и выбрать дополнительную помощь.</p></section>{% endblock %}

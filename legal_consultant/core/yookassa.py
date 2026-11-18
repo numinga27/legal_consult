@@ -75,6 +75,14 @@ def payload(order, attempt_id):
         data['receipt'] = {'internet': True, 'customer': {'email': order.email}, 'items': [{
             'description': order.summary.get('title', 'Юридическая услуга')[:128], 'quantity': '1.00',
             'amount': data['amount'], 'vat_code': vat, 'payment_subject': 'service', 'payment_mode': 'full_payment'}]}
+        if order.summary.get('items'):
+            data['receipt']['items'] = [{
+                'description': item['title'][:128], 'quantity': '1.00',
+                'amount': {'value': format(Decimal(item['price']), '.2f'), 'currency': 'RUB'},
+                'vat_code': vat, 'payment_subject': 'service', 'payment_mode': 'full_payment'
+            } for item in order.summary['items']]
+            if sum(Decimal(i['amount']['value']) for i in data['receipt']['items']) != order.amount:
+                raise PaymentError('Сумма услуг не совпадает с суммой заказа.')
         tax_system = str(config('YOOKASSA_TAX_SYSTEM_CODE'))
         if tax_system:
             if tax_system not in ('1', '2', '3', '4', '5', '6'):

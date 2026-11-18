@@ -31,7 +31,7 @@ class CustomerForm(forms.Form):
 
 @never_cache
 @require_http_methods(['GET', 'POST'])
-def select_help(request, q_id, bundle_index):
+def select_help(request, q_id, bundle_index=None):
     questionnaire = get_object_or_404(Questionnaire, pk=q_id)
     if not imported(questionnaire) or (not request.user.is_staff and (not questionnaire.is_active or questionnaire.is_archived or not questionnaire.direction.is_active)):
         raise Http404
@@ -43,18 +43,36 @@ def select_help(request, q_id, bundle_index):
     if not current.startswith('result:'):
         return redirect('core:guided_questionnaire', q_id=q_id)
     offers = help_offers(questionnaire.workflow)
-    if not 0 <= bundle_index < len(offers) or not offers[bundle_index]['price']:
+    if bundle_index is None:
+        raw = (request.POST if request.method == 'POST' else request.GET).getlist('services')
+        if not raw or any(x not in ('0', '1', '2') for x in raw) or len(set(raw)) != len(raw):
+            return redirect('core:guided_questionnaire', q_id=q_id)
+        indices = sorted(map(int, raw))
+    else:
+        indices = [bundle_index]
+    if any(not 0 <= i < len(offers) or not offers[i]['price'] for i in indices):
         raise Http404
-    offer = offers[bundle_index]
+    from decimal import Decimal
+    selected = [offers[i] for i in indices]
+    offer = dict(selected[0]) if len(selected) == 1 else {
+        'title': 'Выбранные услуги', 'description': ' + '.join(o['title'] for o in selected),
+        'code': 'selection', 'services': [o['title'] for o in selected],
+        'price': sum(Decimal(o['price']) for o in selected)}
+    bundle_index = indices[0]
     source = questionnaire.workflow['conclusions'][current[7:]]
     owner_id = session_owner(request)
     consultation = capture_result(request, questionnaire, questionnaire.workflow, state, current)
     # Bind the form to the current path and published package, not posted price/result IDs.
     context = [owner_id, q_id, questionnaire.workflow, state.get('history', []), state.get('attempt_id'),
-               bundle_index, offer['code'], offer['title']]
+               indices, offer['code'], offer['title']]
     fingerprint = hashlib.sha256(json.dumps(context, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
     form = CustomerForm(request.POST if request.method == 'POST' else None,
                         initial={'email': request.user.email} if request.user.is_authenticated else None)
+    texts = {'consultation': consultation.private_text, 'plan': source.get('plan_text', ''), 'documents': ''}
+    items = [{'code': o['code'], 'title': o['title'], 'price': str(o['price']),
+              'text': texts[o['code']]} for o in selected]
+    private_text = '\n\n'.join((i['title'] + '\n\n' if len(items) > 1 else '') + i['text']
+                                for i in items if i['text'].strip())
     if request.method == 'POST':
         if request.POST.get('revision') != str(state.get('revision', 0)) or request.POST.get('selection') != fingerprint:
             return redirect('core:guided_questionnaire', q_id=q_id)
@@ -63,16 +81,16 @@ def select_help(request, q_id, bundle_index):
                 'owner_id': owner_id, 'questionnaire': questionnaire,
                 'user': request.user if request.user.is_authenticated else None,
                 'consultation': consultation,
-                'private_text': consultation.private_text if offer['code'] == 'consultation' else source.get('plan_text', '') if offer['code'] == 'plan' else '',
+                'private_text': private_text,
                 'result_code': current[7:], 'bundle_index': bundle_index,
                 'summary': {'questionnaire': questionnaire.name, 'result': source['title'],
                             'title': offer['title'], 'services': list(offer['services']),
-                            'service_code': offer['code']},
+                            'service_code': offer['code'], 'items': items},
                 'amount': offer['price'], **form.cleaned_data,
             })
             return redirect('core:help_order', order_id=order.id)
     return render(request, 'user/help_checkout.html', {
-        'questionnaire': questionnaire, 'offer': offer, 'form': form,
+        'questionnaire': questionnaire, 'offer': offer, 'form': form, 'selected_indices': indices,
         'revision': state.get('revision', 0), 'selection': fingerprint,
         'payment_enabled': enabled(),
     })
@@ -98,7 +116,7 @@ def help_order(request, order_id):
 
 
 def _is_documents_order(order):
-    return order.summary.get('service_code') == 'documents' or (
+    return any(i.get('code') == 'documents' for i in order.summary.get('items', [])) or order.summary.get('service_code') == 'documents' or (
         'service_code' not in order.summary and order.bundle_index == 2
     )
 
@@ -167,3 +185,33 @@ def consultation_detail(request, consultation_id):
     for order in orders:
         order.access = order_access(order)
     return render(request, 'user/consultation_detail.html', {'consultation': consultation, 'orders': orders})
+
+
+@never_cache
+@require_http_methods(['GET'])
+def download_order_pdf(request, order_id):
+    if not request.user.is_authenticated:
+        return redirect('core:account_login')
+    order = get_object_or_404(owned_records(HelpOrder, request).select_related('payment_confirmation', 'consultation'), pk=order_id)
+    if order_access(order) != 'paid' or not order.private_text.strip():
+        raise Http404
+    from io import BytesIO
+    from html import escape
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+    from reportlab.lib.styles import ParagraphStyle
+    from .pdf_generator import FONT_NAME
+    output = BytesIO()
+    style = ParagraphStyle('paid', fontName=FONT_NAME, fontSize=11, leading=16, wordWrap='CJK')
+    texts = [order.summary.get('questionnaire', ''), order.summary.get('title', '')]
+    if order.consultation:
+        texts += [order.consultation.result_title, order.consultation.short_text]
+    texts += [order.private_text]
+    story = []
+    for text in texts:
+        for paragraph in text.split('\n'):
+            if paragraph.strip():
+                story.append(Paragraph(escape(paragraph), style))
+            story.append(Spacer(1, 6))
+    SimpleDocTemplate(output, title='Результат консультации', leftMargin=40, rightMargin=40).build(story)
+    output.seek(0)
+    return FileResponse(output, as_attachment=True, filename='result-' + str(order.id) + '.pdf', content_type='application/pdf')

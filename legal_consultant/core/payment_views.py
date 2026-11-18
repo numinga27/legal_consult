@@ -16,6 +16,18 @@ from . import platega, payments, yookassa
 
 
 def materials_ready(order):
+    if order.summary.get('service_code') == 'selection':
+        from copy import copy
+        items = order.summary.get('items', [])
+        if not items:
+            return False
+        for item in items:
+            single = copy(order)
+            single.summary = {'service_code': item['code']}
+            single.private_text = item.get('text', '')
+            if not materials_ready(single):
+                return False
+        return True
     if order.summary.get('service_code') in ('consultation', 'plan'):
         return bool(order.private_text.strip())
     if order.summary.get('service_code') == 'documents':

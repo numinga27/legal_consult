@@ -300,6 +300,8 @@ def validate_package(package):
         errors.append(f'В{nodes[key].get("code", key)} ({key}) недостижим от начала.')
     for key in results.keys() - reached:
         errors.append(f'Вывод {key} недостижим от начала.')
+    from .scenario_import import validate_scenarios
+    errors.extend(validate_scenarios(package))
     return errors
 
 

@@ -175,7 +175,8 @@ class ImportedQuestionnaireTests(TestCase):
                 self.assertNotContains(response, 'Что это значит для вас')
             self.assertEqual(response.context['result']['title'], self.package['conclusions'][expected]['title'])
             self.assertContains(response, 'Краткий вывод:')
-            self.assertContains(response, 'Получить помощь', count=3)
+            self.assertContains(response, 'name="services"', count=3)
+            self.assertContains(response, 'К оформлению', count=1)
             self.assertEqual([offer['price'] for offer in response.context['offers']], ['298', '498', '697'])
             self.assertNotIn('full_text', response.context['result'])
             self.assertNotContains(response, self.package['conclusions'][expected]['full_text'].split('\n\n')[0])
@@ -276,7 +277,8 @@ class ImportedQuestionnaireTests(TestCase):
             ['Документы'],
         ])
         for i in range(3):
-            self.assertContains(response, reverse('core:select_help', args=[self.questionnaire.id, i]))
+            self.assertContains(response, f'name="services" value="{i}"')
+            self.assertContains(response, reverse('core:select_services', args=[self.questionnaire.id]))
         self.assertEqual(Payment.objects.count(), 0)
 
     def test_owner_can_set_bundle_prices_for_future_import_and_export_them(self):

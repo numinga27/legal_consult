@@ -1,4 +1,4 @@
-"""The three separately ordered services; prices are configured per questionnaire."""
+"""The three selectable services; prices are configured per questionnaire."""
 SERVICES = (
     (
         'Письменная консультация',

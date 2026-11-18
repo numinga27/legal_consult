@@ -618,3 +618,12 @@ class UserDocumentData(models.Model):
 
     def __str__(self):
         return f"Данные пользователя #{self.id}"
+
+
+class QuestionnaireSource(models.Model):
+    questionnaires = models.ManyToManyField(Questionnaire, related_name='source_files', blank=True)
+    uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    name = models.CharField(max_length=255)
+    kind = models.CharField(max_length=30)
+    file = models.FileField(upload_to='questionnaire-sources/%Y/%m/%d/', storage=protected_document_storage)
+    created_at = models.DateTimeField(auto_now_add=True)
