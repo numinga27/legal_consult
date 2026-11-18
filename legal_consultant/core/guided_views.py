@@ -129,6 +129,11 @@ def guided_questionnaire(request, q_id):
 @require_http_methods(['GET'])
 def questionnaire_landing(request, q_id):
     q = get_object_or_404(Questionnaire, pk=q_id)
+    successor = q.workflow.get('superseded_by')
+    if q.is_archived and isinstance(successor, int):
+        replacement = get_object_or_404(Questionnaire, pk=successor, is_active=True,
+                                       is_archived=False, direction__is_active=True)
+        return redirect('core:questionnaire_landing', q_id=replacement.pk)
     if not request.user.is_staff and (not q.is_active or q.is_archived or not q.direction.is_active):
         raise Http404
     return render(request, 'user/questionnaire_landing.html', {'questionnaire': q})

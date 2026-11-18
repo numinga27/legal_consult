@@ -90,6 +90,17 @@ class SelectionTests(TestCase):
         self.q.is_active=False;self.q.save()
         self.assertEqual(self.client.get(url).status_code,404)
 
+    def test_archived_landing_preserves_advertising_link(self):
+        p=deepcopy(self.p);p['name']='Replacement'
+        replacement,_=save_package(p,self.q.direction,activate=True)
+        self.q.workflow['superseded_by']=replacement.pk
+        self.q.is_archived=True;self.q.save()
+        self.client.logout()
+        self.assertRedirects(self.client.get(reverse('core:questionnaire_landing',args=[self.q.pk])),
+                             reverse('core:questionnaire_landing',args=[replacement.pk]))
+        replacement.is_active=False;replacement.save()
+        self.assertEqual(self.client.get(reverse('core:questionnaire_landing',args=[self.q.pk])).status_code,404)
+
 class ScenarioTests(SimpleTestCase):
     def test_conflicting_and_empty_scenarios_are_blocked(self):
         checks=read_scenarios(word_bytes(['Вывод 3:','Сценарий 1:','В1-да; В2-нет.',
